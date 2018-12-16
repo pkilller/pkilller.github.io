@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <title>
+    Musics // pkiller&#39;s Blog
+  </title>
+
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="author" content="">
+<meta name="generator" content="Hugo 0.16-DEV" />
+
+  <meta property="og:title" content="Musics" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:url" content="https://pkiller.com/music/" />
+
+
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/base-min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/pure-min.css">
+  
+  
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/grids-responsive-min.css">
+  
+  
+
+  <link rel="stylesheet" href="https://pkiller.com/css/redlounge.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href='//fonts.googleapis.com/css?family=Raleway:400,200,100,700,300,500,600,800' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Libre+Baskerville:400,700,400italic' rel='stylesheet' type='text/css'>
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.png">
+
+  
+  <link href="https://pkiller.com/music/index.xml" rel="alternate" type="application/rss+xml" title="pkiller&#39;s Blog" />
+
+    
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/tomorrow-night-bright.min.css">
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+
+  
+
+  
+
+  
+
+  
+</head>
+
+<body>
+	<div id="layout" class="pure-g">
+    <div class="sidebar pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    
+
+	
+	  <img src="/images/avatar.jpeg" class="sidebarphoto">
+	
+
+    <h1 class="brand-title">pkiller</h1>
+    <h2 class="brand-tagline">Peanut Killer~</h2>
+
+    <nav class="nav">
+      <ul class="nav-list">
+        <li class="nav-item"><span class="nav-item-separator">//</span><a href="https://pkiller.com">Home</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/about">About</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/android">Android</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/music">Music</a></li>
+        
+      </ul>
+    </nav>
+
+    
+    <div class="social-buttons">
+      
+        
+        <a href="http://www.github.com/pkilller" target="_blank"><i class='fa fa-github'></i></a>
+        
+      
+        
+        <a href="http://www.twitter.com/aronkou1" target="_blank"><i class='fa fa-twitter'></i></a>
+        
+      
+      
+    </div>
+    
+
+  </div>
+</div>
+
+
+    <div class="content pure-u-1 pure-u-md-3-4">
+      <a name="top"></a>
+      
+
+      <div class="posts">
+        
+          <section  class="post">
+            <header class="post-header">
+            
+            <h1 class="post-title">
+              <a href="/music/MIDI%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/">MIDI文件结构</a>
+            </h1>
+            </header>
+            <p class="post-meta">
+            	
+		          <span class="post-date">
+		            <span class="post-date-day"><sup>14</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Apr</span> <span class="post-date-year">2017</span>
+		          </span>
+      				
+      				
+      					
+      				
+              
+                <span class="post-reading-time"><i class="fa fa-clock-o"></i> <em>2 min. read</em></span>
+              
+      				
+            </p>
+            
+              <article class="post-summary">
+            	Chunks 一个MIDI文件由多个Chunk(块)构成. 1个Chunk包含以下信息: type length data 4byte 4byte length bytes type: 4-byte, 表示该chunk的类型 length: 4-byte, 表示该chunk中data数据的长度 data: n-byte, 该chunk中存放的数据主体 一共存在两种类型的Chunk: 头部块: Chunk.type = &ldquo;MThd&rdquo; 轨道块: Chunk.type = &ldquo;MTrk&rdquo; 一个MIDI文件由1个头部块加上1到n个的轨道块构成. Chunk.length决定了Chunk的总长度, MIDI文件中可以存在MThd与MTrk之外的Chunk, 但是这些数据都应当被直接忽略. 在MIDI规范中要求软件应当能应付这种异常情况. type length data MThd 6 [format], [tracks], [division] MTrk [length] [delta_time], [event] MTrk [length] [delta_time], [event] 值的含义: MIDI文件中, 除了基础的信息外, 还包括如:delta-times与meta-events. 这些信息包含数值, 这些信息通常以以下两种格式存在: * 二进制 * 变长数值 二进制 用以下方式存储: * 8-bits 1byte * MSB first (Most Significant Byte first) (除非另有规定) 变长数值 变长数值提供了一种简单的表示任意大小数值的方式，没有必要来用定长的数值来表示，避免了不必要的长度浪费。 一个变长数值由n个8bit(最高1位+后面7bit表示）组成.
+              </article>
+			  <div class="read-more-link">
+				<a href="/music/MIDI%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/"><span class="read-more-slashes">//</span>Read More...</a>
+			  </div>
+            
+          </section>
+        
+      </div>
+
+      <div class="footer">
+	<hr class="thin" />
+	<div class="pure-menu pure-menu-horizontal pure-menu-open">
+		<ul class="footer-menu">
+		
+			<li><a href="/posts">Blog</a></li>
+		
+		</ul>
+	</div>
+
+	<p>&copy; 2018. All rights reserved.</p>
+</div>
+    </div>
+  </div>
+  
+</body>
+</html>

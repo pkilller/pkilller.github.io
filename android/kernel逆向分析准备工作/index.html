@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <title>
+    kernel逆向分析准备工作 // pkiller&#39;s Blog
+  </title>
+
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="author" content="">
+<meta name="generator" content="Hugo 0.16-DEV" />
+
+  <meta property="og:title" content="kernel逆向分析准备工作" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:url" content="https://pkiller.com/android/kernel%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C/" />
+
+
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/base-min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/pure-min.css">
+  
+  
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/grids-responsive-min.css">
+  
+  
+
+  <link rel="stylesheet" href="https://pkiller.com/css/redlounge.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href='//fonts.googleapis.com/css?family=Raleway:400,200,100,700,300,500,600,800' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Libre+Baskerville:400,700,400italic' rel='stylesheet' type='text/css'>
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.png">
+
+  
+  <link href="" rel="alternate" type="application/rss+xml" title="pkiller&#39;s Blog" />
+
+    
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/tomorrow-night-bright.min.css">
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+
+  
+
+  
+
+  
+
+  
+</head>
+
+<body>
+	
+
+	<div id="layout" class="pure-g">
+    <div class="sidebar pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    
+
+	
+	  <img src="/images/avatar.jpeg" class="sidebarphoto">
+	
+
+    <h1 class="brand-title">pkiller</h1>
+    <h2 class="brand-tagline">Peanut Killer~</h2>
+
+    <nav class="nav">
+      <ul class="nav-list">
+        <li class="nav-item"><span class="nav-item-separator">//</span><a href="https://pkiller.com">Home</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/about">About</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/android">Android</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/music">Music</a></li>
+        
+      </ul>
+    </nav>
+
+    
+    <div class="social-buttons">
+      
+        
+        <a href="http://www.github.com/pkilller" target="_blank"><i class='fa fa-github'></i></a>
+        
+      
+        
+        <a href="http://www.twitter.com/aronkou1" target="_blank"><i class='fa fa-twitter'></i></a>
+        
+      
+      
+    </div>
+    
+
+  </div>
+</div>
+
+	
+	
+
+    <div class="content pure-u-1 pure-u-md-3-4">
+		<a name="top"></a>
+		
+
+		
+			
+		    <div id="toc" class="pure-u-1 pure-u-md-1-4">
+				<small class="toc-label">Contents</small>
+		   	 	<nav id="TableOfContents">
+<ul>
+<li><a href="#步骤1-提取内核文件:74e08c5c20c35fafeb119b7ae5ebabe7">步骤1、提取内核文件</a>
+<ul>
+<li><a href="#a-通过root权限设备提取:74e08c5c20c35fafeb119b7ae5ebabe7">A. 通过root权限设备提取</a></li>
+<li><a href="#b-通过固件包提取:74e08c5c20c35fafeb119b7ae5ebabe7">B. 通过固件包提取</a></li>
+<li><a href="#x-从-boot-img-kernel-img-中提取kernel:74e08c5c20c35fafeb119b7ae5ebabe7">X. 从<code>boot.img</code> / <code>KERNEL.img</code>中提取kernel</a></li>
+</ul></li>
+<li><a href="#步骤2-用ida加载:74e08c5c20c35fafeb119b7ae5ebabe7">步骤2、用IDA加载</a>
+<ul>
+<li><a href="#arm64的内核:74e08c5c20c35fafeb119b7ae5ebabe7">ARM64的内核</a></li>
+<li><a href="#armv7的内核:74e08c5c20c35fafeb119b7ae5ebabe7">ARMv7的内核</a></li>
+</ul></li>
+<li><a href="#步骤3-为ida中的内核增加符号支持:74e08c5c20c35fafeb119b7ae5ebabe7">步骤3. 为IDA中的内核增加符号支持</a></li>
+<li><a href="#注意事项:74e08c5c20c35fafeb119b7ae5ebabe7">注意事项</a></li>
+<li><a href="#参考资料:74e08c5c20c35fafeb119b7ae5ebabe7">参考资料</a></li>
+</ul>
+</nav>
+		    </div>
+		    
+	    
+  		<section class="post">
+            <h1 class="post-title">
+              <a href="/android/kernel%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C/">kernel逆向分析准备工作</a>
+            </h1>
+            <h3 class="post-subtitle">
+            	
+            </h3>
+            
+            	<span class="post-date">
+                	<span class="post-date-day"><sup>13</sup></span><span class="post-date-separator">/</span><span class="post-date-month">May</span> <span class="post-date-year">2018</span>
+            	</span>
+            	
+            
+            	
+            
+
+			
+			
+
+			
+
+			
+
+            
+
+<h1 id="步骤1-提取内核文件:74e08c5c20c35fafeb119b7ae5ebabe7">步骤1、提取内核文件</h1>
+
+<p>提取内核有两种方式：</p>
+
+<ol>
+<li>通过固件包提取，通常包含在<code>KERNEL.img</code>或<code>boot.img</code>之中。</li>
+<li>通过root权限的手机提取。</li>
+</ol>
+
+<h2 id="a-通过root权限设备提取:74e08c5c20c35fafeb119b7ae5ebabe7">A. 通过root权限设备提取</h2>
+
+<p>以Nexus 5为例子</p>
+
+<p><strong>1. 得到boot分区路径</strong></p>
+
+<pre><code class="language-bash">adb shell
+su
+cd /dev/block/platform/msm_sdcc.1/by-name
+ls -l boot
+</code></pre>
+
+<p><img src="1.png" alt="img" title="img" /></p>
+
+<p>boot 是个系统符号软链接，/dev/block/mmcblk0p19 就是boot分区.</p>
+
+<p><strong>2. 拷贝boot分区数据到sdcard</strong>
+用 dd 将其dump到sdcard文件夹下：</p>
+
+<pre><code class="language-bash">dd if=/dev/block/mmcblk0p19 of=/sdcard/boot.img
+</code></pre>
+
+<p>得到boot.img文件!</p>
+
+<h2 id="b-通过固件包提取:74e08c5c20c35fafeb119b7ae5ebabe7">B. 通过固件包提取</h2>
+
+<p><strong>1. 解开固件包</strong>
+具体打包方法各厂商都不同，有些厂商还有加密。（如：OPPO)</p>
+
+<p><strong>2. 得到boot.img</strong>
+解包后可直接得到boot.img。大部分手机的固件都为<code>boot.img</code>，少数会有其他名称(如华为EMUI: <code>KERNEL.img</code>)</p>
+
+<h2 id="x-从-boot-img-kernel-img-中提取kernel:74e08c5c20c35fafeb119b7ae5ebabe7">X. 从<code>boot.img</code> / <code>KERNEL.img</code>中提取kernel</h2>
+
+<p>可以借助工具，工具有：
+《binwalk》《mkboot》《unpackbootimg》</p>
+
+<pre><code>binwalk -e boot.img
+mkboot KERNEL.img ./output/   # 实际测试有些问题，提取出的kernel.gz不完整
+</code></pre>
+
+<p>也可直接根据特征提有，粗略特征为：</p>
+
+<p><strong>1. 定位boot.img / KERNEL.img 中KERNEL的部分：</strong></p>
+
+<p>搜索字符串<code>ANDROID!</code>先定位到头部，头部后紧跟kernel的描述信息：
+<img src="2.png" alt="img" title="img" /></p>
+
+<p><strong>2. 提出kernel.gz包文件：</strong></p>
+
+<p>接着以此为起点寻找&rdquo;1F 8B 08 00&rdquo;，即gzip的头部Magic。长度不管（直接从此处到文件尾)保存到新的文件如：kernel.gz。
+<img src="3.png" alt="img" title="img" /></p>
+
+<p><strong>3. 解压出kernel.gz中的真正raw文件：</strong></p>
+
+<p>然后用gzip命令解压出文件(用图形界面解压会报错)：</p>
+
+<pre><code class="language-bash">gzip -d kernel.gz
+</code></pre>
+
+<h1 id="步骤2-用ida加载:74e08c5c20c35fafeb119b7ae5ebabe7">步骤2、用IDA加载</h1>
+
+<h2 id="arm64的内核:74e08c5c20c35fafeb119b7ae5ebabe7">ARM64的内核</h2>
+
+<p>使用IDA64打开kernel文件，选择<code>ARM Little-endian [ARM]</code>:</p>
+
+<p><img src="4.png" alt="img" title="img" /></p>
+
+<p><img src="5.png" alt="img" title="img" /></p>
+
+<p>通常都在ARM64中，将kernel文件偏移0x1000加载到内存的0xffffffc000080000处：</p>
+
+<p><img src="6.png" alt="img" title="img" /></p>
+
+<h2 id="armv7的内核:74e08c5c20c35fafeb119b7ae5ebabe7">ARMv7的内核</h2>
+
+<p><img src="7.png" alt="img" title="img" /></p>
+
+<p><img src="8.png" alt="img" title="img" /></p>
+
+<h1 id="步骤3-为ida中的内核增加符号支持:74e08c5c20c35fafeb119b7ae5ebabe7">步骤3. 为IDA中的内核增加符号支持</h1>
+
+<p>以下脚本通过<code>cat /proc/kallsyms</code>的输出结果来对IDA中的内核函数sub_xxx进行重命名:</p>
+
+<p>(由于某个早期版本Android已经不再输出内核符号偏移地址全部以0填充，所以使用该方法前 需要修改kernel使其输出偏移地址。)</p>
+
+<pre><code class="language-python">// 使用一下IDA脚本(python)，将函数/符号名设到对应的sub_xxx上
+ksyms = open(&quot;syms.txt&quot;) 
+i = 0 
+for line in ksyms: 
+    i += 1 
+    addr = int(line[0:8],16)  
+    name = line[11:-1]  
+    idaapi.set_debug_name(addr,name)  
+    MakeNameEx(addr,name,SN_NOWARN)
+    add_func(addr)
+    if i % 100 == 0:
+        Message(&quot;cur: %d\n&quot; % i)
+    # Message(&quot;%08X:%sn&quot;%(addr,name))  
+</code></pre>
+
+<h1 id="注意事项:74e08c5c20c35fafeb119b7ae5ebabe7">注意事项</h1>
+
+<p><strong>kernel加载地址的寻找：</strong></p>
+
+<p>以上的kernel加载地址0xffffffc000080000只是比较普遍的情况，如果以上地址不能正确分析，也有两个方法：</p>
+
+<ol>
+<li><p>可利用<code>cat /proc/kallsyms</code>输出的符号与IDA中的函数进行结合分析，尝试推算出加载地址。</p></li>
+
+<li><p>通过代码中对字符串的引用来推算出加载地址。</p></li>
+
+<li><p>通过内核源文件：boot/boardconfig.h中宏配置寻找内核加载地址。</p></li>
+</ol>
+
+<p><strong>文件偏移的寻找</strong>
+开头处寻找不为00的数据：</p>
+
+<p><img src="9.png" alt="img" title="img" /></p>
+
+<p><strong>加载后，默认为DCB数据，可以用一下脚本自动刷成代码：</strong></p>
+
+<p><img src="10.png" alt="img" title="img" /></p>
+
+<pre><code class="language-python">#! python
+def main():
+    start = AskAddr(MinEA(), &quot;欲转为Code的起始地址：&quot;)
+    end = AskAddr(MinEA(), &quot;欲转为Code的结束地址：&quot;)
+    if start &gt;= end:
+        print('输入的区间不正确～')
+        return
+
+    for cur_addr in range(start, end, 4):
+        flags = GetFlags(cur_addr)
+        print(&quot;[MSG] 0x%X 's flags: %x&quot; % (cur_addr, flags))
+        if Byte(cur_addr) and not (isCode(flags) and isTail(flags) and isUnknown(flags) and isHead(flags)):
+            print('[MSG] 0x%X is Data, Make to code.' % cur_addr)
+            MakeCode(cur_addr)
+main()
+</code></pre>
+
+<h1 id="参考资料:74e08c5c20c35fafeb119b7ae5ebabe7">参考资料</h1>
+
+<p><a href="http://blog.csdn.net/qq1084283172/article/details/57074695">http://blog.csdn.net/qq1084283172/article/details/57074695</a></p>
+
+<p><a href="http://www.hhjack.com/arm64_zimage_reverseengineering_with_ida_pro/">http://www.hhjack.com/arm64_zimage_reverseengineering_with_ida_pro/</a></p>
+
+<p><a href="https://www.cnx-software.com/2015/12/07/how-to-extract-kernel-img-with-mkboot-script/">https://www.cnx-software.com/2015/12/07/how-to-extract-kernel-img-with-mkboot-script/</a></p>
+
+	
+			
+
+			
+
+			
+				<div class="paging">
+					<span class="paging-label">More Reading</span>
+					
+
+					
+					<div class="paging-older">
+						<span class="dark-red">Older</span><span class="decorative-marker">//</span>
+			            <a class="paging-link" href="/android/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80CSharp%E8%84%9A%E6%9C%AC%E7%9A%84%E6%8F%90%E5%8F%96/">王者荣耀荣耀C#脚本的提取</a>
+		            </div>
+		            
+	            </div>
+            
+          </section>
+          
+          	<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'pkiller';
+    var disqus_identifier = 'https:\/\/pkiller.com\/android\/kernel%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C\/';
+    var disqus_title = 'kernel逆向分析准备工作';
+    var disqus_url = 'https:\/\/pkiller.com\/android\/kernel%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          
+        
+      <div class="footer">
+	<hr class="thin" />
+	<div class="pure-menu pure-menu-horizontal pure-menu-open">
+		<ul class="footer-menu">
+		
+			<li><a href="/posts">Blog</a></li>
+		
+		</ul>
+	</div>
+
+	<p>&copy; 2018. All rights reserved.</p>
+</div>
+    </div>
+  </div>
+	
+
+	
+
+  
+</body>
+</html>

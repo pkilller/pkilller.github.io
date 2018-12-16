@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <title>
+    改造linker, 实现无痕加载so模块 // pkiller&#39;s Blog
+  </title>
+
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="author" content="">
+<meta name="generator" content="Hugo 0.16-DEV" />
+
+  <meta property="og:title" content="改造linker, 实现无痕加载so模块" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:url" content="https://pkiller.com/android/%E6%94%B9%E9%80%A0linker,%20%E5%AE%9E%E7%8E%B0%E6%97%A0%E7%97%95%E5%8A%A0%E8%BD%BDso%E6%A8%A1%E5%9D%97/" />
+
+
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/base-min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/pure-min.css">
+  
+  
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/grids-responsive-min.css">
+  
+  
+
+  <link rel="stylesheet" href="https://pkiller.com/css/redlounge.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href='//fonts.googleapis.com/css?family=Raleway:400,200,100,700,300,500,600,800' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Libre+Baskerville:400,700,400italic' rel='stylesheet' type='text/css'>
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.png">
+
+  
+  <link href="" rel="alternate" type="application/rss+xml" title="pkiller&#39;s Blog" />
+
+    
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/tomorrow-night-bright.min.css">
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+
+  
+
+  
+
+  
+
+  
+</head>
+
+<body>
+	
+
+	<div id="layout" class="pure-g">
+    <div class="sidebar pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    
+
+	
+	  <img src="/images/avatar.jpeg" class="sidebarphoto">
+	
+
+    <h1 class="brand-title">pkiller</h1>
+    <h2 class="brand-tagline">Peanut Killer~</h2>
+
+    <nav class="nav">
+      <ul class="nav-list">
+        <li class="nav-item"><span class="nav-item-separator">//</span><a href="https://pkiller.com">Home</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/about">About</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/android">Android</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/music">Music</a></li>
+        
+      </ul>
+    </nav>
+
+    
+    <div class="social-buttons">
+      
+        
+        <a href="http://www.github.com/pkilller" target="_blank"><i class='fa fa-github'></i></a>
+        
+      
+        
+        <a href="http://www.twitter.com/aronkou1" target="_blank"><i class='fa fa-twitter'></i></a>
+        
+      
+      
+    </div>
+    
+
+  </div>
+</div>
+
+	
+	
+
+    <div class="content pure-u-1 pure-u-md-3-4">
+		<a name="top"></a>
+		
+
+		
+			
+		    <div id="toc" class="pure-u-1 pure-u-md-1-4">
+				<small class="toc-label">Contents</small>
+		   	 	<nav id="TableOfContents">
+<ul>
+<li><a href="#第一步-改造各种输出宏定义:29bc7b3984f30f3a453cada00f5708d0">第一步: 改造各种输出宏定义.</a></li>
+<li><a href="#第二步-替换dt-need的依赖加载:29bc7b3984f30f3a453cada00f5708d0">第二步: 替换DT_NEED的依赖加载</a></li>
+<li><a href="#第三步-去除soinfo链:29bc7b3984f30f3a453cada00f5708d0">第三步: 去除soinfo链.</a></li>
+<li><a href="#第四步-从-proc-pid-maps中隐藏map信息:29bc7b3984f30f3a453cada00f5708d0">第四步: 从/proc/pid/maps中隐藏map信息</a>
+<ul>
+<li><a href="#具体思路如上-nexus-5-4-4-4-下测试通过-对linker了解不深-如果有偏差和错误还请大家指正-附上代码:29bc7b3984f30f3a453cada00f5708d0">具体思路如上, <code>nexus 5</code>+ <code>4.4.4</code>下测试通过.  对linker了解不深, 如果有偏差和错误还请大家指正. 附上代码:~</a></li>
+</ul></li>
+</ul>
+</nav>
+		    </div>
+		    
+	    
+  		<section class="post">
+            <h1 class="post-title">
+              <a href="/android/%E6%94%B9%E9%80%A0linker,%20%E5%AE%9E%E7%8E%B0%E6%97%A0%E7%97%95%E5%8A%A0%E8%BD%BDso%E6%A8%A1%E5%9D%97/">改造linker, 实现无痕加载so模块</a>
+            </h1>
+            <h3 class="post-subtitle">
+            	
+            </h3>
+            
+            	<span class="post-date">
+                	<span class="post-date-day"><sup>11</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Apr</span> <span class="post-date-year">2018</span>
+            	</span>
+            	
+            
+            	
+            
+
+			
+			
+
+			
+
+			
+
+            
+
+<p>最近研究了一些防内存检测方面的姿势, 异常so模块检测在对抗中占了挺重要的部分.
+    由于<code>Bionic/linker</code>完全是一个用户态的实现, 所以就想着对linker的代码做一番改造, 实现一个自己的so loader, 目的是隐藏so模块,躲过检测.</p>
+
+<p>目前遍历进程内已加载模块的方法大概有两个:</p>
+
+<ol>
+<li>遍历soinfo-&gt;next(本身为一个环形链表).</li>
+<li>读取/proc/pid/maps.</li>
+</ol>
+
+<p>涉及的核心逻辑主要在: <code>linker.cpp</code>与<code>linker_phdr.cpp</code>两个文件中, <code>linker_phdr.cpp</code>负责elf内存的映射与读取, <code>linker.cpp</code>主要负责对数据进行展开和初始化.</p>
+
+<p><strong>linker里面涉及的引用比较多,弄了很久才剥离出来,最后修修补补,提取出了以下几个必须的文件:</strong></p>
+
+<pre><code>    elf_machdep.h 
+    diy_exec_elf.h 
+    diy_linker.cpp 
+    diy_linker.h 
+    diy_linker_phdr.cpp 
+    diy_linker_phdr.h 
+</code></pre>
+
+<p>在linker中是不允许调用<code>malloc</code>,<code>free</code>等函数的. 这是因为linker作为第一个被加载的模块(早于libc.so),所以可用资源方面比较严苛, 从代码中的一段注释可以得知原因:</p>
+
+<pre><code>/* &gt;&gt;&gt; IMPORTANT NOTE - READ ME BEFORE MODIFYING &lt;&lt;&lt;
+ *
+ * Do NOT use malloc() and friends or pthread_*() code here.
+ * Don't use printf() either; it's caused mysterious memory
+ * corruption in the past.
+ * The linker runs before we bring up libc and it's easiest
+ * to make sure it does not depend on any complex libc features
+ *
+ * open issues / todo:
+ *
+ * - are we doing everything we should for ARM_COPY relocations?
+ * - cleaner error reporting
+ * - after linking, set as much stuff as possible to READONLY
+ *   and NOEXEC
+ */
+</code></pre>
+
+<p>虽然上面列举了linker中的诸多限制, 但是这仅仅是对于原生linker而言. 而我们自己改造的linker在使用时周围的资源已经是非常丰富了, libc等各种库基本都已经加载完毕. 所以可以放开手脚的干一番.  废话不多, 下面开始干活.</p>
+
+<h1 id="第一步-改造各种输出宏定义:29bc7b3984f30f3a453cada00f5708d0">第一步: 改造各种输出宏定义.</h1>
+
+<p>linker中有很多不同种类的调试信息输出宏, 我并不想一次性删除, 因为这些输出对后面的调错还有很大帮助, 毕竟linker里的逻辑还是比较复杂的. 我全部都用__android_log_print():</p>
+
+<pre><code>// linker.h
+
+#define DL_ERR(x...) __android_log_print(ANDROID_LOG_DEBUG, &quot;linker_ERR&quot;, x);
+
+#define DL_WARN(fmt, x...) __android_log_print(ANDROID_LOG_DEBUG, &quot;linker_WARN&quot;, fmt, x);
+
+#define DL_TRACE(fmt, x...) __android_log_print(ANDROID_LOG_DEBUG, &quot;linker_TRACE&quot;, fmt, x);
+
+#define TRACE_TYPE(x, y...) __android_log_print(ANDROID_LOG_DEBUG, &quot;linker_TRACE_TYPE&quot;, y);
+
+#define DEBUG(x...) __android_log_print(ANDROID_LOG_DEBUG, &quot;linker_DEBUG&quot;, x);
+
+#define INFO(x...) __android_log_print(ANDROID_LOG_DEBUG, &quot;linker_INFO&quot;, x);
+
+#define LOOKUP 1  // 某个宏...作用忘了
+
+#define __libc_format_buffer(b, s, f, p...) sprintf(b, f, p);     // 这里用sprintf代替, 否则就要把libc里面的一大堆文件剥离出来, 不建议入坑.
+</code></pre>
+
+<h1 id="第二步-替换dt-need的依赖加载:29bc7b3984f30f3a453cada00f5708d0">第二步: 替换DT_NEED的依赖加载</h1>
+
+<p>在static bool soinfo_link_image(soinfo* si)函数的后半段，有一处代码是遍历DT_NEED并加载依赖库的代码，这里将代码直接替换成dlopen(), 调用原生linker来加载依赖库.</p>
+
+<pre><code>// linker.cpp
+  if (dynamic != NULL) {
+    for (Elf32_Dyn* d = dynamic; d-&gt;d_tag != DT_NULL; ++d) {
+      if (d-&gt;d_tag == DT_NEEDED) {
+        const char* library_name = strtab + d-&gt;d_un.d_val;
+        TRACE(&quot;\&quot;%s\&quot;: calling constructors in DT_NEEDED \&quot;%s\&quot;&quot;, name, library_name);
+        find_loaded_library(library_name)-&gt;CallConstructors();
+      }
+    }
+  }
+</code></pre>
+
+<p>修改后为:</p>
+
+<pre><code>    for (Elf32_Dyn* d = si-&gt;dynamic; d-&gt;d_tag != DT_NULL; ++d) {
+        if (d-&gt;d_tag == DT_NEEDED) {
+            const char* library_name = si-&gt;strtab + d-&gt;d_un.d_val;
+            DEBUG(&quot;%s needs %s&quot;, si-&gt;name, library_name);
+            soinfo* lsi = (soinfo*)dlopen(library_name, 0);       // 加载其他依赖的so, 这里直接调用原生linker
+            if (lsi == NULL) {
+                strlcpy(tmp_err_buf, linker_get_error_buffer(), sizeof(tmp_err_buf));
+                DL_ERR(&quot;could not load library \&quot;%s\&quot; needed by \&quot;%s\&quot;; caused by %s&quot;,
+                       library_name, si-&gt;name, tmp_err_buf);
+                return false;
+            }
+            *pneeded++ = lsi;
+        }
+    }
+</code></pre>
+
+<h1 id="第三步-去除soinfo链:29bc7b3984f30f3a453cada00f5708d0">第三步: 去除soinfo链.</h1>
+
+<p>该链作为原生linker中的一条很关键的结构, 每个加载的soinfo都会被串到这条链上来. 去除soinfo链后我们加载的模块就无法被通过遍历soinfo链表检测到.
+先删除掉以下变量定义, 编译一把使引用部位报错, 然后一点点清理.</p>
+
+<pre><code>// linker.cpp
+static struct soinfo_pool_t* gSoInfoPools = NULL;
+static soinfo* gSoInfoFreeList = NULL;
+static soinfo* solist = &amp;libdl_info;
+static soinfo* sonext = &amp;libdl_info;
+static soinfo* somain; /* main process, always the one after libdl_info */
+</code></pre>
+
+<p>一处关键的引用在函数<code>soinfo_alloc</code>中, 这里用于分配新的<code>soinfo</code>空间:</p>
+
+<pre><code class="language-C">static soinfo* soinfo_alloc(const char* name) {
+  if (strlen(name) &gt;= SOINFO_NAME_LEN) {
+    DL_ERR(&quot;library name \&quot;%s\&quot; too long&quot;, name);
+    return NULL;
+  }
+
+  if (!ensure_free_list_non_empty()) {
+    DL_ERR(&quot;out of memory when loading \&quot;%s\&quot;&quot;, name);
+    return NULL;
+  }
+
+  // Take the head element off the free list.
+  soinfo* si = gSoInfoFreeList;
+  gSoInfoFreeList = gSoInfoFreeList-&gt;next;
+
+  // Initialize the new element.
+  memset(si, 0, sizeof(soinfo));
+  strlcpy(si-&gt;name, name, sizeof(si-&gt;name));
+  sonext-&gt;next = si;
+  sonext = si;
+
+  TRACE(&quot;name %s: allocated soinfo @ %p&quot;, name, si);
+  return si;
+}
+</code></pre>
+
+<p>由于我们剥离了全局的soinfo链, 所以这里清理掉相关代码, 直接用<code>malloc</code>代替, 修改后的<code>soinfo_alloc</code>如下:</p>
+
+<pre><code class="language-C">static soinfo* soinfo_alloc(const char* name) {
+  if (strlen(name) &gt;= SOINFO_NAME_LEN) {
+    DL_ERR(&quot;library name \&quot;%s\&quot; too long&quot;, name);
+    return NULL;
+  }
+
+  if (!ensure_free_list_non_empty()) {
+    DL_ERR(&quot;out of memory when loading \&quot;%s\&quot;&quot;, name);
+    return NULL;
+  }
+
+  // Initialize the new element. 
+  // 以下是我们修改后的代码, 我这里直接用了new ....嘿嘿. 
+  soinfo *si = new soinfo();
+  memset(si, 0, sizeof(soinfo));
+  strlcpy(si-&gt;name, name, sizeof(si-&gt;name));
+  DL_TRACE(&quot;name %s: allocated soinfo @ %p&quot;, name, si);
+  return si;
+}
+</code></pre>
+
+<h1 id="第四步-从-proc-pid-maps中隐藏map信息:29bc7b3984f30f3a453cada00f5708d0">第四步: 从/proc/pid/maps中隐藏map信息</h1>
+
+<p>很多的对抗行为都发生在<strong>/proc/pid/</strong>目录下, 对于模块检测来说<code>maps</code>一定是非常重要的检测点. 所以下面我们修改代码, 不让模块信息出现在<code>maps</code>中.
+首先理清原理: 之所以能在maps文件中看到模块信息, 是因为linker在加载so时使用<code>mmap(xx, xx, xx, xx, fd_, xx)</code>映射了so文件的fd(文件描述符). 这个操作会被内核记录下来体现在<code>maps</code>中:</p>
+
+<pre><code class="language-C">// linker_phdr.cpp
+
+// Map all loadable segments in process' address space.
+// This assumes you already called phdr_table_reserve_memory to
+// reserve the address space range for the library.
+// TODO: assert assumption.
+bool ElfReader::LoadSegments() {
+...
+    if (file_length != 0) {
+      void* seg_addr = mmap((void*)seg_page_start,
+                            file_length,
+                            PFLAGS_TO_PROT(phdr-&gt;p_flags),
+                            MAP_FIXED|MAP_PRIVATE,
+                            fd_,    // 就是这个参数....
+                            file_page_start);
+      if (seg_addr == MAP_FAILED) {
+        DL_ERR(&quot;couldn't map \&quot;%s\&quot; segment %d: %s&quot;, name_, i, strerror(errno));
+        return false;
+      }
+    }
+...
+}
+</code></pre>
+
+<p>下面我们必须改变直接映射fd的方式, 并且还不影响原有功能, 思路为: 先mmap一块无fd内存, 然后使用read读出so指定偏移内容填充到mmap的内存处, 最后将mmap的内存属性设置为segment的属性. 代码如下:</p>
+
+<pre><code class="language-C">bool ElfReader::LoadSegments() {
+    if (file_length != 0) {
+       // 修改后: 
+       void* seg_addr = mmap((void*)seg_page_start,
+                              file_length,
+                              PROT_WRITE|PROT_READ,
+                              MAP_FIXED|MAP_PRIVATE| MAP_ANONYMOUS,
+                              0,  // 不直接映射文件...
+                              0);
+      if (seg_addr == MAP_FAILED) {
+         DL_ERR(&quot;couldn't mmap1 \&quot;%s\&quot; segment %d: %s&quot;, name_, i, strerror(errno));
+         return false;
+      }
+      if(lseek( fd_ , file_page_start, SEEK_SET ) == -1L ) { // 移动到当前segment处
+          DL_ERR(&quot;couldn't lseek1 \&quot;%s\&quot; segment %d: %s&quot;, name_, i, strerror(errno));
+          return -1;
+      }
+      if(-1 == read(fd_, seg_addr, file_length)) { // 读出内容到mmap出的缓存区
+          DL_ERR(&quot;couldn't read \&quot;%s\&quot; segment %d: %s&quot;, name_, i, strerror(errno));
+          return -1;
+      }
+      if( -1 == mprotect(seg_addr, file_length, PFLAGS_TO_PROT(phdr-&gt;p_flags))) { // 根据文件内容设置内存属性.
+          DL_ERR(&quot;couldn't mprotect \&quot;%s\&quot; segment %d: %s&quot;, name_, i, strerror(errno));
+          return -1;
+      }
+      DL_INFO(&quot;LoadSegments succeed:%s!&quot;, name_);
+    }
+}
+</code></pre>
+
+<h2 id="具体思路如上-nexus-5-4-4-4-下测试通过-对linker了解不深-如果有偏差和错误还请大家指正-附上代码:29bc7b3984f30f3a453cada00f5708d0">具体思路如上, <code>nexus 5</code>+ <code>4.4.4</code>下测试通过.  对linker了解不深, 如果有偏差和错误还请大家指正. 附上代码:~</h2>
+
+<p><a href="https://bbs.pediy.com/thread-216119.htm">https://bbs.pediy.com/thread-216119.htm</a></p>
+
+	
+			
+
+			
+
+			
+				<div class="paging">
+					<span class="paging-label">More Reading</span>
+					
+					<div class="paging-newer">
+						<span class="dark-red">Newer</span><span class="decorative-marker">//</span>
+						<a class="paging-link" href="/android/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80CSharp%E8%84%9A%E6%9C%AC%E7%9A%84%E6%8F%90%E5%8F%96/">王者荣耀荣耀C#脚本的提取</a>
+		            </div>
+		            
+
+					
+					<div class="paging-older">
+						<span class="dark-red">Older</span><span class="decorative-marker">//</span>
+			            <a class="paging-link" href="/android/ARMv8%E4%BB%A3%E7%A0%81%E5%AE%9A%E5%BC%8F/">ARMv8代码定式</a>
+		            </div>
+		            
+	            </div>
+            
+          </section>
+          
+          	<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'pkiller';
+    var disqus_identifier = 'https:\/\/pkiller.com\/android\/%E6%94%B9%E9%80%A0linker,%20%E5%AE%9E%E7%8E%B0%E6%97%A0%E7%97%95%E5%8A%A0%E8%BD%BDso%E6%A8%A1%E5%9D%97\/';
+    var disqus_title = '改造linker, 实现无痕加载so模块';
+    var disqus_url = 'https:\/\/pkiller.com\/android\/%E6%94%B9%E9%80%A0linker,%20%E5%AE%9E%E7%8E%B0%E6%97%A0%E7%97%95%E5%8A%A0%E8%BD%BDso%E6%A8%A1%E5%9D%97\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          
+        
+      <div class="footer">
+	<hr class="thin" />
+	<div class="pure-menu pure-menu-horizontal pure-menu-open">
+		<ul class="footer-menu">
+		
+			<li><a href="/posts">Blog</a></li>
+		
+		</ul>
+	</div>
+
+	<p>&copy; 2018. All rights reserved.</p>
+</div>
+    </div>
+  </div>
+	
+
+	
+
+  
+</body>
+</html>

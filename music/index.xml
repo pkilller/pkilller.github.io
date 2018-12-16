@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Musics on pkiller&#39;s Blog</title>
+    <link>https://pkiller.com/music/</link>
+    <description>Recent content in Musics on pkiller&#39;s Blog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 14 Apr 2017 23:37:31 +0800</lastBuildDate>
+    <atom:link href="https://pkiller.com/music/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>MIDI文件结构</title>
+      <link>https://pkiller.com/music/MIDI%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/</link>
+      <pubDate>Fri, 14 Apr 2017 23:37:31 +0800</pubDate>
+      
+      <guid>https://pkiller.com/music/MIDI%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/</guid>
+      <description>
+
+&lt;h2 id=&#34;chunks:2d6c6e1edfddae58fcf117ef7bfef91a&#34;&gt;Chunks&lt;/h2&gt;
+
+&lt;p&gt;一个MIDI文件由多个&lt;code&gt;Chunk(块)&lt;/code&gt;构成.
+1个&lt;code&gt;Chunk&lt;/code&gt;包含以下信息:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;type&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;length&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;data&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;4byte&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;4byte&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;em&gt;length bytes&lt;/em&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;ul&gt;
+&lt;li&gt;type: 4-byte, 表示该chunk的类型&lt;/li&gt;
+&lt;li&gt;length: 4-byte, 表示该chunk中data数据的长度&lt;/li&gt;
+&lt;li&gt;data: n-byte, 该chunk中存放的数据主体&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;一共存在两种类型的Chunk:&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;头部块: &lt;em&gt;Chunk.type = &amp;ldquo;MThd&amp;rdquo;&lt;/em&gt;
+轨道块: &lt;em&gt;Chunk.type = &amp;ldquo;MTrk&amp;rdquo;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;一个MIDI文件由1个&lt;code&gt;头部块&lt;/code&gt;加上1到n个的&lt;code&gt;轨道块&lt;/code&gt;构成.&lt;/strong&gt;&lt;/p&gt;
+
+&lt;p&gt;Chunk.length决定了Chunk的总长度, MIDI文件中可以存在&lt;code&gt;MThd&lt;/code&gt;与&lt;code&gt;MTrk&lt;/code&gt;之外的Chunk, 但是这些数据都应当被直接忽略. 在MIDI规范中要求软件应当能应付这种异常情况.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;type&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;length&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;data&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;MThd&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;6&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;em&gt;[format], [tracks], [division]&lt;/em&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;MTrk&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;em&gt;[length]&lt;/em&gt;&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;em&gt;[delta_time], [event]&lt;/em&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;MTrk&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;&lt;em&gt;[length]&lt;/em&gt;&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;&lt;em&gt;[delta_time], [event]&lt;/em&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&#34;值的含义:2d6c6e1edfddae58fcf117ef7bfef91a&#34;&gt;值的含义:&lt;/h3&gt;
+
+&lt;p&gt;MIDI文件中, 除了基础的信息外, 还包括如:&lt;code&gt;delta-times&lt;/code&gt;与&lt;code&gt;meta-events&lt;/code&gt;.
+这些信息包含数值, 这些信息通常以以下两种格式存在:
+* 二进制
+* 变长数值&lt;/p&gt;
+
+&lt;h3 id=&#34;二进制:2d6c6e1edfddae58fcf117ef7bfef91a&#34;&gt;二进制&lt;/h3&gt;
+
+&lt;p&gt;用以下方式存储:
+* 8-bits 1byte
+* MSB first (Most Significant Byte first)
+(除非另有规定)&lt;/p&gt;
+
+&lt;h3 id=&#34;变长数值:2d6c6e1edfddae58fcf117ef7bfef91a&#34;&gt;变长数值&lt;/h3&gt;
+
+&lt;p&gt;&lt;strong&gt;变长数值&lt;/strong&gt;提供了一种简单的表示任意大小数值的方式，没有必要来用定长的数值来表示，避免了不必要的长度浪费。
+一个&lt;strong&gt;变长数值&lt;/strong&gt;由n个8bit(最高1位+后面7bit表示）组成. 非结尾的byte/8bit, 最高bit为1. 最后1byte最高bit为0.
+Example:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;center&#34;&gt;Decimal&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Hex&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Binary&lt;/th&gt;
+&lt;th align=&#34;right&#34;&gt;Veriable-Length-Representation Binary&lt;/th&gt;
+&lt;th align=&#34;center&#34;&gt;Veriable-Length-Representation Hex&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;-&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;abcd&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;aaaabbbbccccdddd&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;100000aa 1aabbbbc 0cccdddd&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;-&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;0 &amp;hellip; 127&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;00 &amp;hellip; 7F&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0000 0000 &amp;hellip; 0111 1111&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0000 0000 &amp;hellip; 0111 1111&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;00 &amp;hellip; 7F&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;128 &amp;hellip; 16383&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;80 &amp;hellip; 3FFF&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;00000000 10000000 &amp;hellip; 00111111 11111111&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;100000001 00000000 &amp;hellip; 11111111 01111111&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;81 00 &amp;hellip; FF 7F&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;1000&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;03E8&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;11 1110 1000&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;10000111 01101000&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;87 68&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;center&#34;&gt;100000&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;0F4240&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;1111 0100 0010 0100 0000&lt;/td&gt;
+&lt;td align=&#34;right&#34;&gt;10111101 10000100 01000000&lt;/td&gt;
+&lt;td align=&#34;center&#34;&gt;BD 84 40&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;上面例子可以看到，每个byte中有7-bit(可容纳0-127)用来存放具体的值。
+在MIDI文件中允许的最大值为：0FFFFFFF, 也就是占用4byte (32bit)。&lt;/p&gt;
+
+&lt;h2 id=&#34;header-chunks:2d6c6e1edfddae58fcf117ef7bfef91a&#34;&gt;Header Chunks&lt;/h2&gt;
+
+&lt;p&gt;这里的Data数据由3部分16bit的字段构成，分别为：描述格式、描述音轨数和描述事件定时.&lt;/p&gt;
+
+&lt;p&gt;header 为6-bytes. 读取MIDI文件时需要遵循长度字段, 就算超过预期长度, 也需要忽略. &lt;code&gt;Header Chunk&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;1.png&#34; alt=&#34;Header Chunk&#34; title=&#34;Header Chunk&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;length&lt;/strong&gt;
+    指明chunk中的data长度.
+    这是一个MSB的32-bit数值.
+    在MIDI 1.0下时, 这里的数值通常都为6(byte). 尽管如此, 还是要考虑更大的尺寸, 以兼容未来可能的扩展.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;format&lt;/strong&gt;
+    指明该MIDI的格式
+    这是一个MSB的16-bit数值.
+    这里有效的值为三种: 0, 1和2.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;tracks&lt;/strong&gt;
+    指明该MIDI文件包含的音轨chunks数量.
+    这是一个MSB的16-bit数值.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;division&lt;/strong&gt;
+    这里定义了一个delta-time单位的时长.
+    这是一个MSB的16-bit数值.
+    该值为以下两种格式之一:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;2.png&#34; alt=&#34;2.png&#34; title=&#34;2.png&#34; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;if (bit 15 == 0):&lt;/em&gt;
+    bits 0-14 : 每四分之一音符中，包含多少个Tick(Tick是MIDI中的最小时间单位).&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;if (bit 15 == 1):&lt;/em&gt;
+    bits 0-7:  每SMTPE frame有多少Tick.
+    bits 8-14: 这里由负数构成，表示每秒有多少个SMTPE frames, 呼应bit 0-7.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;-24 = 24 frames per second
+-25 = 25 frames per second
+-29 = 30 frames per second, drop frame
+-30 = 30 frames per second, non-drop frame
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;**总结以上两种division值的类型: **第一种以&lt;code&gt;四分之一音符&lt;/code&gt;来描述速度, 而第二种以&lt;code&gt;SMTPE frame&lt;/code&gt;来描述速度(先确定每秒的frame数，然后再从frame中确定出Tick数, 实际上就是确定了速度) .&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://www.personal.kent.edu/~sbirch/Music_Production/MP-II/MIDI/midi_system_common_messages.htm&#34;&gt;http://www.personal.kent.edu/~sbirch/Music_Production/MP-II/MIDI/midi_system_common_messages.htm&lt;/a&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;midi-文件格式:2d6c6e1edfddae58fcf117ef7bfef91a&#34;&gt;MIDI 文件格式&lt;/h3&gt;
+
+&lt;p&gt;MIDI文件有3个变种：
+* Format 0
+只包含单个音轨.
+* Format 1
+包含一或多个同步的音轨(可以理解为不同乐器演奏一首曲子)
+* Format 2
+包含一或多个独立的音轨(理解为该文件内包含多首曲子?)&lt;/p&gt;
+
+&lt;p&gt;&amp;hellip;  后续还未完成..&lt;/p&gt;
+
+&lt;h3 id=&#34;原文:2d6c6e1edfddae58fcf117ef7bfef91a&#34;&gt;原文&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://cs.fit.edu/~ryan/cse4051/projects/midi/midi.html（已失效）&#34;&gt;http://cs.fit.edu/~ryan/cse4051/projects/midi/midi.html（已失效）&lt;/a&gt;
+&lt;a href=&#34;https://www.csie.ntu.edu.tw/~r92092/ref/midi/&#34;&gt;https://www.csie.ntu.edu.tw/~r92092/ref/midi/&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

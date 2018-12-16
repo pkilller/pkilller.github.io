@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <title>
+    Java混淆/反混淆/加固 总结 // pkiller&#39;s Blog
+  </title>
+
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="author" content="">
+<meta name="generator" content="Hugo 0.16-DEV" />
+
+  <meta property="og:title" content="Java混淆/反混淆/加固 总结" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:url" content="https://pkiller.com/android/Java%E6%B7%B7%E6%B7%86%E6%8A%80%E5%B7%A7-%E5%8F%8D%E6%B7%B7%E6%B7%86-%E5%8A%A0%E5%9B%BA%20%E6%80%BB%E7%BB%93/" />
+
+
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/base-min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/pure-min.css">
+  
+  
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/grids-responsive-min.css">
+  
+  
+
+  <link rel="stylesheet" href="https://pkiller.com/css/redlounge.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href='//fonts.googleapis.com/css?family=Raleway:400,200,100,700,300,500,600,800' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Libre+Baskerville:400,700,400italic' rel='stylesheet' type='text/css'>
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.png">
+
+  
+  <link href="" rel="alternate" type="application/rss+xml" title="pkiller&#39;s Blog" />
+
+    
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/tomorrow-night-bright.min.css">
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+
+  
+
+  
+
+  
+
+  
+</head>
+
+<body>
+	
+
+	<div id="layout" class="pure-g">
+    <div class="sidebar pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    
+
+	
+	  <img src="/images/avatar.jpeg" class="sidebarphoto">
+	
+
+    <h1 class="brand-title">pkiller</h1>
+    <h2 class="brand-tagline">Peanut Killer~</h2>
+
+    <nav class="nav">
+      <ul class="nav-list">
+        <li class="nav-item"><span class="nav-item-separator">//</span><a href="https://pkiller.com">Home</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/about">About</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/android">Android</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/music">Music</a></li>
+        
+      </ul>
+    </nav>
+
+    
+    <div class="social-buttons">
+      
+        
+        <a href="http://www.github.com/pkilller" target="_blank"><i class='fa fa-github'></i></a>
+        
+      
+        
+        <a href="http://www.twitter.com/aronkou1" target="_blank"><i class='fa fa-twitter'></i></a>
+        
+      
+      
+    </div>
+    
+
+  </div>
+</div>
+
+	
+	
+
+    <div class="content pure-u-1 pure-u-md-3-4">
+		<a name="top"></a>
+		
+
+		
+			
+		    <div id="toc" class="pure-u-1 pure-u-md-1-4">
+				<small class="toc-label">Contents</small>
+		   	 	<nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#混淆手段:8ab83e4bc2022a61fc42fc0d15c45011">混淆手段</a>
+<ul>
+<li><a href="#定义超长类名:8ab83e4bc2022a61fc42fc0d15c45011">定义超长类名</a></li>
+<li><a href="#找茬:8ab83e4bc2022a61fc42fc0d15c45011">找茬</a></li>
+<li><a href="#使用java关键字:8ab83e4bc2022a61fc42fc0d15c45011">使用Java关键字</a></li>
+<li><a href="#unicode字符:8ab83e4bc2022a61fc42fc0d15c45011">Unicode字符</a></li>
+<li><a href="#cjk-china-japan-korea-字符:8ab83e4bc2022a61fc42fc0d15c45011">CJK(China Japan korea)字符</a></li>
+<li><a href="#其他少见字符:8ab83e4bc2022a61fc42fc0d15c45011">其他少见字符</a></li>
+<li><a href="#盲文点字符:8ab83e4bc2022a61fc42fc0d15c45011">盲文点字符</a></li>
+<li><a href="#识别类名:8ab83e4bc2022a61fc42fc0d15c45011">识别类名</a></li>
+<li><a href="#识别enum:8ab83e4bc2022a61fc42fc0d15c45011">识别Enum</a></li>
+<li><a href="#acc-bridge:8ab83e4bc2022a61fc42fc0d15c45011">ACC_BRIDGE</a></li>
+<li><a href="#getter-setter:8ab83e4bc2022a61fc42fc0d15c45011">Getter/Setter</a></li>
+<li><a href="#根据日志:8ab83e4bc2022a61fc42fc0d15c45011">根据日志</a></li>
+<li><a href="#字符串加密:8ab83e4bc2022a61fc42fc0d15c45011">字符串加密</a></li>
+<li><a href="#asset加密:8ab83e4bc2022a61fc42fc0d15c45011">Asset加密</a></li>
+<li><a href="#androidmanifest-xml中namespace-name被清除:8ab83e4bc2022a61fc42fc0d15c45011">AndroidManifest.xml中namespace:name被清除.</a></li>
+<li><a href="#函数合并:8ab83e4bc2022a61fc42fc0d15c45011">函数合并</a></li>
+<li><a href="#利用java函数重载:8ab83e4bc2022a61fc42fc0d15c45011">利用Java函数重载</a></li>
+</ul></li>
+<li><a href="#反混淆手段:8ab83e4bc2022a61fc42fc0d15c45011">反混淆手段</a>
+<ul>
+<li><a href="#借助jeb简化混淆的命名:8ab83e4bc2022a61fc42fc0d15c45011">借助JEB简化混淆的命名</a></li>
+<li><a href="#借助proguard简化混淆的命名:8ab83e4bc2022a61fc42fc0d15c45011">借助Proguard简化混淆的命名</a></li>
+</ul></li>
+<li><a href="#加固:8ab83e4bc2022a61fc42fc0d15c45011">加固</a>
+<ul>
+<li><a href="#dalvik-bug:8ab83e4bc2022a61fc42fc0d15c45011">&ldquo;dalvik&rdquo;bug</a></li>
+<li><a href="#dex超长数组:8ab83e4bc2022a61fc42fc0d15c45011">dex超长数组</a></li>
+<li><a href="#elf清除或畸形化section:8ab83e4bc2022a61fc42fc0d15c45011">elf清除或畸形化section</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+		    </div>
+		    
+	    
+  		<section class="post">
+            <h1 class="post-title">
+              <a href="/android/Java%E6%B7%B7%E6%B7%86%E6%8A%80%E5%B7%A7-%E5%8F%8D%E6%B7%B7%E6%B7%86-%E5%8A%A0%E5%9B%BA%20%E6%80%BB%E7%BB%93/">Java混淆/反混淆/加固 总结</a>
+            </h1>
+            <h3 class="post-subtitle">
+            	
+            </h3>
+            
+            	<span class="post-date">
+                	<span class="post-date-day"><sup>18</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Jun</span> <span class="post-date-year">2016</span>
+            	</span>
+            	
+            
+            	
+            
+
+			
+			
+
+			
+
+			
+
+            
+
+<h2 id="混淆手段:8ab83e4bc2022a61fc42fc0d15c45011">混淆手段</h2>
+
+<h3 id="定义超长类名:8ab83e4bc2022a61fc42fc0d15c45011">定义超长类名</h3>
+
+<p>可以造成超长文件名, 造成常规反编译工具失败(路径太长).
+例子: oooooooooooooo</p>
+
+<h3 id="找茬:8ab83e4bc2022a61fc42fc0d15c45011">找茬</h3>
+
+<p>OoOoOoooOOooo
+<strong>$$_$$</strong>$<em>$$</em></p>
+
+<h3 id="使用java关键字:8ab83e4bc2022a61fc42fc0d15c45011">使用Java关键字</h3>
+
+<p>java对关键字检查操作在编译时, 所以在编译后修改没有问题.</p>
+
+<h3 id="unicode字符:8ab83e4bc2022a61fc42fc0d15c45011">Unicode字符</h3>
+
+<p>&hellip;</p>
+
+<h3 id="cjk-china-japan-korea-字符:8ab83e4bc2022a61fc42fc0d15c45011">CJK(China Japan korea)字符</h3>
+
+<p>&hellip;</p>
+
+<h3 id="其他少见字符:8ab83e4bc2022a61fc42fc0d15c45011">其他少见字符</h3>
+
+<p>&hellip;</p>
+
+<h3 id="盲文点字符:8ab83e4bc2022a61fc42fc0d15c45011">盲文点字符</h3>
+
+<p>&hellip;</p>
+
+<h3 id="识别类名:8ab83e4bc2022a61fc42fc0d15c45011">识别类名</h3>
+
+<p>通过源码中保留的Log.d(tag, &ldquo;xx&rdquo;); 通常程序员会将tag写为所在class名.</p>
+
+<h3 id="识别enum:8ab83e4bc2022a61fc42fc0d15c45011">识别Enum</h3>
+
+<p>构建Enum的第二个参数是成员名.</p>
+
+<h3 id="acc-bridge:8ab83e4bc2022a61fc42fc0d15c45011">ACC_BRIDGE</h3>
+
+<p>标识的函数会调用另外一个, 两个函数同名.</p>
+
+<h3 id="getter-setter:8ab83e4bc2022a61fc42fc0d15c45011">Getter/Setter</h3>
+
+<p>成员与函数同名</p>
+
+<h3 id="根据日志:8ab83e4bc2022a61fc42fc0d15c45011">根据日志</h3>
+
+<p>&hellip;.</p>
+
+<h3 id="字符串加密:8ab83e4bc2022a61fc42fc0d15c45011">字符串加密</h3>
+
+<p>&hellip;</p>
+
+<h3 id="asset加密:8ab83e4bc2022a61fc42fc0d15c45011">Asset加密</h3>
+
+<p>加密文件, 在打开文件函数处注入解密代码.  达到无缝加密. 分析并解密</p>
+
+<h3 id="androidmanifest-xml中namespace-name被清除:8ab83e4bc2022a61fc42fc0d15c45011">AndroidManifest.xml中namespace:name被清除.</h3>
+
+<p>该文件中同时包含ResourceId(Android特有)和namespace/name(标准xml特有)两套访问方式, 而Android中大部分使用resourceId, 该ResourceId对应了文本资源中的namaspace/name字符串。</p>
+
+<h3 id="函数合并:8ab83e4bc2022a61fc42fc0d15c45011">函数合并</h3>
+
+<p>合并函数调用</p>
+
+<h3 id="利用java函数重载:8ab83e4bc2022a61fc42fc0d15c45011">利用Java函数重载</h3>
+
+<p>在java中, 函数以 &ldquo;函数名+参数列表&rdquo; 为sig(函数名相同, 参数不同可构成重载). 而在smali(bytecodes)中, 函数则以 &ldquo;函数名+参数列表+返回类型&rdquo; 为sig.
+因此直接在编译后的smali(bytecodes)上动手, 将具有相同&rdquo;函数列表&rdquo;的函数改为同名. 这样在smali中可以正常执行, 但还原为java后, 会因为有多个相同&rdquo;函数名+参数列表&rdquo;而产生冲突.</p>
+
+<h2 id="反混淆手段:8ab83e4bc2022a61fc42fc0d15c45011">反混淆手段</h2>
+
+<h3 id="借助jeb简化混淆的命名:8ab83e4bc2022a61fc42fc0d15c45011">借助JEB简化混淆的命名</h3>
+
+<p>&hellip;</p>
+
+<h3 id="借助proguard简化混淆的命名:8ab83e4bc2022a61fc42fc0d15c45011">借助Proguard简化混淆的命名</h3>
+
+<p>如果混淆字符长期且复杂, 可以先用Proguard混淆一把, 简化复杂度.</p>
+
+<p>通过Proguard keep class *(不混淆任何东西)来输出mapping表文件.(目的是为了修改mapping表中的对应名称来达到整体修改工程中名称的目的)</p>
+
+<p>通过分析得到类的有意义名称, 然后将其修改至mapping文件, 最后利用Proguard来帮助批量修改回代码.</p>
+
+<h2 id="加固:8ab83e4bc2022a61fc42fc0d15c45011">加固</h2>
+
+<h3 id="dalvik-bug:8ab83e4bc2022a61fc42fc0d15c45011">&ldquo;dalvik&rdquo;bug</h3>
+
+<p>利用&rdquo;dalvik&rdquo;bug使其可以运行, 但不能够被反编译.</p>
+
+<h3 id="dex超长数组:8ab83e4bc2022a61fc42fc0d15c45011">dex超长数组</h3>
+
+<p>定义超长数组可以使不少工具反编译失败(耗尽其内存), 实际运行中要在入口将其释放, 以免内存太大无法运行.</p>
+
+<h3 id="elf清除或畸形化section:8ab83e4bc2022a61fc42fc0d15c45011">elf清除或畸形化section</h3>
+
+<p>清除或填充为畸形, 可使IDA和gikdbg.art等发生崩溃或无法正常解析. 可参见笔记: IDA - 打开畸形ELF时的报错信息含义</p>
+
+	
+			
+
+			
+
+			
+				<div class="paging">
+					<span class="paging-label">More Reading</span>
+					
+					<div class="paging-newer">
+						<span class="dark-red">Newer</span><span class="decorative-marker">//</span>
+						<a class="paging-link" href="/android/ELF32%20%28Android%20ARM%29/">ELF32 (Android ARM)</a>
+		            </div>
+		            
+
+					
+	            </div>
+            
+          </section>
+          
+          	<div id="disqus_thread"></div>
+<script type="text/javascript">
+    var disqus_shortname = 'pkiller';
+    var disqus_identifier = 'https:\/\/pkiller.com\/android\/Java%E6%B7%B7%E6%B7%86%E6%8A%80%E5%B7%A7-%E5%8F%8D%E6%B7%B7%E6%B7%86-%E5%8A%A0%E5%9B%BA%20%E6%80%BB%E7%BB%93\/';
+    var disqus_title = 'Java混淆\/反混淆\/加固 总结';
+    var disqus_url = 'https:\/\/pkiller.com\/android\/Java%E6%B7%B7%E6%B7%86%E6%8A%80%E5%B7%A7-%E5%8F%8D%E6%B7%B7%E6%B7%86-%E5%8A%A0%E5%9B%BA%20%E6%80%BB%E7%BB%93\/';
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+          
+        
+      <div class="footer">
+	<hr class="thin" />
+	<div class="pure-menu pure-menu-horizontal pure-menu-open">
+		<ul class="footer-menu">
+		
+			<li><a href="/posts">Blog</a></li>
+		
+		</ul>
+	</div>
+
+	<p>&copy; 2018. All rights reserved.</p>
+</div>
+    </div>
+  </div>
+	
+
+	
+
+  
+</body>
+</html>

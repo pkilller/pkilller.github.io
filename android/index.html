@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en-us">
+<head>
+  <title>
+    Androids // pkiller&#39;s Blog
+  </title>
+
+  <link href="http://gmpg.org/xfn/11" rel="profile">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+
+<meta name="description" content="">
+<meta name="keywords" content="">
+<meta name="author" content="">
+<meta name="generator" content="Hugo 0.16-DEV" />
+
+  <meta property="og:title" content="Androids" />
+<meta property="og:description" content="" />
+<meta property="og:type" content="website" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:url" content="https://pkiller.com/android/" />
+
+
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/base-min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/pure-min.css">
+  
+  
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pure/0.5.0/grids-responsive-min.css">
+  
+  
+
+  <link rel="stylesheet" href="https://pkiller.com/css/redlounge.css">
+  <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
+  <link href='//fonts.googleapis.com/css?family=Raleway:400,200,100,700,300,500,600,800' rel='stylesheet' type='text/css'>
+  <link href='//fonts.googleapis.com/css?family=Libre+Baskerville:400,700,400italic' rel='stylesheet' type='text/css'>
+
+  
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="/touch-icon-144-precomposed.png">
+  <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.png">
+
+  
+  <link href="https://pkiller.com/android/index.xml" rel="alternate" type="application/rss+xml" title="pkiller&#39;s Blog" />
+
+    
+  
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/styles/tomorrow-night-bright.min.css">
+  
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.7/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+
+  
+
+  
+
+  
+
+  
+</head>
+
+<body>
+	<div id="layout" class="pure-g">
+    <div class="sidebar pure-u-1 pure-u-md-1-4">
+  <div class="header">
+    
+
+	
+	  <img src="/images/avatar.jpeg" class="sidebarphoto">
+	
+
+    <h1 class="brand-title">pkiller</h1>
+    <h2 class="brand-tagline">Peanut Killer~</h2>
+
+    <nav class="nav">
+      <ul class="nav-list">
+        <li class="nav-item"><span class="nav-item-separator">//</span><a href="https://pkiller.com">Home</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/about">About</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/android">Android</a></li>
+        
+          <li class="nav-item"><span class="nav-item-separator">//</span><a href="/music">Music</a></li>
+        
+      </ul>
+    </nav>
+
+    
+    <div class="social-buttons">
+      
+        
+        <a href="http://www.github.com/pkilller" target="_blank"><i class='fa fa-github'></i></a>
+        
+      
+        
+        <a href="http://www.twitter.com/aronkou1" target="_blank"><i class='fa fa-twitter'></i></a>
+        
+      
+      
+    </div>
+    
+
+  </div>
+</div>
+
+
+    <div class="content pure-u-1 pure-u-md-3-4">
+      <a name="top"></a>
+      
+
+      <div class="posts">
+        
+          <section  class="post">
+            <header class="post-header">
+            
+            <h1 class="post-title">
+              <a href="/android/kernel%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C/">kernel逆向分析准备工作</a>
+            </h1>
+            </header>
+            <p class="post-meta">
+            	
+		          <span class="post-date">
+		            <span class="post-date-day"><sup>13</sup></span><span class="post-date-separator">/</span><span class="post-date-month">May</span> <span class="post-date-year">2018</span>
+		          </span>
+      				
+      				
+      					
+      				
+              
+                <span class="post-reading-time"><i class="fa fa-clock-o"></i> <em>1 min. read</em></span>
+              
+      				
+            </p>
+            
+              <article class="post-summary">
+            	步骤1、提取内核文件 提取内核有两种方式： 通过固件包提取，通常包含在KERNEL.img或boot.img之中。 通过root权限的手机提取。 A. 通过root权限设备提取 以Nexus 5为例子 1. 得到boot分区路径 adb shell su cd /dev/block/platform/msm_sdcc.1/by-name ls -l boot boot 是个系统符号软链接，/dev/block/mmcblk0p19 就是boot分区. 2. 拷贝boot分区数据到sdcard 用 dd 将其dump到sdcard文件夹下： dd if=/dev/block/mmcblk0p19 of=/sdcard/boot.img 得到boot.img文件! B. 通过固件包提取 1. 解开固件包 具体打包方法各厂商都不同，有些厂商还有加密。（如：OPPO) 2. 得到boot.img 解包后可直接得到boot.img。大部分手机的固件都为boot.img，少数会有其他名称(如华为EMUI: KERNEL.img) X. 从boot.img / KERNEL.img中提取kernel 可以借助工具，工具有： 《binwalk》《mkboot》《unpackbootimg》 binwalk -e boot.img mkboot KERNEL.img ./output/ # 实际测试有些问题，提取出的kernel.gz不完整 也可直接根据特征提有，粗略特征为： 1. 定位boot.img / KERNEL.img 中KERNEL的部分： 搜索字符串ANDROID!先定位到头部，头部后紧跟kernel的描述信息： 2. 提出kernel.gz包文件： 接着以此为起点寻找&rdquo;1F 8B 08 00&rdquo;，即gzip的头部Magic。长度不管（直接从此处到文件尾)保存到新的文件如：kernel.gz。 3. 解压出kernel.gz中的真正raw文件： 然后用gzip命令解压出文件(用图形界面解压会报错)： gzip -d kernel.gz 步骤2、用IDA加载 ARM64的内核 使用IDA64打开kernel文件，选择ARM Little-endian [ARM]: 通常都在ARM64中，将kernel文件偏移0x1000加载到内存的0xffffffc000080000处： ARMv7的内核 步骤3.
+              </article>
+			  <div class="read-more-link">
+				<a href="/android/kernel%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C/"><span class="read-more-slashes">//</span>Read More...</a>
+			  </div>
+            
+          </section>
+        
+          <section  class="post">
+            <header class="post-header">
+            
+            <h1 class="post-title">
+              <a href="/android/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80CSharp%E8%84%9A%E6%9C%AC%E7%9A%84%E6%8F%90%E5%8F%96/">王者荣耀荣耀C#脚本的提取</a>
+            </h1>
+            </header>
+            <p class="post-meta">
+            	
+		          <span class="post-date">
+		            <span class="post-date-day"><sup>26</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Apr</span> <span class="post-date-year">2018</span>
+		          </span>
+      				
+      				
+      					
+      				
+              
+                <span class="post-reading-time"><i class="fa fa-clock-o"></i> <em>1 min. read</em></span>
+              
+      				
+            </p>
+            
+              
+
+<p>王者荣耀采用流行的Unity3d框架开发，主要游戏逻辑使用C#编写， 但目前尚未确认是否有使用到Lua。</p>
+
+<h2 id="一-关于unity3d:f2902e0ae70def3075b11d65b413adb2">一、关于Unity3D</h2>
+
+<p>Unity3D是一款专用于3D游戏开发的跨平台框架，支持Lua、C#、JS脚本语言开发游戏逻辑。但目前使用较为广泛的还是C#，<code>王者荣耀使用的正是C#</code>。</p>
+
+<h2 id="二-unity3d-with-c-手游的通用修改方案:f2902e0ae70def3075b11d65b413adb2">二、Unity3D with C#手游的通用修改方案</h2>
+
+<p>Unity3D只是提供3D框架，其对C#脚本的支持能力完全依赖开源项：</p>
+
+<p>mono (<a href="https://github.com/mono/mono">https://github.com/mono/mono</a>, <code>在apk的lib下面有一个名为libmono.so就是使用了mono项目的特征</code>)。</p>
+
+<p><img src="/android/王者荣耀CSharp脚本的提取/1.png" alt="img" title="img" /></p>
+
+<p>Unity3D编译好后，最终的C#文件保存在<code>×.apk/assets/bin/Data/Managed/中的Assembly-CSharp.dll</code> 和 <code>Assembly-Csharp-firstpass.dll</code> 两个文件，其都是编译好的C#文件。</p>
+
+<p><img src="/android/王者荣耀CSharp脚本的提取/2.png" alt="img" title="img" /></p>
+
+<p>对Unity3D游戏逻辑的修改最后就是针对以上这两个dll文件，<code>这两个dll文件是windows上的PE格式</code></p>
+
+<p><img src="/android/王者荣耀CSharp脚本的提取/3.png" alt="img" title="img" /></p>
+
+<p>正常无保护的情况下可以很明显的看出以上两个文件的特征，使用一些C#的反编译工具(如:<code>.Net Reflector、ILSpy</code>)可以很容易的得到源码逻辑：</p>
+
+<p><img src="/android/王者荣耀CSharp脚本的提取/4.png" alt="img" title="img" /></p>
+
+<p>最后利用如.NetReflector工具对 dll文件中的游戏逻辑做修改，并替换dll文件后打包。便完成了游戏的修改。</p>
+
+<h2 id="三-对王者荣耀进行分析:f2902e0ae70def3075b11d65b413adb2">三、对王者荣耀进行分析</h2>
+
+<p><strong>1. 在王者荣耀中，这两个文件(<code>Assembly-CSharp.dll</code> 和 <code>Assembly-Csharp-firstpass.dll</code>)均被加密保护，已经无法看到标准的PE头。</strong></p>
+
+<p><img src="/android/王者荣耀CSharp脚本的提取/5.png" alt="img" title="img" /></p>
+
+<p><strong>2. C#解析引擎libmono.so也被加壳混淆。</strong></p>
+
+<p><img src="/android/王者荣耀CSharp脚本的提取/6.png" alt="img" title="img" /></p>
+
+<p><strong>3. 游戏存在反调试保护，无法用断点断到关键函数，会自动退出。</strong></p>
+
+<p>根据阅读mono开源项目得知其的加载assembly文件的方法名为：</p>
+
+<p>mono_image_open_from_data_with_name(<code>char *data, guint32 data_len</code>, gboolean need_copy, MonoImageOpenStatus *status, gboolean refonly, const char *name)</p>
+
+<p>并且该函数在libmono.so中对外导出</p>
+
+<ul>
+<li><p>第1个参数data, 指向的是Assembly-*.dll的完整文件数据。</p></li>
+
+<li><p>第2个参数是data_len，是数据长度。</p></li>
+</ul>
+
+<p>首先查看libmono.so中的<code>mono_image_open_from_data_with_name</code>导出函数，发现已被加密混淆。怀疑TX可能对mono做了特殊的定制(如果是的话会比较棘手)</p>
+
+<p><strong>4. 通过进程注入对libmono.so脱壳还原代码后发现并无特殊定制：</strong></p>
+
+<p>说明调用到<code>mono_image_open_from_data_with_name</code>后参数中的一定是明文dll数据。</p>
+
+<p><img src="/android/王者荣耀CSharp脚本的提取/7.png" alt="img" title="img" /></p>
+
+<p>既然没有定制libmono.so，所以直接采用hook方式进行(可使用开源项目adbi、或自己开发)hook这个函数(<code>mono_image_open_from_data_with_name</code>)
+但由于Assembly-*.dll文件在游戏启动时就被加载，所以需要考虑hook时机：</p>
+
+<p>1.使用debug模式启动王者荣耀，使其处于等待调试状态&hellip;</p>
+
+<p>2.先hook住libc.so中的__openat函数，当发现有Assembly-*.dll文件被打开时，再对libmono.so中的<code>mono_image_open_from_data_with_name</code>挂钩，这样可以保证hook不错过时机，并且外壳代码已经还原完毕。</p>
+
+<p>3.最后将<code>mono_image_open_from_data_with_name</code> 的数据写出文件。</p>
+
+<p><strong>5. DUMP成功后的脚本，使用反编译工具可以看到游戏逻辑，并可以修改：</strong></p>
+
+<p><img src="/android/王者荣耀CSharp脚本的提取/8.png" alt="img" title="img" /></p>
+
+<p>本次分析验证到此。</p>
+
+<h2 id="四-基于此开发辅助工具的一点思路:f2902e0ae70def3075b11d65b413adb2">四、基于此开发辅助工具的一点思路</h2>
+
+<p>定位到游戏关键逻辑后（如：地图全亮）。使用C#反编译修改工具(如:<code>.Net Reflector、ILSpy</code>)对脚本进行修改。最后利用hook将修改后的脚本替换到内存中去，让游戏使用新的脚本。即可达成修改游戏逻辑的目的。</p>
+
+            
+          </section>
+        
+          <section  class="post">
+            <header class="post-header">
+            
+            <h1 class="post-title">
+              <a href="/android/%E6%94%B9%E9%80%A0linker,%20%E5%AE%9E%E7%8E%B0%E6%97%A0%E7%97%95%E5%8A%A0%E8%BD%BDso%E6%A8%A1%E5%9D%97/">改造linker, 实现无痕加载so模块</a>
+            </h1>
+            </header>
+            <p class="post-meta">
+            	
+		          <span class="post-date">
+		            <span class="post-date-day"><sup>11</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Apr</span> <span class="post-date-year">2018</span>
+		          </span>
+      				
+      				
+      					
+      				
+              
+                <span class="post-reading-time"><i class="fa fa-clock-o"></i> <em>4 min. read</em></span>
+              
+      				
+            </p>
+            
+              <article class="post-summary">
+            	最近研究了一些防内存检测方面的姿势, 异常so模块检测在对抗中占了挺重要的部分. 由于Bionic/linker完全是一个用户态的实现, 所以就想着对linker的代码做一番改造, 实现一个自己的so loader, 目的是隐藏so模块,躲过检测. 目前遍历进程内已加载模块的方法大概有两个: 遍历soinfo-&gt;next(本身为一个环形链表). 读取/proc/pid/maps. 涉及的核心逻辑主要在: linker.cpp与linker_phdr.cpp两个文件中, linker_phdr.cpp负责elf内存的映射与读取, linker.cpp主要负责对数据进行展开和初始化. linker里面涉及的引用比较多,弄了很久才剥离出来,最后修修补补,提取出了以下几个必须的文件: elf_machdep.h diy_exec_elf.h diy_linker.cpp diy_linker.h diy_linker_phdr.cpp diy_linker_phdr.h 在linker中是不允许调用malloc,free等函数的. 这是因为linker作为第一个被加载的模块(早于libc.so),所以可用资源方面比较严苛, 从代码中的一段注释可以得知原因: /* &gt;&gt;&gt; IMPORTANT NOTE - READ ME BEFORE MODIFYING &lt;&lt;&lt; * * Do NOT use malloc() and friends or pthread_*() code here. * Don't use printf() either; it's caused mysterious memory * corruption in the past. * The linker runs before we bring up libc and it's easiest * to make sure it does not depend on any complex libc features * * open issues / todo: * * - are we doing everything we should for ARM_COPY relocations?
+              </article>
+			  <div class="read-more-link">
+				<a href="/android/%E6%94%B9%E9%80%A0linker,%20%E5%AE%9E%E7%8E%B0%E6%97%A0%E7%97%95%E5%8A%A0%E8%BD%BDso%E6%A8%A1%E5%9D%97/"><span class="read-more-slashes">//</span>Read More...</a>
+			  </div>
+            
+          </section>
+        
+          <section  class="post">
+            <header class="post-header">
+            
+            <h1 class="post-title">
+              <a href="/android/ARMv8%E4%BB%A3%E7%A0%81%E5%AE%9A%E5%BC%8F/">ARMv8代码定式</a>
+            </h1>
+            </header>
+            <p class="post-meta">
+            	
+		          <span class="post-date">
+		            <span class="post-date-day"><sup>23</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Oct</span> <span class="post-date-year">2017</span>
+		          </span>
+      				
+      				
+      					
+      				
+              
+                <span class="post-reading-time"><i class="fa fa-clock-o"></i> <em>9 min. read</em></span>
+              
+      				
+            </p>
+            
+              <article class="post-summary">
+            	本文案例默认编译自android-ndk-r10d, 并且编译选项的均为: APP_OPTIM := release OPT_CFLAGS := -O2&quot; 若为其它ndk环境将会在小节开头处有特殊说明. 一. 成员函数 a. 参数传递 二. 全局变量引用 const char g_str0[] = &quot;hello world 0~&quot;; const char g_str1[] = &quot;hello world 1~&quot;; const char g_str2[] = &quot;hello world 2~&quot;; int main(int argc, char *argv[]) { printf(g_str0); printf(g_str1); printf(g_str2); return 0; } objdump: adrp x19, 11000 ; 这里的0x11000指向的是.data数据区 add x19, x19, #0x10 ; .data+0x10, 定位到&quot;hello world 0~&quot; mov x0, x19 bl 590 &lt;printf@plt&gt; add x0, x19, #0x10 ; .data+0x20, 定位到&quot;hello world 1~&quot; bl 590 &lt;printf@plt&gt; add x0, x19, #0x20 ; .data+0x30, 定位到&quot;hello world 2~&quot; bl 590 &lt;printf@plt&gt; 总结 如果变量之间有相邻关系, 编译器会定位首个变量位置, 然后进行叠加定位.
+              </article>
+			  <div class="read-more-link">
+				<a href="/android/ARMv8%E4%BB%A3%E7%A0%81%E5%AE%9A%E5%BC%8F/"><span class="read-more-slashes">//</span>Read More...</a>
+			  </div>
+            
+          </section>
+        
+          <section  class="post">
+            <header class="post-header">
+            
+            <h1 class="post-title">
+              <a href="/android/Android%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E5%8F%8A%E8%8E%B7%E5%8F%96/">Android服务注册及获取</a>
+            </h1>
+            </header>
+            <p class="post-meta">
+            	
+		          <span class="post-date">
+		            <span class="post-date-day"><sup>14</sup></span><span class="post-date-separator">/</span><span class="post-date-month">May</span> <span class="post-date-year">2017</span>
+		          </span>
+      				
+      				
+      					
+      				
+              
+                <span class="post-reading-time"><i class="fa fa-clock-o"></i> <em>2 min. read</em></span>
+              
+      				
+            </p>
+            
+              <article class="post-summary">
+            	本文以Android 5.1为例展开，在7.0上细节会略有差异，但基本一致： Service大致分为两种 1. 系统服务SystemService // 以下展示的框架为标准的Android SystemService的调用结构。如：Context.LOCATION_SERVICE. [services.jar部分] 服务提供方通过ServiceManager.addService()注册服务 服务调用方通过ServiceManager.getService()获取服务，为IBinder类型. (通常供framework.jar使用，framework.jar内部会再包装Wrapper类，最后供上层APP使用.) [framework.jar部分] 使用ContextImpl.registerService() (在7.0上为SystemServiceRegistry), 将通过ServiceManager.getService()的到的IBinder对象注册到framework中. 在APP中使用context.getSystemService(LOCATION_SERVICE) 2. 普通APP的Binder服务 服务提供方在内部最终通过什么注册服务? (TODO: 分析如应用中的服务是如何注册的) 服务调用放通过bindService获得服务，为IBinder类型 以上两种方法对于IBinder都一样，使用asInterface将IBinder转为可方便调用的Client端接口： public static IPowerManager asInterface(IBinder arg2) { IPowerManager v1 = null; if(arg2 == null) { return v1; } IInterface v0 = arg2.queryLocalInterface(&quot;android.os.IPowerManager&quot;); if(v0 != null &amp;&amp; ((v0 instanceof IPowerManager))) { return ((IPowerManager)v0); // 如果该Service在本进程内，则直接返回。 } return new Proxy(arg2); // Service不在本进程内，使用Proxy进行代理访问(内部通过mRemote.transact()访问远端服务)。 } 1个标准Android SystemService的完整实现 首先在services.jar中添加服务 在service.jar可以通过调用SystemService.publishBinderService()或ServiceManager.addService将1个Service加入Binder队列. SystemManager.addService(LOCATION_SERVICE, new LocationManagerService(context)); // or SystemService.publishBinderService(POWER_SERVICE, new BinderService(this, null)); 最后在framework中使用ContextImpl.registerService()将包装Binder后的Wrapper对象加入队列，之后便可以在APP开发中直接使用context.getSystemService(XXXX_SERVICE)获取Manager(Wrapper)进行服务操作: // xref: /frameworks/base/core/java/android/app/ContextImpl.java static { // 将对应Service的Manager(Wrapper)加入管理器中， 以后便可以直接在APP开发中使用context.getSystemService(XXXX_SERVICE)来获取指定服务的Manager(Wrapper).
+              </article>
+			  <div class="read-more-link">
+				<a href="/android/Android%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E5%8F%8A%E8%8E%B7%E5%8F%96/"><span class="read-more-slashes">//</span>Read More...</a>
+			  </div>
+            
+          </section>
+        
+          <section  class="post">
+            <header class="post-header">
+            
+            <h1 class="post-title">
+              <a href="/android/Android%20%E8%BF%9B%E7%A8%8B%E7%BA%A7%E5%88%AB%20%E5%92%8C%20oom_adj%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB/">Android进程级别和oom_adj对应关系</a>
+            </h1>
+            </header>
+            <p class="post-meta">
+            	
+		          <span class="post-date">
+		            <span class="post-date-day"><sup>26</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Feb</span> <span class="post-date-year">2017</span>
+		          </span>
+      				
+      				
+      					
+      				
+              
+                <span class="post-reading-time"><i class="fa fa-clock-o"></i> <em>1 min. read</em></span>
+              
+      				
+            </p>
+            
+              
+
+<p>oom_adj 数值越小证明优先级越高, 被干掉的时间越晚. 如果大于 8 一般就是属于 backgroud 随时可能被干掉. -100为system进程的值, 表示绝不会被干掉.</p>
+
+<h3 id="oom-adj-0:6479aa3cb737dc69cbfb28a6c158a468">[oom_adj=0]</h3>
+
+<p><strong>前台进程 (Active Process)</strong></p>
+
+<p>前台进程包括:</p>
+
+<pre><code>1.活动 正在前台接收用户输入 
+2.活动、服务与广播接收器正在执行一个onReceive事件的处理函数
+3.服务正在运行 onStart、onCreate或onDestroy事件处理函数.
+</code></pre>
+
+<p><strong>已启动服务的进程(Started Service Process)</strong></p>
+
+<pre><code>这类进程包含一个已启动的服务. 服务并不直接与用户输入交互,因此服务的优先级低于可见活动的优先级,但是,已启动服务的进程任被认为是前台进程,只有在活动以及可见活动需要资源时,已启动服务的进程才会被杀死.
+</code></pre>
+
+<h3 id="oom-adj-1:6479aa3cb737dc69cbfb28a6c158a468">[oom_adj=1]</h3>
+
+<p><strong>可见进程 (Visible Process)</strong></p>
+
+<pre><code>活动是可见的,但并不在前台,或者不响应用户的输入.例如,活动被非全屏或者透明的活动所遮挡.
+</code></pre>
+
+<h3 id="oom-adj-2:6479aa3cb737dc69cbfb28a6c158a468">[oom_adj=2]</h3>
+
+<p><strong>后台进程 (Backgroud Process)</strong></p>
+
+<pre><code>这类进程不包含任何可见的活动与启动的服务.通常大量后台进程存在时,系统会采用（last-seen-first-kill）后见先杀的方式,释放资源为前台进程使用.
+</code></pre>
+
+<h3 id="oom-adj-4:6479aa3cb737dc69cbfb28a6c158a468">[oom_adj=4]</h3>
+
+<p><strong>主界面 (home process)</strong></p>
+
+<h3 id="oom-adj-7:6479aa3cb737dc69cbfb28a6c158a468">[oom_adj=7]</h3>
+
+<p><strong>隐藏进程 (hidden process)</strong></p>
+
+<h3 id="oom-adj-14:6479aa3cb737dc69cbfb28a6c158a468">[oom_adj=14]</h3>
+
+<p><strong>内容提供者 (content provider)</strong></p>
+
+<h3 id="oom-adj-15:6479aa3cb737dc69cbfb28a6c158a468">[oom_adj=15]</h3>
+
+<p><strong>空进程 (Empty process)</strong></p>
+
+            
+          </section>
+        
+          <section  class="post">
+            <header class="post-header">
+            
+            <h1 class="post-title">
+              <a href="/android/ELF%E7%9A%84dump%E5%8F%8A%E4%BF%AE%E5%A4%8D%E6%80%9D%E8%B7%AF/">ELF的DUMP及修复思路</a>
+            </h1>
+            </header>
+            <p class="post-meta">
+            	
+		          <span class="post-date">
+		            <span class="post-date-day"><sup>12</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Jul</span> <span class="post-date-year">2016</span>
+		          </span>
+      				
+      				
+      					
+      				
+              
+                <span class="post-reading-time"><i class="fa fa-clock-o"></i> <em>2 min. read</em></span>
+              
+      				
+            </p>
+            
+              <article class="post-summary">
+            	加壳后ELF的section基本是被抹掉或是被写垃圾数据的, 但section对于静态分析来讲又非常重要, 所以DUMP后有必要重建section让静态分析的体验变得更好. ELF的内存分布 因为section的部分项目只能通过编译器的一些特定规律和残留的信息来恢复,不可能百分百重建和还原. 所以必须先对编译器规划的内存布局有一个清晰的了解. 以下是一个32bit的ELF(.so)文件中在内存中的常见分布情况: { [0x0h]elf(.so) { [0x0h]PT_LOAD(0) { [0x0h]ehdr } [0x33h]ehdr { [0x34h]PT_PHDR / phdr } [0x133h]PT_PHDR / phdr { [0x134h].interp / PT_INERP } [0x146h].interp / PT_INERP /* gap size: 1h */ { [0x148h].dynsym / DT_SYMTAB } [0x607h].dynsym / DT_SYMTAB { [0x608h].dynstr / DT_STRTAB } [0xbdah].dynstr / DT_STRTAB /* gap size: 1h */ { [0xbdch].hash / DT_HASH } [0xe1fh].hash / DT_HASH { [0xe20h].rel.dyn / DT_REL } [0xe67h].rel.dyn / DT_REL { [0xe68h].rel.plt / DT_JMPREL } [0xf1fh].rel.plt / DT_JMPREL { [0xf20h].plt } [0x1047h].plt { [0x1048h].text } [0x2b23h].text { [0x2b24h].ARM.extab } [0x2b8fh].ARM.extab { [0x2b90h].ARM.exidx } [0x2cbfh].ARM.exidx { [0x2cc0h].rodata } [0x2d2fh].rodata } [0x2d2fh]PT_LOAD(0) /* gap size: 113ch */ { [0x3e6ch]PT_LOAD(1) { [0x3e6ch]PT_UNK_70000001h { [0x3e6ch].fini_array / DT_FINI_ARRAY } [0x3e73h].fini_array / DT_FINI_ARRAY { [0x3e74h].init_array / DT_INIT_ARRAY } [0x3e77h].init_array / DT_INIT_ARRAY { [0x3e78h].dynamic / PT_DYNAMIC } [0x3f77h].dynamic / PT_DYNAMIC { [0x3f78h].got { [0x3f98h]DT_PLTGOT } [0x3fffh]DT_PLTGOT } [0x3fffh].got } [0x3fffh]PT_UNK_70000001h { [0x4000h].data } [0x4003h].data } [0x4003h]PT_LOAD(1) } [0x4003h]elf(.so) 案例分析 这里用某厂商加固中携带的so文件来试验: section只有一个有效项.strtab: 加载so后DUMP dump后section已经丢失: 用IDA打开后查看效果,首先依赖库信息丢失: 其次Sections信息不全: 该so外壳通过DT_INIT还原代码.
+              </article>
+			  <div class="read-more-link">
+				<a href="/android/ELF%E7%9A%84dump%E5%8F%8A%E4%BF%AE%E5%A4%8D%E6%80%9D%E8%B7%AF/"><span class="read-more-slashes">//</span>Read More...</a>
+			  </div>
+            
+          </section>
+        
+          <section  class="post">
+            <header class="post-header">
+            
+            <h1 class="post-title">
+              <a href="/android/ELF32%20%28Android%20ARM%29/">ELF32 (Android ARM)</a>
+            </h1>
+            </header>
+            <p class="post-meta">
+            	
+		          <span class="post-date">
+		            <span class="post-date-day"><sup>18</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Jun</span> <span class="post-date-year">2016</span>
+		          </span>
+      				
+      				
+      					
+      				
+              
+                <span class="post-reading-time"><i class="fa fa-clock-o"></i> <em>1 min. read</em></span>
+              
+      				
+            </p>
+            
+              <article class="post-summary">
+            	首先勘误： 下图中 用STB_WEAK 来表示导出函数是错误的。 1. .rel.dyn(DT_REL) 和 .rel.plt(DT_JMPREL) 的区别. 在任意位置 使用静态方式 调用导入函数(API) 引用项会出现在.rel.plt(DT_JMPREL)中, TYPE为R_ARM_JUMP_SLOT 例子: exit (0); 在函数内 使用指针方式 调用导入函数(API) 引用项会出现在.rel.dyn(DT_REL)中, TYPE为R_ARM_GLOB_DAT 例子: void fun(){ typedef void *(*my_exit )(int); my_exit exit_ptr = (my_exit )exit; exit_ptr(0); } 在全局 引用导入函数(API)指针 引用项会分别在.rel.dyn(DT_REL)和.rel.plt(DT_JMPREL)中各加入一条: 在.rel.dyn(DT_REL)中加入TYPE为R_ARM_ABS32. 在.rel.plt(DT_JMPREL)中加入TYPE为R_ARM_JUMP_SLOT. 例子: void *g_exit = (void*)exit; 2. GOT 概念(GLOBAL OFFSET TABLE) module的GOT表被加载时, 会由linker填充该module导入函数的addr. 之后该module中的代码通过GOT中被填充好的地址值来间接调用导入函数. GOT表无需太关注, 因为GOT中的每一项Elf32_Addr. 都有DT_REL和DT_JMPREL中Elf32_Rel::r_offset对其的指向,被所有Elf32_Rel::r_offset指向形成的这一片连续Elf32_Addr区域就被称为&rdquo;GOT表&rdquo;, 理论上讲所有的Elf32_Rel::r_offset也可以指向不连续的区域(前提是linker不再按照连续地址方式处理. 目前linker中对got表的处理使用了地址连续的方式.).这样在对抗和逆向中就多了一条路径: 通过Elf32_Rel::r_offset来找到对应got项. DT_PLTGOT与&rdquo;.got&rdquo; dynamic的DT_PLTGOT处于section的&rdquo;.got&rdquo;范围之中: &ldquo;.got&rdquo; :[item,item,&hellip;,DT_PLTGOT[item,item,&hellip;]] 3. HOOK 导入/导出函数. 导入函数信息存储于Elf32_Rel结构中, 该结构位于: (program_table::p_type == PT_DYNAMIC)的项下的Elf32_Dyn::d_type == DT_REL(.rel.dyn) 与 DT_JMP_REL(.rel.plt).
+              </article>
+			  <div class="read-more-link">
+				<a href="/android/ELF32%20%28Android%20ARM%29/"><span class="read-more-slashes">//</span>Read More...</a>
+			  </div>
+            
+          </section>
+        
+          <section  class="post">
+            <header class="post-header">
+            
+            <h1 class="post-title">
+              <a href="/android/Java%E6%B7%B7%E6%B7%86%E6%8A%80%E5%B7%A7-%E5%8F%8D%E6%B7%B7%E6%B7%86-%E5%8A%A0%E5%9B%BA%20%E6%80%BB%E7%BB%93/">Java混淆/反混淆/加固 总结</a>
+            </h1>
+            </header>
+            <p class="post-meta">
+            	
+		          <span class="post-date">
+		            <span class="post-date-day"><sup>18</sup></span><span class="post-date-separator">/</span><span class="post-date-month">Jun</span> <span class="post-date-year">2016</span>
+		          </span>
+      				
+      				
+      					
+      				
+              
+                <span class="post-reading-time"><i class="fa fa-clock-o"></i> <em>1 min. read</em></span>
+              
+      				
+            </p>
+            
+              <article class="post-summary">
+            	混淆手段 定义超长类名 可以造成超长文件名, 造成常规反编译工具失败(路径太长). 例子: oooooooooooooo 找茬 OoOoOoooOOooo $$_$$$$$ 使用Java关键字 java对关键字检查操作在编译时, 所以在编译后修改没有问题. Unicode字符 &hellip; CJK(China Japan korea)字符 &hellip; 其他少见字符 &hellip; 盲文点字符 &hellip; 识别类名 通过源码中保留的Log.d(tag, &ldquo;xx&rdquo;); 通常程序员会将tag写为所在class名. 识别Enum 构建Enum的第二个参数是成员名. ACC_BRIDGE 标识的函数会调用另外一个, 两个函数同名. Getter/Setter 成员与函数同名 根据日志 &hellip;. 字符串加密 &hellip; Asset加密 加密文件, 在打开文件函数处注入解密代码. 达到无缝加密. 分析并解密 AndroidManifest.xml中namespace:name被清除. 该文件中同时包含ResourceId(Android特有)和namespace/name(标准xml特有)两套访问方式, 而Android中大部分使用resourceId, 该ResourceId对应了文本资源中的namaspace/name字符串。 函数合并 合并函数调用 利用Java函数重载 在java中, 函数以 &ldquo;函数名+参数列表&rdquo; 为sig(函数名相同, 参数不同可构成重载). 而在smali(bytecodes)中, 函数则以 &ldquo;函数名+参数列表+返回类型&rdquo; 为sig. 因此直接在编译后的smali(bytecodes)上动手, 将具有相同&rdquo;函数列表&rdquo;的函数改为同名. 这样在smali中可以正常执行, 但还原为java后, 会因为有多个相同&rdquo;函数名+参数列表&rdquo;而产生冲突. 反混淆手段 借助JEB简化混淆的命名 &hellip; 借助Proguard简化混淆的命名 如果混淆字符长期且复杂, 可以先用Proguard混淆一把, 简化复杂度. 通过Proguard keep class *(不混淆任何东西)来输出mapping表文件.(目的是为了修改mapping表中的对应名称来达到整体修改工程中名称的目的) 通过分析得到类的有意义名称, 然后将其修改至mapping文件, 最后利用Proguard来帮助批量修改回代码.
+              </article>
+			  <div class="read-more-link">
+				<a href="/android/Java%E6%B7%B7%E6%B7%86%E6%8A%80%E5%B7%A7-%E5%8F%8D%E6%B7%B7%E6%B7%86-%E5%8A%A0%E5%9B%BA%20%E6%80%BB%E7%BB%93/"><span class="read-more-slashes">//</span>Read More...</a>
+			  </div>
+            
+          </section>
+        
+      </div>
+
+      <div class="footer">
+	<hr class="thin" />
+	<div class="pure-menu pure-menu-horizontal pure-menu-open">
+		<ul class="footer-menu">
+		
+			<li><a href="/posts">Blog</a></li>
+		
+		</ul>
+	</div>
+
+	<p>&copy; 2018. All rights reserved.</p>
+</div>
+    </div>
+  </div>
+  
+</body>
+</html>
