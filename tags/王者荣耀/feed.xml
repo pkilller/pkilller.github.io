@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>王者荣耀 on pkiller</title>
+    <link>https://pkiller.com/tags/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80/</link>
+    <description>Recent content in 王者荣耀 on pkiller</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 26 Apr 2018 11:07:43 +0800</lastBuildDate>
+    
+	<atom:link href="https://pkiller.com/tags/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80/feed.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>王者荣耀荣耀C#脚本的提取</title>
+      <link>https://pkiller.com/android/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80csharp%E8%84%9A%E6%9C%AC%E7%9A%84%E6%8F%90%E5%8F%96/</link>
+      <pubDate>Thu, 26 Apr 2018 11:07:43 +0800</pubDate>
+      
+      <guid>https://pkiller.com/android/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80csharp%E8%84%9A%E6%9C%AC%E7%9A%84%E6%8F%90%E5%8F%96/</guid>
+      <description>王者荣耀采用流行的Unity3d框架开发，主要游戏逻辑使用C#编写， 但目前尚未确认是否有使用到Lua。 一、关于Unity3D Unity3D是</description>
+    </item>
+    
+  </channel>
+</rss>

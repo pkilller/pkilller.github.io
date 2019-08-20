@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>elf on pkiller</title>
+    <link>https://pkiller.com/tags/elf/</link>
+    <description>Recent content in elf on pkiller</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Tue, 12 Jul 2016 11:02:04 +0800</lastBuildDate>
+    
+	<atom:link href="https://pkiller.com/tags/elf/feed.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>ELF的DUMP及修复思路</title>
+      <link>https://pkiller.com/android/elf%E7%9A%84dump%E5%8F%8A%E4%BF%AE%E5%A4%8D%E6%80%9D%E8%B7%AF/</link>
+      <pubDate>Tue, 12 Jul 2016 11:02:04 +0800</pubDate>
+      
+      <guid>https://pkiller.com/android/elf%E7%9A%84dump%E5%8F%8A%E4%BF%AE%E5%A4%8D%E6%80%9D%E8%B7%AF/</guid>
+      <description>加壳后ELF的section基本是被抹掉或是被写垃圾数据的, 但section对于静态分析来讲又非常重要, 所以DUMP后有必要重建sectio</description>
+    </item>
+    
+    <item>
+      <title>ELF32 (Android ARM)</title>
+      <link>https://pkiller.com/android/elf32-android-arm/</link>
+      <pubDate>Sat, 18 Jun 2016 08:36:15 +0800</pubDate>
+      
+      <guid>https://pkiller.com/android/elf32-android-arm/</guid>
+      <description>首先勘误： 下图中 用STB_WEAK 来表示导出函数是错误的。 1. .rel.dyn(DT_REL) 和 .rel.plt(DT_JMPREL) 的区别. 在任意位置 使用静态方式 调用导入函数(API) 引用项会出现在.rel</description>
+    </item>
+    
+  </channel>
+</rss>

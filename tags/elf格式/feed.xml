@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>elf格式 on pkiller</title>
+    <link>https://pkiller.com/tags/elf%E6%A0%BC%E5%BC%8F/</link>
+    <description>Recent content in elf格式 on pkiller</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sat, 18 Jun 2016 08:36:15 +0800</lastBuildDate>
+    
+	<atom:link href="https://pkiller.com/tags/elf%E6%A0%BC%E5%BC%8F/feed.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>ELF32 (Android ARM)</title>
+      <link>https://pkiller.com/android/elf32-android-arm/</link>
+      <pubDate>Sat, 18 Jun 2016 08:36:15 +0800</pubDate>
+      
+      <guid>https://pkiller.com/android/elf32-android-arm/</guid>
+      <description>首先勘误： 下图中 用STB_WEAK 来表示导出函数是错误的。 1. .rel.dyn(DT_REL) 和 .rel.plt(DT_JMPREL) 的区别. 在任意位置 使用静态方式 调用导入函数(API) 引用项会出现在.rel</description>
+    </item>
+    
+  </channel>
+</rss>

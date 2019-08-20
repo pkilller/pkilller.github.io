@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>linker on pkiller</title>
+    <link>https://pkiller.com/tags/linker/</link>
+    <description>Recent content in linker on pkiller</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Wed, 11 Apr 2018 10:06:24 +0800</lastBuildDate>
+    
+	<atom:link href="https://pkiller.com/tags/linker/feed.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>改造linker, 实现无痕加载so模块</title>
+      <link>https://pkiller.com/android/%E6%94%B9%E9%80%A0linker-%E5%AE%9E%E7%8E%B0%E6%97%A0%E7%97%95%E5%8A%A0%E8%BD%BDso%E6%A8%A1%E5%9D%97/</link>
+      <pubDate>Wed, 11 Apr 2018 10:06:24 +0800</pubDate>
+      
+      <guid>https://pkiller.com/android/%E6%94%B9%E9%80%A0linker-%E5%AE%9E%E7%8E%B0%E6%97%A0%E7%97%95%E5%8A%A0%E8%BD%BDso%E6%A8%A1%E5%9D%97/</guid>
+      <description>最近研究了一些防内存检测方面的姿势, 异常so模块检测在对抗中占了挺重要的部分. 由于`Bionic/linker`完全是一个用户态的实现, 所以</description>
+    </item>
+    
+  </channel>
+</rss>

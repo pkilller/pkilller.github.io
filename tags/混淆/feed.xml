@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>混淆 on pkiller</title>
+    <link>https://pkiller.com/tags/%E6%B7%B7%E6%B7%86/</link>
+    <description>Recent content in 混淆 on pkiller</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sat, 18 Jun 2016 08:36:15 +0800</lastBuildDate>
+    
+	<atom:link href="https://pkiller.com/tags/%E6%B7%B7%E6%B7%86/feed.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Java混淆/反混淆/加固 总结</title>
+      <link>https://pkiller.com/android/java%E6%B7%B7%E6%B7%86%E6%8A%80%E5%B7%A7-%E5%8F%8D%E6%B7%B7%E6%B7%86-%E5%8A%A0%E5%9B%BA-%E6%80%BB%E7%BB%93/</link>
+      <pubDate>Sat, 18 Jun 2016 08:36:15 +0800</pubDate>
+      
+      <guid>https://pkiller.com/android/java%E6%B7%B7%E6%B7%86%E6%8A%80%E5%B7%A7-%E5%8F%8D%E6%B7%B7%E6%B7%86-%E5%8A%A0%E5%9B%BA-%E6%80%BB%E7%BB%93/</guid>
+      <description>混淆手段 定义超长类名 可以造成超长文件名, 造成常规反编译工具失败(路径太长). 例子: oooooooooooooo 找茬 OoOoOoooOOooo $$_$$$$$ 使用Java关键字 java对关键字检查操作在编译</description>
+    </item>
+    
+  </channel>
+</rss>
