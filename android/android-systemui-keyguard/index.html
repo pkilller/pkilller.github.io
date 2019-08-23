@@ -1,0 +1,1745 @@
+<!DOCTYPE HTML>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>Android SystemUI &amp; Keyguard原理分析，加个“摇一摇”解锁 - pkiller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+  <meta name="keywords" content="android,锁屏,解锁,keyguard,systemui,systemui布局,android锁屏,">
+  <meta name="description" content="android systemui 与 keyguard 的原理分析，并在基础上进行定制">
+  
+  <meta itemprop="name" content="Android SystemUI &amp; Keyguard原理分析，加个“摇一摇”解锁 - pkiller">
+  <meta itemprop="description" content="android systemui 与 keyguard 的原理分析，并在基础上进行定制">
+  <meta itemprop="image" content="https://pkiller.com/img/author.jpg">
+  
+  <meta name="twitter:description" content="android systemui 与 keyguard 的原理分析，并在基础上进行定制" />
+  
+  <link rel="shortcut icon" href="https://pkiller.com/img/favicon.ico"/>
+  <link rel="apple-touch-icon" href="https://pkiller.com/apple-touch-icon.png" />
+  <link rel="apple-touch-icon-precomposed" href="https://pkiller.com/apple-touch-icon.png" />
+  <link rel="stylesheet" href="https://pkiller.com/highlight/styles/github.css">
+  <script src="https://pkiller.com/highlight/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  
+  <link rel="stylesheet" href="https://pkiller.com/font/hack/css/hack.min.css">
+  <link rel="stylesheet" href="https://pkiller.com/css/style.css">
+</head>
+
+<body>
+  <header>
+    <div>
+  
+  <div id="imglogo">
+    <a href="https://pkiller.com/"><img src="https://pkiller.com/img/logo.svg" alt="pkiller" title="pkiller"/></a>
+  </div>
+  
+  <div id="textlogo">
+    <h1 class="site-name"><a href="https://pkiller.com/" title="pkiller">pkiller</a></h1>
+    <h2 class="blog-motto">个人技术博客</h2>
+  </div>
+  <div class="navbar"><a class="navbutton navmobile" href="#" title="menu"></a></div>
+  <nav class="animated">
+    <ul>
+      
+      <li><a href="/android">Android</a></li>
+      
+      <li><a href="/security">安全</a></li>
+      
+      <li><a href="/music">音乐</a></li>
+      
+      <li><a href="/about">关于</a></li>
+      
+      <li>
+        <form class="search" method="get" action="https://www.google.com/search">
+          <div>
+            <input type="text" id="search" name="q" placeholder="搜索">
+          </div>
+        </form>
+      </li>
+    </ul>
+  </nav>
+</div>
+
+  </header>
+  <div id="container">
+    <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody">
+    <header class="article-info clearfix">
+  <h1 itemprop="name">
+      <a href="https://pkiller.com/android/android-systemui-keyguard/" title="Android SystemUI &amp; Keyguard原理分析，加个“摇一摇”解锁" itemprop="url">Android SystemUI &amp; Keyguard原理分析，加个“摇一摇”解锁</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="" title=""></a>
+    
+  </p>
+  <p class="article-time">
+    <time datetime="2019-08-23 14:10:05 &#43;0800 CST" itemprop="datePublished">2019年08月23日</time>
+  </p>
+</header>
+
+	<div class="article-content">
+    
+    
+
+<h2 id="基本知识">基本知识</h2>
+
+<p>本文的所有分析都基于Android 7.0.</p>
+
+<h3 id="keyguard">Keyguard</h3>
+
+<p>系统中并不存在Keyguard这个应用，Keyguard实际上是com.android.systemui中的一个静态库，这个库主要负责跟锁屏解锁相关业务。</p>
+
+<h3 id="systemui">SystemUI</h3>
+
+<p>系统应用com.android.systemui负责跟UI相关的显示工作,比如：StatusBar(状态栏)、NavigationBar(导航栏)等、通知栏(Notification)等等.其中也包含锁屏部分的功能.</p>
+
+<h2 id="a-systemui-gn-8003-m6">A、SystemUI - GN 8003(M6)</h2>
+
+<p>本节以金立8003(M6)为目标进行Keyguard的分析</p>
+
+<h3 id="一-快速认识keyguard">一、快速认识Keyguard</h3>
+
+<p><img src="1.png" alt="img" title="img" /></p>
+
+<p><strong>SystemUI布局</strong></p>
+
+<pre><code>FrameLayout
+|— keyguard_host_view (安全解锁)
+|— keyguard_security_container
+|— — view_flipper
+|— — — keyguard_pattern_view / keyguard_pin_view (不同解锁方式)
+FrameLayout
+|— panel_holder (通知区域：锁屏状态 与 通知栏下拉状态)
+|— — notification_panel (通知栏区域)
+|— — — notification_container_parent 
+|— — — — scroll_view
+|— — — — — LinerLayout
+|— — — — — — quick_settings_container
+|— — — — — — reserve_notification_space
+|— — — — notification_stack_scroller
+|— — — — — FrameLayout  (一个通知项)
+|— — — — — — backgroundNormal
+|— — — — — — expanded
+|— — — — — — — status_bar_latest_event_content
+|— — — header  (通知栏上方区域)
+|— — — keyguard_header  (锁屏状态下通知栏上方区域)
+|— — — — clock
+|— — — — date_group
+|— — — — system_icons_super_container
+|— — — — multi_user_switch
+|— scrim_behind
+|— scrim_in_front
+|— status_bar (状态栏)
+|— — center_clock_layout
+|— — status_bar_contents
+|— — — notification_icon_area
+</code></pre>
+
+<p><strong>跟锁屏相关的重要的类</strong></p>
+
+<p><strong>KeyguardViewMediator</strong>
+负责代处理SystemUI的所有和界面有关的操作，所有到此的调用都会转为UI线程。该类主要被<code>KeyguardService</code>调用。
+其有一个启动锁屏的关键函数<code>doKeyguardLocked()</code>, 该函数内会检测是否开启了锁屏功能，如果没有开启则直接return。</p>
+
+<p><strong>StatusBarKeyguardViewManager</strong>
+负责处理锁屏的所有操作，但该类也会负责显示解锁View(PIN、Pattern、Fingerprint)。其中<code>doKeyguardLocked()</code>负责进行锁屏，而这些操作最终依赖KeyguardBouncer。该类主要被<code>KeyguardViewMediator</code>调用。</p>
+
+<p><strong>KeyguardUpdateMonitor</strong>
+负责监控各类事件，电量指纹等事件外，该类还整合KeyguardViewMediator传来的事件整合为一个事件全集。如：电量、壁纸、指纹解锁等等所有跟锁屏有关的事件均可以在此找到。
+所有希望监听事件的都需要需要通过registerCallback()进行注册.</p>
+
+<p><strong>KeyguardBouncer</strong>
+负责具体执行安全锁屏的操作，包括锁屏UI的加载，解锁等。</p>
+
+<p><strong>KeyguardHostView</strong>
+为锁屏界面的绑定类： R.id.keyguard_host_view，其继承自：FrameLayout，implements SecurityCallback。keyguard_host_view对应如下区域:</p>
+
+<p><img src="2.png" alt="img" title="img" /></p>
+
+<h3 id="二-启动流程">二、启动流程</h3>
+
+<p>**1. SystemUI不同于普通的APP, 在AndroidManifest.xml中没有找到类似于<code>android.intent.category.LAUNCHER</code>这样供外部调用的接口. **
+但是有一个名为<code>SystemUIService</code>的Service供外部调用，这个接口就是用来启动SystemUI的入口。</p>
+
+<pre><code class="language-xml">&lt;!--xref: frameworks/base/packages/SystemUI/AndroidManifest.xml--&gt;
+    &lt;application android:allowBackup=&quot;false&quot; android:allowClearUserData=&quot;false&quot; android:hardwareAccelerated=&quot;true&quot; android:icon=&quot;@drawable/icon&quot; android:label=&quot;@string/app_label&quot; android:largeHeap=&quot;true&quot; android:name=&quot;.SystemUIApplication&quot; android:persistent=&quot;true&quot; android:process=&quot;com.android.systemui&quot; android:supportsRtl=&quot;true&quot; android:theme=&quot;@style/systemui_theme&quot;&gt;
+        &lt;meta-data android:name=&quot;supporticon&quot; android:value=&quot;true&quot; /&gt;
+        &lt;service android:exported=&quot;true&quot; android:name=&quot;SystemUIService&quot; /&gt;  &lt;!--入口点，被system_server调用--&gt;
+        &lt;service android:exported=&quot;true&quot; android:name=&quot;com.android.systemui.gionee.GnStatusBarService&quot; /&gt;
+        &lt;service android:exported=&quot;true&quot; android:name=&quot;com.android.systemui.usb.GnOtgService&quot; /&gt;
+        &lt;service android:exported=&quot;false&quot; android:name=&quot;.screenshot.TakeScreenshotService&quot; android:process=&quot;:screenshot&quot; /&gt;
+        &lt;service android:exported=&quot;true&quot; android:name=&quot;.LoadAverageService&quot; /&gt;
+</code></pre>
+
+<p><strong>2. 系统启动后<code>system_server$StartSystemUI()</code>会调用<code>SystemUI$SystemUIService</code>从而启动SystemUI. 而<code>StartSystemUI()</code>则由喜闻乐见的<code>startOtherServices()</code>调用：</strong></p>
+
+<pre><code class="language-java">// xref: frameworks/base/services/java/com/android/server/SystemServer.java
+static final void startSystemUi(Context context) {
+    Intent intent = new Intent();
+    intent.setComponent(new ComponentName(&quot;com.android.systemui&quot;,
+            &quot;com.android.systemui.SystemUIService&quot;));
+    intent.addFlags(Intent.FLAG_DEBUG_TRIAGED_MISSING);
+    //Slog.d(TAG, &quot;Starting service: &quot; + intent);
+    context.startServiceAsUser(intent, UserHandle.SYSTEM);
+}
+</code></pre>
+
+<p><strong>3. SystemUIService启动后，会轮流start各种模块，用于监听系统的各种状态:</strong></p>
+
+<pre><code class="language-java">// xref: frameworks/base/packages/SystemUI/src/com/android/systemui/SystemUIApplication.java
+private final Class&lt;?&gt;[] SERVICES = new Class[] {
+        com.android.systemui.tuner.TunerService.class,
+        com.android.systemui.keyguard.KeyguardViewMediator.class,  // 初始化锁屏相关的UI，声效等    
+        com.android.systemui.recents.Recents.class,
+        com.android.systemui.volume.VolumeUI.class, // 注册音量相关回调(以便能够响应音量调整事件)
+        Divider.class,
+        com.android.systemui.statusbar.SystemBars.class,  // 监控并启动状态栏
+        com.android.systemui.usb.StorageNotification.class,
+        com.android.systemui.power.PowerUI.class, // 监控电源相关信息，如电量改变，充电状态或低电量模式改变等
+        com.android.systemui.media.RingtonePlayer.class,  // 注册铃声播放回调
+        com.android.systemui.keyboard.KeyboardUI.class,  // 监控物理键盘的连接
+        com.android.systemui.tv.pip.PipUI.class,
+        com.android.systemui.shortcut.ShortcutKeyDispatcher.class,  // 物理键盘快捷键
+        com.android.systemui.VendorServices.class
+};
+</code></pre>
+
+<p><strong>4. 重点关注KeyguardViewMediator部分，跟进start()：</strong></p>
+
+<pre><code class="language-java">// xref: frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java
+@Override
+public void start() {
+    synchronized (this) {
+        setupLocked(); // &lt;--初始化跟锁屏相关的信息
+    }
+    putComponent(KeyguardViewMediator.class, this);
+}
+</code></pre>
+
+<p><strong>5. 进入setupLocked()， 这里初始化一些信息。比较重要的是<code>mUpdateMonitor</code>与<code>mStatusBarKeyguardViewManager</code>两个成员的初始化，后续的界面更新和事件传递全部依靠这两个对象进行:</strong></p>
+
+<pre><code class="language-java">// xref: frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java
+private void setupLocked() {
+    // ...
+    mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
+    mUpdateMonitor = KeyguardUpdateMonitor.getInstance(mContext);  // 创建事件监控
+    // ...
+    mStatusBarKeyguardViewManager =  // 创建UI管理器
+            SystemUIFactory.getInstance().createStatusBarKeyguardViewManager(mContext,
+                    mViewMediatorCallback, mLockPatternUtils);
+    // ...
+    String soundPath = Settings.Global.getString(cr, Settings.Global.LOCK_SOUND);  // 载入锁屏声音
+    // ...
+    soundPath = Settings.Global.getString(cr, Settings.Global.UNLOCK_SOUND); //载入解锁声音
+    // ...
+}
+
+</code></pre>
+
+<h3 id="三-首次锁屏事件">三、首次锁屏事件</h3>
+
+<p><img src="3.png" alt="img" title="img" /></p>
+
+<p><strong>开机显示keyguard的总结：</strong></p>
+
+<p>1、在KeyguardViewMediator.java的onSystemReady()方法内调用doKeyguardLocked()开始锁屏加载流程;</p>
+
+<p>2、setKeyguardEnabled();其他应用程序或者服务可以调用setKeyguardEnabled()方法请求禁止锁屏;</p>
+
+<p>3、KeyguardViewMediator.java在keyguard中起着主要调度的作用，主要负责</p>
+
+<pre><code>1）查询锁屏状态，当前是锁屏还是解锁状态;在锁屏状态下，会限制输入事件。
+2）PhoneWindowManager.java通过mKeyguardDelegate对象(KeyguardServiceDelegate.java)来使能KeyguardViewMediator.java，调用其中的方法;
+3）响应SIM卡状态变化并对锁屏界面做相应的调整onSimStateChanged();
+</code></pre>
+
+<p>4、判断keyguard是否被禁止、keyguard当前是否正在显示等等即当前是否可以显示keguard，可以显示的话继续调用showLocked()方法;</p>
+
+<p>5、调用handleShow()方法，调用StatusBarKeyguardViewManager.java的show()开始显示keyguard锁屏界面;</p>
+
+<p>6、调用reset()方法，调用showBouncerOrKeyguard()方法判断是显示正常锁屏界面还是安全锁屏界面;显示正常锁屏的话直接调用PhoneStatusBar.java的showKeyguard()或者hideKeyguard()方法;如果显示安全锁屏界面的话则调入KeyguardBouncer.java类内;</p>
+
+<p>7、调用KeyguardBouncer.java的show()方法;使用ensureView()方法去加载实例化布局;调用KeyguardHostView.java的showPrimarySecurityScreen()方法去显示安全锁屏界面;
+8、KeyguardHostView.java的showPrimarySecurityScreen()方法会调入到KeyguardSecurityContainer.java的showPrimarySecurityScreen()方法中来;</p>
+
+<p>9、调用showSecurityScreen()方法，根据锁屏方式来加载不同的锁屏view;</p>
+
+<p>10、KeyguardSecurityView.java是一个接口类，其内部方法都是抽象的只有声明没有实现，其方法实现都是在继承于这个接口的类中。</p>
+
+<p>而在keyguard中主要是KeyguardAbsKeyInputView.java、KeyguardPasswordView.java、KeyguardPatternView.java等等Keyguard*View.java这些类继承于此接口实现其内部方法，这些类就是具体的锁屏界面view显示;</p>
+
+<h3 id="四-关闭屏幕后的锁屏流程">四、关闭屏幕后的锁屏流程</h3>
+
+<p>关闭屏幕后SystemUI会第一时间将锁屏界面准备好，以便用户点亮后能够即使显示。  所以关闭屏幕的第一件事就是进行锁屏。 下图描述了整个过程，在后半段的流程与以上的<code>首次锁屏事件</code>完全一样。</p>
+
+<p><img src="4.png" alt="img" title="img" /></p>
+
+<p><strong>关闭屏幕keyguard流程总结：</strong>
+1、不管是按Power键还是自动灭屏，都会执行到PowerManagerService.java的gotoSleep()方法;
+2、在这个方法内通过一系列的调用，调入到PhoneWindowManager.java的finishedGoingToSleep()方法;
+3、在PhoneWindowManager.java类中通过KeyguardServiceDelegate.java类的对象mKeyguardDelegate来使能KeyguardViewMediator.java;
+4、而KeyguardViewMediator.java作为keyguard的调度者，从这里开始keyguard的加载;
+5、最终在KeyguardSecurityContainer.java的showPrimarySecurityScreen()方法内去实现根据锁屏方式加载锁屏界面;</p>
+
+<h3 id="五-按键屏蔽">五、按键屏蔽</h3>
+
+<p>当锁屏开启后，HOME、APP_SWITCH按钮全部会失效，这些限制是在PhoneWIindowManager中进行限制的:</p>
+
+<pre><code class="language-java">// xref: frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
+public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags) {
+    // ....
+    } else if (keyCode == KeyEvent.KEYCODE_APP_SWITCH) {
+        if (!keyguardOn) {  // 是否处于锁屏状态中
+            if (down &amp;&amp; repeatCount == ) {
+                preloadRecentApps();
+            } else if (!down) {
+                toggleRecentApps();
+            }
+        }
+        return -;
+    }
+    // ....
+    } else if ((event.getFlags() &amp; KeyEvent.FLAG_LONG_PRESS) != ) {
+        if (!keyguardOn) {  // 是否处于锁屏状态中
+            handleLongPressOnHome(event.getDeviceId());
+        }
+    }
+    // ...
+}
+</code></pre>
+
+<h3 id="六-amigo定制内容">六、Amigo定制内容</h3>
+
+<p><img src="5.png" alt="img" title="img" /></p>
+
+<p><strong>新增HostViewHost</strong>
+Amigo自行增加了一个KeyguardViewHost的类(android原始版本中称为KeyguardHostView)，然后在StatusBarKeyguardViewManager::registerStatusBar()中增加代码来初始化和注册。
+并使用新增的KeyguardViewHostManager来对KeyguardViewHost进行操纵，新增的KeyguardViewHost不再由KeyguardBouncer代为操作，而是直接由StatusBarKeyguardViewManager进行。</p>
+
+<p><strong>新增界面资源</strong>
+Amigo新增的界面资源全部放于一个单独包：<code>com.amigo.keyguard</code>，在SystemUI通过KeyguardViewHost-&gt;KeyguardViewHostManager-&gt;KeyguardInterfaceManager来加载和操作.
+KeyguardInterfaceManager内部最终利用反射来调用<code>com.amigo.keyguard</code>中的逻辑.</p>
+
+<p><strong>指纹解锁的定制</strong>
+在Android原版本中: 指纹解锁的指纹事件是由<code>FingerprintUnlockController</code>向<code>KeyguardUpdateMonitor::registerCallback()</code>主动注册指纹事件回调，待事件发生后回调其<code>FingerprintUnlockController::onFingerprintAuthenticated()</code>来进行解锁处理.
+但在Amigo中: <code>FingerprintUnlockController</code>已被删除，指纹相关处理被回调值Amigo新增的<code>FingerprintManagerExt::handleAuthenticationResult()</code>内(FingerprintManagerExt负责跟隐私空间相关的操作，主要是负责跟FingerprintManager进行交互).  之后如果此指纹属于隐私空间，那么最终将此回调至FingerprintManager::privateCallback()，直接解锁进入到隐私空间.</p>
+
+<h2 id="b-android-systemui的事件派发框架">B、Android SystemUI的事件派发框架</h2>
+
+<p>本节基于Android_7.1.1源码进行(android 6与之大同小异)，主要分析整个SystemUI的事件(如：按下关机键、电量改变、解锁成功等)派发框架(顺便指出GIONEE-S10(Amigo)在SystemUI上的一些定制点)。本节不会对指纹、图形锁、密码等鉴权细节做深入，涉及指纹等其他细节将在后续章节中作详细描述。</p>
+
+<p><img src="6.png" alt="img" title="img" /></p>
+
+<h3 id="一-概括">一、概括</h3>
+
+<p>Android中由系统应用com.android.systemui来负责跟UI相关的显示工作, 比如：StatusBar(状态栏)、NavigationBar(导航栏)等.其中也包含锁屏部分的功能.
+com.android.systemui的大致工作原理是：
+* 暴露一个service接口.keyguard.KeyguardService给system_server.
+* 系统的状态发生改变时, 如: 关闭屏幕、解锁成功等. PhoneWindowManager(在system_server中)通过接口将事件通知到com.android.systemui.
+* 最后SystemUI进行UI元素的绘制和更新.</p>
+
+<p>举例说明：
+当system_server中PhoneWindowManager产生了一个事件并通过.keyguard.KeyguardService传递到com.android.systemui后.次消息在com.android.systemui的内部会在以下类中传递：
+KeyguardService –&gt; KeyguardViewMediator –&gt; KeyguardUpdateMonitor –&gt; [KeyguardUpdateMonitorCallback_0, KeyguardUpdateMonitorCallback_1, &hellip;]
+其中:
+* KeyguardService : 负责从<code>PhoneWindowManager</code>接收设备的各种状态，比如开始休眠、屏幕关闭等
+* KeyguardViewMediator : 提供锁屏相关的控制接口供<code>KeyguardService</code>调用，比如：锁屏、唤醒、被遮盖(来电后、或进入快速拍照模式等)等等。
+* KeyguardUpdateMonitor : 用来监听系统的各种状态（例如：电池信息、更换壁纸、时间改变等），同时还会整合<code>KeyguardViewMediator</code>中触发的锁屏信息。总而言之，该类的任务就是整合各个来源的信息，最后形成一个监控器，最后用事件回调来驱动上层UI的更新.
+* KeyguardUpdateMonitorCallback: 所有向<code>KeyguardUpdateMonitor</code>注册的事件时都必须提供一个继承自该类的实例(Amigo便是在这里注册了自己的事件回调).</p>
+
+<p><strong>事件类型包含但不限于</strong></p>
+
+<ul>
+<li>指纹验证通过/失败</li>
+<li>电池状态/点亮改变</li>
+<li>更换壁纸</li>
+<li>进入休眠</li>
+<li>关闭屏幕</li>
+<li>时间改变</li>
+</ul>
+
+<p>Amigo系统便是向<code>KeyguardUpdateMonitor</code>注册了很多回调，以下为监控电池状态的回调：</p>
+
+<pre><code class="language-java">// Amigo：
+KeyguardUpdateMonitor.getInstance(this.mContext).registerCallback(this.mUpdateMonitorCallback); // 注册回调
+// ***********************************************************************************************************************
+// 回调处理, 监控电量
+class com.amigo.navi.keyguard.AmigoKeyguardPageManager$1 extends KeyguardUpdateMonitorCallback {
+   // ...
+    public void onRefreshBatteryInfo(AmigoBatteryStatus arg3) {
+        if(arg3 == null) {
+            DebugLog.d(&quot;AmigoKeyguardPageManager&quot;, &quot;BatteryStatus is null&quot;);
+            return;
+        }
+        AmigoKeyguardPageManager.-set0(AmigoKeyguardPageManager.this, arg3);
+        AmigoKeyguardPageManager.-wrap1(AmigoKeyguardPageManager.this, arg3);
+    }
+    // ...
+}
+</code></pre>
+
+<h3 id="二-代码分析">二、代码分析</h3>
+
+<p><strong>1. 我们先以<code>service.jar</code>中的<code>class PhoneWindowManager</code>作为分析的起点</strong>
+系统启动后<code>PhoneWindowManager::systemBooted()</code>被调用：</p>
+
+<pre><code class="language-java">// xref: /frameworks/base/services/core/java/com/android/server/policy/PhoneWindowManager.java
+/** {@inheritDoc} */
+@Override
+public void systemBooted() {
+    //...
+    if (bindKeyguardNow) {
+        mKeyguardDelegate.bindService(mContext);  // &lt;---- 准备绑定`com.android.systemui/com.android.systemui.keyguard.KeyguardService`
+        mKeyguardDelegate.onBootCompleted();
+    }
+    synchronized (mLock) {
+        mSystemBooted = true;
+    }
+    //...
+}
+</code></pre>
+
+<p><code>KeyguardServiceDelegate::bindService()</code>, 绑定了SystemUI中的KeyguardService服务(<code>com.android.systemui/com.android.systemui.keyguard.KeyguardService</code>):</p>
+
+<pre><code class="language-java">// xref: /frameworks/base/services/core/java/com/android/server/policy/keyguard/KeyguardServiceDelegate.java
+public void bindService(Context context) {
+    Intent intent = new Intent();
+    final Resources resources = context.getApplicationContext().getResources();
+
+    final ComponentName keyguardComponent = ComponentName.unflattenFromString(
+            resources.getString(com.android.internal.R.string.config_keyguardComponent)); // com.android.systemui/com.android.systemui.keyguard.KeyguardService
+    intent.setComponent(keyguardComponent);
+
+    if (!context.bindServiceAsUser(intent, mKeyguardConnection,
+            Context.BIND_AUTO_CREATE, UserHandle.OWNER)) {
+       // ........
+        }
+    } else {
+        if (DEBUG) Log.v(TAG, &quot;*** Keyguard started&quot;);
+    }
+}
+</code></pre>
+
+<p>Bind成功后,开始调用<code>KeyguardService</code>的接口来执行一些初始化操作:</p>
+
+<pre><code class="language-java">// xref: /frameworks/base/services/core/java/com/android/server/policy/keyguard/KeyguardServiceDelegate.java
+
+public void onServiceConnected(ComponentName name, IBinder service) {
+    if (DEBUG) Log.v(TAG, &quot;*** Keyguard connected (yay!)&quot;);
+    mKeyguardService = new KeyguardServiceWrapper(mContext,  // &lt;-- 这里的KeyguardServiceWrapper没有什么特殊用处,就是把调用中转到远程Service上去. 里面接口和Service一模一样,只是套了一层try..catch以便捕获“Remote Except”.
+            IKeyguardService.Stub.asInterface(service), mShowingStateChangedCallback);
+    if (mKeyguardState.systemIsReady) {
+        // If the system is ready, it means keyguard crashed and restarted.
+        mKeyguardService.onSystemReady();  // &lt;-- 这里的接口全部在com.android.systemui中实现
+        if (mKeyguardState.currentUser != UserHandle.USER_NULL) {
+            // There has been a user switch earlier
+            mKeyguardService.setCurrentUser(mKeyguardState.currentUser);
+        }
+        // This is used to hide the scrim once keyguard displays.
+        if (mKeyguardState.interactiveState == INTERACTIVE_STATE_AWAKE) {
+            mKeyguardService.onStartedWakingUp();
+        }
+        if (mKeyguardState.screenState == SCREEN_STATE_ON
+                || mKeyguardState.screenState == SCREEN_STATE_TURNING_ON) {
+            mKeyguardService.onScreenTurningOn(
+                    new KeyguardShowDelegate(mDrawnListenerWhenConnect));
+        }
+        if (mKeyguardState.screenState == SCREEN_STATE_ON) {
+            mKeyguardService.onScreenTurnedOn();
+        }
+        mDrawnListenerWhenConnect = null;
+    }
+    if (mKeyguardState.bootCompleted) {
+        mKeyguardService.onBootCompleted();
+    }
+    if (mKeyguardState.occluded) {
+        mKeyguardService.setOccluded(mKeyguardState.occluded, false /* animate */);
+    }
+}
+</code></pre>
+
+<p>以上为Service.jar内的流程,经过上面在onServiceConnected内对mKeyguardService调用,流程将来到com.android.systemui中.</p>
+
+<p><strong>2.  接以上Service.jar中的流程,分析进入<code>com.android.systemui</code>后的流程：</strong>
+首先,以下是KeyguardService提供的所有接口,所有接口进入时都会检查调用者是否拥有<code>android.permission.CONTROL_KEYGUARD</code>(level:signature)权限或为<code>SYSTEM</code>用户（正常）：</p>
+
+<pre><code class="language-java">// xref: /frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardService.java
+void checkPermission() {
+    if(Binder.getCallingUid() == 1000) {
+        return;
+    }
+
+    if(this.getBaseContext().checkCallingOrSelfPermission(&quot;android.permission.CONTROL_KEYGUARD&quot;) != 0) {
+        Log.w(&quot;KeyguardService&quot;, &quot;Caller needs permission \'android.permission.CONTROL_KEYGUARD\' to call &quot; + Debug.getCaller());
+        throw new SecurityException(&quot;Access denied to process: &quot; + Binder.getCallingPid() + &quot;, must have permission &quot; + &quot;android.permission.CONTROL_KEYGUARD&quot;);
+    }
+}
+
+private final IKeyguardService.Stub mBinder = new IKeyguardService.Stub() {
+
+    @Override // Binder interface
+    public void addStateMonitorCallback(IKeyguardStateCallback callback) {
+        checkPermission();
+        mKeyguardViewMediator.addStateMonitorCallback(callback);
+    }
+
+    @Override // Binder interface
+    public void verifyUnlock(IKeyguardExitCallback callback) {
+        Trace.beginSection(&quot;KeyguardService.mBinder#verifyUnlock&quot;);
+        checkPermission();
+        mKeyguardViewMediator.verifyUnlock(callback);
+        Trace.endSection();
+    }
+
+    @Override // Binder interface
+    public void keyguardDone(boolean authenticated, boolean wakeup) {
+        Trace.beginSection(&quot;KeyguardService.mBinder#keyguardDone&quot;);
+        checkPermission();
+        // TODO: Remove wakeup
+        mKeyguardViewMediator.keyguardDone(authenticated);
+        Trace.endSection();
+    }
+
+    @Override // Binder interface
+    public void setOccluded(boolean isOccluded, boolean animate) {
+        Trace.beginSection(&quot;KeyguardService.mBinder#setOccluded&quot;);
+        checkPermission();
+        mKeyguardViewMediator.setOccluded(isOccluded, animate);
+        Trace.endSection();
+    }
+
+    @Override // Binder interface
+    public void dismiss(boolean allowWhileOccluded) {
+        checkPermission();
+        mKeyguardViewMediator.dismiss(allowWhileOccluded);
+    }
+
+    @Override // Binder interface
+    public void onDreamingStarted() {
+        checkPermission();
+        mKeyguardViewMediator.onDreamingStarted();
+    }
+
+    @Override // Binder interface
+    public void onDreamingStopped() {
+        checkPermission();
+        mKeyguardViewMediator.onDreamingStopped();
+    }
+
+    @Override // Binder interface
+    public void onStartedGoingToSleep(int reason) {
+        checkPermission();
+        mKeyguardViewMediator.onStartedGoingToSleep(reason);  &lt;------------------------------------------------------------
+    }
+
+    @Override // Binder interface
+    public void onFinishedGoingToSleep(int reason, boolean cameraGestureTriggered) {
+        checkPermission();
+        mKeyguardViewMediator.onFinishedGoingToSleep(reason, cameraGestureTriggered);
+    }
+
+    @Override // Binder interface
+    public void onStartedWakingUp() {
+        Trace.beginSection(&quot;KeyguardService.mBinder#onStartedWakingUp&quot;);
+        checkPermission();
+        mKeyguardViewMediator.onStartedWakingUp();
+        Trace.endSection();
+    }
+
+    @Override // Binder interface
+    public void onScreenTurningOn(IKeyguardDrawnCallback callback) {
+        Trace.beginSection(&quot;KeyguardService.mBinder#onScreenTurningOn&quot;);
+        checkPermission();
+        mKeyguardViewMediator.onScreenTurningOn(callback);
+        Trace.endSection();
+    }
+
+    @Override // Binder interface
+    public void onScreenTurnedOn() {
+        Trace.beginSection(&quot;KeyguardService.mBinder#onScreenTurningOn&quot;);
+        checkPermission();
+        mKeyguardViewMediator.onScreenTurnedOn();
+        Trace.endSection();
+    }
+
+    @Override // Binder interface
+    public void onScreenTurnedOff() {
+        checkPermission();
+        mKeyguardViewMediator.onScreenTurnedOff();
+    }
+
+    @Override // Binder interface
+    public void setKeyguardEnabled(boolean enabled) {
+        checkPermission();
+        mKeyguardViewMediator.setKeyguardEnabled(enabled);
+    }
+
+    @Override // Binder interface
+    public void onSystemReady() {
+        Trace.beginSection(&quot;KeyguardService.mBinder#onSystemReady&quot;);
+        checkPermission();
+        mKeyguardViewMediator.onSystemReady();
+        Trace.endSection();
+    }
+
+    @Override // Binder interface
+    public void doKeyguardTimeout(Bundle options) {
+        checkPermission();
+        mKeyguardViewMediator.doKeyguardTimeout(options);
+    }
+
+    @Override // Binder interface
+    public void setCurrentUser(int userId) {
+        checkPermission();
+        mKeyguardViewMediator.setCurrentUser(userId);
+    }
+
+    @Override
+    public void onBootCompleted() {
+        checkPermission();
+        mKeyguardViewMediator.onBootCompleted();
+    }
+
+    @Override
+    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
+        Trace.beginSection(&quot;KeyguardService.mBinder#startKeyguardExitAnimation&quot;);
+        checkPermission();
+        mKeyguardViewMediator.startKeyguardExitAnimation(startTime, fadeoutDuration);
+        Trace.endSection();
+    }
+
+    @Override
+    public void onActivityDrawn() {
+        checkPermission();
+        mKeyguardViewMediator.onActivityDrawn();
+    }
+}
+</code></pre>
+
+<p>现在从上面随便挑一个接口,来看消息的传递路径.这里选<code>onStartedGoingToSleep</code>,字面意思看上去应该是&rdquo;已经开始休眠/锁屏&rdquo;：</p>
+
+<pre><code class="language-java">// xref: /frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardService.java
+
+@Override // Binder interface
+public void onStartedGoingToSleep(int reason) {
+    checkPermission();
+    mKeyguardViewMediator.onStartedGoingToSleep(reason);   // &lt;--  
+}
+</code></pre>
+
+<p>跟进<code>KeyguardViewMediator::onStartedGoingToSleep(reason)</code>,  通过<code>KeyguardUpdateMonitor::dispatchStartedGoingToSleep(why)</code>向下派发消息：</p>
+
+<pre><code class="language-java">// xref: /frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java
+
+/**
+ * Called to let us know the screen was turned off.
+ * @param why either {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_USER} or
+ *   {@link android.view.WindowManagerPolicy#OFF_BECAUSE_OF_TIMEOUT}.
+ */
+public void onStartedGoingToSleep(int why) {
+    if (DEBUG) Log.d(TAG, &quot;onStartedGoingToSleep(&quot; + why + &quot;)&quot;);
+        // ...
+        // Lock immediately based on setting if secure (user has a pin/pattern/password).
+        // This also &quot;locks&quot; the device when not secure to provide easy access to the
+        // camera while preventing unwanted input.
+        int currentUser = KeyguardUpdateMonitor.getCurrentUser();
+        final boolean lockImmediately =
+                mLockPatternUtils.getPowerButtonInstantlyLocks(currentUser)
+                        || !mLockPatternUtils.isSecure(currentUser);
+        long timeout = getLockTimeout(KeyguardUpdateMonitor.getCurrentUser());
+        mLockLater = false;
+       // ...
+    }
+    KeyguardUpdateMonitor.getInstance(mContext).dispatchStartedGoingToSleep(why);  &lt; -- 继续向下传递事件
+    notifyStartedGoingToSleep();
+}
+</code></pre>
+
+<p>进入<code>KeyguardUpdateMonitor::dispatchStartedGoingToSleep()</code>,将以上信息发送到Handler：</p>
+
+<pre><code class="language-java">// xref: /frameworks/base/packages/Keyguard/src/com/android/keyguard/KeyguardUpdateMonitor.java
+
+public void dispatchStartedGoingToSleep(int why) {
+    mHandler.sendMessage(mHandler.obtainMessage(MSG_STARTED_GOING_TO_SLEEP, why, 0));
+}
+</code></pre>
+
+<p>Handler开始处理, 进入以下<code>case MSG_STARTED_GOING_TO_SLEEP</code>分支：</p>
+
+<pre><code class="language-java">// xref: /frameworks/base/packages/Keyguard/src/com/android/keyguard/KeyguardUpdateMonitor.java
+
+private final Handler mHandler = new Handler() {
+    @Override
+    public void handleMessage(Message msg) {
+        switch (msg.what) {
+            case MSG_TIME_UPDATE:
+                handleTimeUpdate();
+                break;
+            case MSG_BATTERY_UPDATE:
+                handleBatteryUpdate((BatteryStatus) msg.obj);
+                break;
+            case MSG_SIM_STATE_CHANGE:
+                handleSimStateChange(msg.arg1, msg.arg2, (State) msg.obj);
+                break;
+            case MSG_RINGER_MODE_CHANGED:
+                handleRingerModeChange(msg.arg1);
+                break;
+            case MSG_PHONE_STATE_CHANGED:
+                handlePhoneStateChanged((String) msg.obj);
+                break;
+            case MSG_DEVICE_PROVISIONED:
+                handleDeviceProvisioned();
+                break;
+            case MSG_DPM_STATE_CHANGED:
+                handleDevicePolicyManagerStateChanged();
+                break;
+            case MSG_USER_SWITCHING:
+                handleUserSwitching(msg.arg1, (IRemoteCallback) msg.obj);
+                break;
+            case MSG_USER_SWITCH_COMPLETE:
+                handleUserSwitchComplete(msg.arg1);
+                break;
+            case MSG_KEYGUARD_RESET:
+                handleKeyguardReset();
+                break;
+            case MSG_KEYGUARD_BOUNCER_CHANGED:
+                handleKeyguardBouncerChanged(msg.arg1);
+                break;
+            case MSG_BOOT_COMPLETED:
+                handleBootCompleted();
+                break;
+            case MSG_USER_INFO_CHANGED:
+                handleUserInfoChanged(msg.arg1);
+                break;
+            case MSG_REPORT_EMERGENCY_CALL_ACTION:
+                handleReportEmergencyCallAction();
+                break;
+            case MSG_STARTED_GOING_TO_SLEEP:  &lt;---------- 进入次分支
+                handleStartedGoingToSleep(msg.arg1);
+                break;
+            case MSG_FINISHED_GOING_TO_SLEEP:
+                handleFinishedGoingToSleep(msg.arg1);
+                break;
+            case MSG_STARTED_WAKING_UP:
+                Trace.beginSection(&quot;KeyguardUpdateMonitor#handler MSG_STARTED_WAKING_UP&quot;);
+                handleStartedWakingUp();
+                Trace.endSection();
+                break;
+            case MSG_FACE_UNLOCK_STATE_CHANGED:
+                Trace.beginSection(&quot;KeyguardUpdateMonitor#handler MSG_FACE_UNLOCK_STATE_CHANGED&quot;);
+                handleFaceUnlockStateChanged(msg.arg1 != 0, msg.arg2);
+                Trace.endSection();
+                break;
+            case MSG_SIM_SUBSCRIPTION_INFO_CHANGED:
+                handleSimSubscriptionInfoChanged();
+                break;
+            case MSG_AIRPLANE_MODE_CHANGED:
+                handleAirplaneModeChanged();
+                break;
+            case MSG_SERVICE_STATE_CHANGE:
+                handleServiceStateChange(msg.arg1, (ServiceState) msg.obj);
+                break;
+            case MSG_SCREEN_TURNED_ON:
+                handleScreenTurnedOn();
+                break;
+            case MSG_SCREEN_TURNED_OFF:
+                Trace.beginSection(&quot;KeyguardUpdateMonitor#handler MSG_SCREEN_TURNED_ON&quot;);
+                handleScreenTurnedOff();
+                Trace.endSection();
+                break;
+            case MSG_DREAMING_STATE_CHANGED:
+                handleDreamingStateChanged(msg.arg1);
+                break;
+            case MSG_USER_UNLOCKED:
+                handleUserUnlocked();
+                break;
+        }
+    }
+};
+</code></pre>
+
+<p>跟进<code>KeyguardUpdateMonitor::handleStartedGoingToSleep()</code>, 这里会把 <code>MSG_STARTED_GOING_TO_SLEEP</code>传送给所有已注册的回调：</p>
+
+<pre><code class="language-java">// xref: /frameworks/base/packages/Keyguard/src/com/android/keyguard/KeyguardUpdateMonitor.java
+protected void handleStartedGoingToSleep(int arg1) {
+    clearFingerprintRecognized();
+    final int count = mCallbacks.size();  // 这里有一条回调链, `MSG_STARTED_GOING_TO_SLEEP`会被通知到mCallbacks中所有继承自`KeyguardUpdateMonitorCallback`的实例
+    for (int i = 0; i &lt; count; i++) {
+        KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get(); 
+        if (cb != null) {
+            cb.onStartedGoingToSleep(arg1);  // 回调通知
+        }
+    }
+    mGoingToSleep = true;
+    mFingerprintAlreadyAuthenticated = false;
+    updateFingerprintListeningState();
+}
+</code></pre>
+
+<p>以上是处理<code>MSG_STARTED_GOING_TO_SLEEP</code>的流程.同理,其他消息的派发流程也都基本一样,最后都要通过mCallbacks来派发.</p>
+
+<p><strong>3. 以下分析回调的注册. 所有回调者都通过<code>KeyguardViewMediator::registerCallback</code>来注册：</strong></p>
+
+<pre><code class="language-java">// xref: /frameworks/base/packages/Keyguard/src/com/android/keyguard/KeyguardUpdateMonitor.java
+
+/**
+ * Register to receive notifications about general keyguard information
+ * (see {@link InfoCallback}.
+ * @param callback The callback to register
+ */
+public void registerCallback(KeyguardUpdateMonitorCallback callback) {
+    if (DEBUG) Log.v(TAG, &quot;*** register callback for &quot; + callback);
+    // Prevent adding duplicate callbacks
+    for (int i = 0; i &lt; mCallbacks.size(); i++) {
+        if (mCallbacks.get(i).get() == callback) {
+            if (DEBUG) Log.e(TAG, &quot;Object tried to add another callback&quot;,
+                    new Exception(&quot;Called by&quot;));
+            return;
+        }
+    }
+    mCallbacks.add(new WeakReference&lt;KeyguardUpdateMonitorCallback&gt;(callback));  // &lt;------ 加入回调链
+    removeCallback(null); // remove unused references
+    sendUpdates(callback);
+}
+</code></pre>
+
+<p>查看registerCallback的引用,可以发现很多Amigo的定制代码:</p>
+
+<p>回调最终会驱动状态栏、锁屏画面等UI的显示，回调类型包含诸如：</p>
+
+<pre><code>指纹验证通过/失败
+电池状态/点亮改变
+更换壁纸
+进入休眠
+关闭屏幕
+时间改变
+...
+</code></pre>
+
+<p>Amigo定制后的系统也在此处注册了很多回调，以下为监控电池状态的回调：</p>
+
+<pre><code class="language-java">// Amigo：
+KeyguardUpdateMonitor.getInstance(this.mContext).registerCallback(this.mUpdateMonitorCallback); // 注册回调
+// ***********************************************************************************************************************
+// 回调处理, 监控电量
+class com.amigo.navi.keyguard.AmigoKeyguardPageManager$1 extends KeyguardUpdateMonitorCallback {
+   // ...
+    public void onRefreshBatteryInfo(AmigoBatteryStatus arg3) {
+        if(arg3 == null) {
+            DebugLog.d(&quot;AmigoKeyguardPageManager&quot;, &quot;BatteryStatus is null&quot;);
+            return;
+        }
+        AmigoKeyguardPageManager.-set0(AmigoKeyguardPageManager.this, arg3);
+        AmigoKeyguardPageManager.-wrap1(AmigoKeyguardPageManager.this, arg3);
+    }
+    // ...
+}
+</code></pre>
+
+<pre><code class="language-java">
+# 时序图代码，https://www.websequencediagrams.com/
+title SystemUI锁屏事件的传递
+KeyguardService-&gt;KeyguardViewMediator: KeyguardService发送&quot;锁屏类&quot;事件：\n锁屏、唤醒等
+KeyguardViewMediator-&gt;KeyguardUpdateMonitor: KeyguardViewMediator将&quot;锁屏类&quot;\n事件稍作处理，向后传递
+KeyguardUpdateMonitor-&gt;KeyguardUpdateMonitorCallback: KeyguardUpdateMonitor监听&quot;其他事件&quot;：\n电量、壁纸和时间等，并整合&quot;锁屏类&quot;事件.
+option footer=bar
+
+</code></pre>
+
+<h3 id="七-faq">七、FAQ</h3>
+
+<h4 id="1-本文所涉及的内容应该从哪里看起">1. 本文所涉及的内容应该从哪里看起？</h4>
+
+<p>本文设计的有三个维度: 1. SystemUI启动方式       2. 锁屏事件的传递(关屏幕、锁屏等)     3. 关键类的创建</p>
+
+<p>1). SystemUI启动方式:<br />
+如果要从头跟下去，可以从 system_server(service.jar)中的startOtherServices()开始，然后会调到StartSystemUI，一直通过KeyguardService进入SystemUI内。
+如果只关心SystemUI的内部逻辑，那么就直接从KeyguardService开始，或从KeyguardViewMediator开始也可以.</p>
+
+<p>2). SystemUI事件的派发(关屏幕、锁屏等):
+如果要跟休眠、锁屏、亮屏这种级别的事件，可以直接从system_server中的<code>PhoneWindowManager</code>跟起，也可以直接从SystemUI内的KeyguardViewMediator开始.
+如果要跟像电量改变、时间改变、和指纹解锁这种事件，就需要在SystemUI内的KeyguardUpdateMonitor寻找.</p>
+
+<p>3). SystemUI关键类的创建:
+SystemUI内的关键类初始化工作基本都以PhoneStatusBar::startKeyguard()为起点。这些关键类包含: KeyguardMediator、KeyguardUpdateMonitor、StatusBarKeyguardViewManager、FingerprintUnlockController等等.</p>
+
+<h4 id="2-如何阻止keyguard的显示-关闭锁屏界面">2. 如何阻止keyguard的显示(关闭锁屏界面)？</h4>
+
+<p>KeyguardViewMediator::doKeyguardLocked(); // 直接在函数头return， 例如：</p>
+
+<pre><code class="language-java">// xref: frameworks/base/packages/SystemUI/src/com/android/systemui/keyguard/KeyguardViewMediator.java
+private void doKeyguardLocked(Bundle options) {
+    return;
+}
+</code></pre>
+
+<h4 id="3-如何让指纹-图形-数字锁屏失效-滑动直接解锁">3. 如何让指纹/图形/数字锁屏失效, 滑动直接解锁？</h4>
+
+<p><code>KeyguardSecurityModel::getSecurityMode()</code>中负责返回当前Settings中设置的锁屏类型，如：指纹/图形等：</p>
+
+<pre><code class="language-java">// xref: /frameworks/base/packages/Keyguard/src/com/android/keyguard/KeyguardSecurityModel.java
+    public enum SecurityMode {
+        Invalid, // NULL state
+        None, // No security enabled
+        Pattern, // Unlock by drawing a pattern.
+        Password, // Unlock by entering an alphanumeric password
+        PIN, // Strictly numeric password
+        Biometric, // Unlock with a biometric key (e.g. finger print or face unlock)
+        Account, // Unlock by entering an account's login and password.
+        SimPin, // Unlock by entering a sim pin.
+        SimPuk // Unlock by entering a sim puk
+    }
+</code></pre>
+
+<p>如果此函数返回SecurityMode.None类型，Keyguard会认为没有设置安全锁屏，从而直接解锁，所以作如下修改:</p>
+
+<pre><code class="language-java">// xref: /frameworks/base/packages/Keyguard/src/com/android/keyguard/KeyguardSecurityModel.java
+// 修改后：
+SecurityMode getSecurityMode() {
+    Slog.w(&quot;DIY_KEYGUARD&quot;, &quot;Exception calling onShown():&quot;);
+    return SecurityMode.None;
+}
+</code></pre>
+
+<h4 id="4-systemui跟ui相关的东西都在哪里">4. SystemUI跟UI相关的东西都在哪里？</h4>
+
+<p>在SystemUI中，所有跟界面的初始化工作都会从<code>class SystemUIFactory</code>为起点。</p>
+
+<h4 id="5-keyguardbouncer的界面在哪里被初始化">5. KeyguardBouncer的界面在哪里被初始化？</h4>
+
+<p>KeyguardBouncer的界面在class KeyguardBouncer::inflateView()中被初始化，R.layout.keyguard_bouncer会被mContainer设置到界面中. 而mContainer为R.layout.super_status_bar.</p>
+
+<pre><code class="language-java">// xref: frameworks/base/packages/SystemUI/src/com/android/systemui/statusbar/phone/KeyguardBouncer.java
+protected void inflateView() {
+    removeView();
+    mRoot = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.keyguard_bouncer, null);
+    // ...
+    mContainer.addView(mRoot, mContainer.getChildCount());  // 增加安全解锁的界面
+    mRoot.setVisibility(View.INVISIBLE);
+}
+</code></pre>
+
+<h4 id="6-如何增加一种新的解锁方式">6. 如何增加一种新的解锁方式？</h4>
+
+<p>下面以<code>摇一摇解锁</code>为例子：</p>
+
+<p>新增一种解锁方式大概需要以下操作：</p>
+
+<ul>
+<li>为新的解锁界面增加一个Layout和对应的Class</li>
+<li>在锁屏类型的enum中增加一项新值</li>
+<li>向负责获取解锁界面View的函数中，添加上面增加的Layout的Id.</li>
+<li>在最后解锁验证的函数中增加代码，允许新的解锁方式解锁.</li>
+</ul>
+
+<p>以下为详细步骤，以摇动手机解锁为例：</p>
+
+<p><strong>1). 为新的解锁界面增加一个Layout和对应的Class.</strong></p>
+
+<p>首先要为Keyguard增加一个文件名为<code>keyguard_shake_view.xml</code>新的Layout资源(路径：<code>frameworks/base/packages/Keyguard/res/layout/</code>)，如下，类名设为: <code>com.android.keyguard.KeyguardShakeView</code>
+当向上滑动锁屏界面试图解锁时，以下的这个Layout就会被显示出来：</p>
+
+<pre><code class="language-xml">&lt;!--xref: frameworks/base/packages/Keyguard/res/layout/keyguard_shake_view.xml--&gt;
+&lt;com.android.keyguard.KeyguardShakeView
+       xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+       xmlns:androidprv=&quot;http://schemas.android.com/apk/res-auto&quot;
+       android:id=&quot;@+id/keyguard_pkiller_view&quot;
+       android:layout_width=&quot;match_parent&quot;
+       android:layout_height=&quot;match_parent&quot;
+       androidprv:layout_maxWidth=&quot;@dimen/keyguard_security_width&quot;
+       androidprv:layout_maxHeight=&quot;@dimen/keyguard_security_max_height&quot;
+       android:orientation=&quot;vertical&quot;
+       android:contentDescription=&quot;@string/keyguard_accessibility_pin_unlock&quot;
+       &gt;
+   &lt;include layout=&quot;@layout/keyguard_message_area&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+           /&gt;
+   &lt;LinearLayout
+           android:id=&quot;@+id/keyguard_bouncer_frame&quot;
+           android:layout_width=&quot;match_parent&quot;
+           android:layout_height=&quot;match_parent&quot;
+           android:orientation=&quot;vertical&quot;
+           android:layout_weight=&quot;1&quot;
+           android:layoutDirection=&quot;ltr&quot;
+           &gt;
+
+       &lt;TextView
+           android:id=&quot;@+id/textView&quot;
+           android:text=&quot;@string/shake_text&quot;  &lt;!--搖一摇解锁--&gt;
+           android:layout_height=&quot;match_parent&quot;
+           android:layout_width=&quot;match_parent&quot; /&gt;
+   &lt;/LinearLayout&gt;
+   &lt;include layout=&quot;@layout/keyguard_eca&quot;
+            android:id=&quot;@+id/keyguard_selector_fade_container&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:orientation=&quot;vertical&quot;
+            android:layout_gravity=&quot;bottom|center_horizontal&quot;
+            android:gravity=&quot;center_horizontal&quot;/&gt;
+&lt;/com.android.keyguard.KeyguardShakeView&gt;
+</code></pre>
+
+<p><strong>2). 为以上Layout增加一个Class：</strong></p>
+
+<p>上面Layout中的根节点已经指明了Class的名称为：<code>com.android.keyguard.KeyguardShakeView</code>，所以就要在<code>frameworks/base/packages/Keyguard/src/com/android/keyguard/</code>下增加一个<code>KeyguardShakeView.java</code>
+这个类必须<code>implements KeyguardSecurityView</code>，才能让<code>KeyguardSecurityContainer</code>调用<code>KeyguardShakeView::setKeyguardCallback()</code>来设置Callback，这样解锁成功/失败的状态就能反馈给上层。
+在该类的逻辑中，监听加速度传感器的数值，达到一定值后执行解锁操作(摇一摇解锁)：</p>
+
+<pre><code class="language-java">// xref: frameworks/base/packages/Keyguard/src/com/android/keyguard/KeyguardShakeView.java
+package com.android.keyguard;
+
+import android.content.Context;
+import android.hardware.SensorEventListener;
+import android.util.AttributeSet;
+import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import com.android.internal.widget.LockPatternUtils;
+
+import static android.content.Context.SENSOR_SERVICE;
+
+/**
+* Displays Shake for unlocking.
+*/
+public class KeyguardShakeView extends FrameLayout implements SensorEventListener, KeyguardSecurityView {
+   SensorManager mSensorManager;
+   Sensor mAccelerometerSensor;
+   boolean isShake = false;
+   final static String TAG = &quot;DIY_KEYGUARD&quot;;
+   KeyguardSecurityCallback mCallback;
+
+
+   public KeyguardShakeView(Context context) {
+
+       this(context, null);
+       Log.d(TAG, &quot;KeyguardShakeView(Context context)&quot;);
+   }
+
+   public KeyguardShakeView(Context context, AttributeSet attrs) {
+       super(context, attrs);
+       Log.d(TAG, &quot;KeyguardShakeView(Context context, AttributeSet attrs)&quot;);
+   }
+
+
+   @Override
+   protected void onFinishInflate() {
+       super.onFinishInflate();
+       Log.d(TAG, &quot;onFinishInflate()&quot;);
+   }
+
+   public static Context getAppContext() {
+       Context context = null;
+       try {
+           context = (Context) Class.forName(&quot;android.app.ActivityThread&quot;)
+                   .getMethod(&quot;currentApplication&quot;).invoke(null, (Object[]) null);
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+
+       return context;
+   }
+
+   public void initSensor(){
+       Log.d(TAG, &quot;initSensor()&quot; + mSensorManager);
+       if (mSensorManager != null){
+           return;
+       }
+       isShake = false;
+       //获取 SensorManager 负责管理传感器
+       mSensorManager = ((SensorManager) getAppContext().getSystemService(SENSOR_SERVICE));
+       if (mSensorManager != null) {
+           //获取加速度传感器
+           mAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+           if (mAccelerometerSensor != null) {
+               mSensorManager.registerListener(this, mAccelerometerSensor, SensorManager.SENSOR_DELAY_UI);
+           }
+       }
+   }
+
+   ///////////////////////////////////////////////////////////////////////////
+   // SensorEventListener回调方法
+   ///////////////////////////////////////////////////////////////////////////
+   @Override
+   public void onSensorChanged(SensorEvent event) {
+       Log.d(TAG, &quot;onSensorChanged()&quot;);
+       int type = event.sensor.getType();
+
+       if (type == Sensor.TYPE_ACCELEROMETER) {
+           //获取三个方向值
+           float[] values = event.values;
+           float x = values[0];
+           float y = values[1];
+           float z = values[2];
+
+           if ((Math.abs(x) &gt; 17 || Math.abs(y) &gt; 17 || Math
+                   .abs(z) &gt; 17) &amp;&amp; !isShake) {
+               isShake = true;
+               Thread thread = new Thread() {
+                   @Override
+                   public void run() {
+                       super.run();
+                       Log.d(TAG, &quot;onSensorChanged: 摇动&quot;);
+                       if (mSensorManager != null) {
+                           mSensorManager.unregisterListener(KeyguardShakeView.this);
+                           mSensorManager = null;
+                       }
+                       mCallback.dismiss(true);   // &lt;---------------------------- 执行解锁操作
+                   }
+               };
+               thread.start();
+           }
+       }
+   }
+
+   @Override
+   public void onAccuracyChanged(Sensor sensor, int accuracy) {
+       Log.d(TAG, &quot;onAccuracyChanged()&quot;);
+   }
+
+   ///////////////////////////////////////////////////////////////////////////
+   // 首次加载时，会被调用
+   ///////////////////////////////////////////////////////////////////////////
+   @Override
+   public void setKeyguardCallback(KeyguardSecurityCallback callback) {
+       Log.d(TAG, &quot;setKeyguardCallback()&quot;);
+       mCallback = callback;
+   }
+
+   @Override
+   public void setLockPatternUtils(LockPatternUtils utils) {
+       Log.d(TAG, &quot;setLockPatternUtils()&quot;);
+   }
+
+   @Override
+   public void reset() {
+       Log.d(TAG, &quot;reset()&quot;);
+       initSensor();
+   }
+
+   ///////////////////////////////////////////////////////////////////////////
+   // 锁屏界面下上滑时被调用
+   ///////////////////////////////////////////////////////////////////////////
+   @Override
+   public void startAppearAnimation() {
+       Log.d(TAG, &quot;startAppearAnimation()&quot;);
+       initSensor();
+   }
+
+   ///////////////////////////////////////////////////////////////////////////
+   // 关闭屏幕后被调用
+   ///////////////////////////////////////////////////////////////////////////
+   @Override
+   public void onPause() {
+       Log.d(TAG, &quot;onPause()&quot;);
+       if (mSensorManager != null) {
+           mSensorManager.unregisterListener(this);
+           mSensorManager = null;
+       }
+   }
+
+   @Override
+   public void onResume(int reason) {
+       Log.d(TAG, &quot;onResume()&quot;);
+       initSensor();
+   }
+
+   @Override
+   public boolean needsInput() {
+       Log.d(TAG, &quot;needsInput()&quot;);
+       return false;
+   }
+
+   @Override
+   public KeyguardSecurityCallback getCallback() {
+       Log.d(TAG, &quot;getCallback()&quot;);
+       return null;
+   }
+
+   @Override
+   public void showUsabilityHint() {
+       Log.d(TAG, &quot;showUsabilityHint()&quot;);
+   }
+
+   @Override
+   public void showBouncer(int duration) {
+       Log.d(TAG, &quot;showBouncer()&quot;);
+   }
+
+   @Override
+   public void hideBouncer(int duration) {
+       Log.d(TAG, &quot;hideBouncer()&quot;);
+   }
+
+   @Override
+   public boolean startDisappearAnimation(Runnable finishRunnable) {
+       Log.d(TAG, &quot;startDisappearAnimation()&quot;);
+       return false;
+   }
+}
+</code></pre>
+
+<p><strong>3). 给Keyguard增加新的解锁类型：</strong></p>
+
+<pre><code class="language-java">// xref: frameworks/base/packages/Keyguard/src/com/android/keyguard/KeyguardSecurityModel.java
+    public enum SecurityMode {
+        Invalid, // NULL state
+        None, // No security enabled
+        Pattern, // Unlock by drawing a pattern.
+        Password, // Unlock by entering an alphanumeric password
+        PIN, // Strictly numeric password
+        SimPin, // Unlock by entering a sim pin.
+        SimPuk, // Unlock by entering a sim puk
+        Shake  // &lt; ----- 新增的解锁方式
+    }
+</code></pre>
+
+<p><strong>4). 向提供View的函数增加Shake，让Keyguard能够找到新的资源文件：</strong></p>
+
+<pre><code class="language-java">// xref: frameworks/base/packages/Keyguard/src/com/android/keyguard/KeyguardSecurityContainer.java
+
+    private int getSecurityViewIdForMode(SecurityMode securityMode) {
+        switch (securityMode) {
+            case Pattern: return R.id.keyguard_pattern_view;
+            case PIN: return R.id.keyguard_pin_view;
+            case Password: return R.id.keyguard_password_view;
+            case SimPin: return R.id.keyguard_sim_pin_view;
+            case SimPuk: return R.id.keyguard_sim_puk_view;
+            case Shake: return R.id.keyguard_shake_view;  // &lt;-------新增layout
+        }
+        return ;
+    }
+
+    protected int getLayoutIdFor(SecurityMode securityMode) {
+        switch (securityMode) {
+            case Pattern: return R.layout.keyguard_pattern_view;
+            case PIN: return R.layout.keyguard_pin_view;
+            case Password: return R.layout.keyguard_password_view;
+            case SimPin: return R.layout.keyguard_sim_pin_view;
+            case SimPuk: return R.layout.keyguard_sim_puk_view;
+            case Shake: return R.id.keyguard_shake_view;  // &lt;-------新增layout
+            default:
+                return ;
+        }
+    }
+</code></pre>
+
+<p>至此，Keyguard已经可以随时显示新增的Shake界面了。但是在第2步骤中调用的<code>mCallback.dismiss(true);</code>还是无法成功解锁。
+这是因为调用<code>mCallback.dismiss(true);</code>后会在KeyguardSecurityContainer::showNextSecurityScreenOrFinish()中判断解锁步骤是否已经全部完成，还是需要继续显示下一组解锁。</p>
+
+<p><strong>5). 所以在以下switch中新增<code>case Shake:</code>分支，来告知解锁已经完成：</strong></p>
+
+<pre><code class="language-java">// xref: frameworks/base/packages/Keyguard/src/com/android/keyguard/KeyguardSecurityContainer.java
+    /**
+     * Shows the next security screen if there is one.
+     * @param authenticated true if the user entered the correct authentication
+     * @return true if keyguard is done
+     */
+    boolean showNextSecurityScreenOrFinish(boolean authenticated) {
+        if (DEBUG) Log.d(TAG, &quot;showNextSecurityScreenOrFinish(&quot; + authenticated + &quot;)&quot;);
+        boolean finish = false;
+        boolean strongAuth = false;
+        if (mUpdateMonitor.getUserCanSkipBouncer(
+            // ...
+        } else if (SecurityMode.None == mCurrentSecuritySelection) {
+            // ...
+        } else if (authenticated) {
+            switch (mCurrentSecuritySelection) {
+                case Pattern:
+                case Password:
+                case PIN:
+                    // ...
+                    break;
+                case SimPin:
+                case SimPuk:
+                    // ...
+                    break;
+                case Shake:    // &lt;-------------------------------加入新的解锁方式
+                    finish = true;  // &lt;------------------------------告知解锁完成
+                    break;
+                default:
+                    Log.v(TAG, &quot;Bad security screen &quot; + mCurrentSecuritySelection + &quot;, fail safe&quot;);
+                    showPrimarySecurityScreen(false);
+                    break;
+            }
+        }
+        if (finish) {
+            mSecurityCallback.finish(strongAuth);
+        }
+        return finish;
+    }
+</code></pre>
+
+<p>到这一步，已经成功的添加了一个新的解锁方式。但以上仅仅是添加，因为Keyguard当前采用何种解锁方式，要取决于Settings的设置。
+而这个设置Keyguard是通过<code>KeyguardSecurityModel::getSecurityMode()</code>来获取的。
+如果想要做的很完善还需要对<code>com.android.settings</code>做修改，向其中增加Shake解锁方式。</p>
+
+<p><strong>6). 但是这里只作试验，直接修改代码让<code>KeyguardSecurityModel::getSecurityMode()</code>返回<code>SecurityMode.Shake</code>类型，修改如下：</strong></p>
+
+<pre><code class="language-java">// xref: frameworks/base/packages/Keyguard/src/com/android/keyguard/KeyguardSecurityModel.java
+    SecurityMode getSecurityMode() {
+        return SecurityMode.Shake;
+        /*
+        KeyguardUpdateMonitor monitor = KeyguardUpdateMonitor.getInstance(mContext);
+
+        if (SubscriptionManager.isValidSubscriptionId(
+                monitor.getNextSubIdForState(IccCardConstants.State.PIN_REQUIRED))) {
+            return SecurityMode.SimPin;
+        }
+
+        if (mIsPukScreenAvailable &amp;&amp; SubscriptionManager.isValidSubscriptionId(
+                monitor.getNextSubIdForState(IccCardConstants.State.PUK_REQUIRED))) {
+            return SecurityMode.SimPuk;
+        }
+
+        final int security = mLockPatternUtils.getActivePasswordQuality(
+                KeyguardUpdateMonitor.getCurrentUser());
+        switch (security) {
+            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_NUMERIC_COMPLEX:
+                return SecurityMode.PIN;
+
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC:
+            case DevicePolicyManager.PASSWORD_QUALITY_COMPLEX:
+            case DevicePolicyManager.PASSWORD_QUALITY_MANAGED:
+                return SecurityMode.Password;
+
+            case DevicePolicyManager.PASSWORD_QUALITY_SOMETHING:
+                return SecurityMode.Pattern;
+            case DevicePolicyManager.PASSWORD_QUALITY_UNSPECIFIED:
+                return SecurityMode.None;
+
+            default:
+                throw new IllegalStateException(&quot;Unknown security quality:&quot; + security);
+        }*/
+    }
+</code></pre>
+
+<p>解锁效果图：</p>
+
+<p><img src="7.png" alt="img" title="img" /></p>
+
+<h2 id="总结">总结</h2>
+
+<ol>
+<li>Keyguard作为SystemUI(com.android.systemui)的Library主要负责锁屏业务。</li>
+<li>amigo主要对Keyguard的UI部分进行了定制，核心功能并无改动。</li>
+<li>SystemUI的核心事件全部依靠PhoneWindowManager驱动。</li>
+<li>SystemUI的按键屏蔽由PhoneWindowManager实现。</li>
+</ol>
+
+    
+	</div>
+  <footer class="article-footer clearfix">
+  
+
+<div class="article-tags">
+  <span></span>
+  
+  <a href="https://pkiller.com/tags/android">android</a>
+  
+  <a href="https://pkiller.com/tags/keyguard">keyguard</a>
+  
+  <a href="https://pkiller.com/tags/systemui">systemui</a>
+  
+  <a href="https://pkiller.com/tags/android%E9%94%81%E5%B1%8F">android锁屏</a>
+  
+</div>
+
+
+
+
+
+<div class="article-categories">
+  <span></span>
+  
+  <a class="article-category-link" href="https://pkiller.com/categories/android">android</a>
+  
+</div>
+
+
+
+  <div class="article-share" id="share">
+    <div data-url="https://pkiller.com/android/android-systemui-keyguard/" data-title="Android SystemUI &amp; Keyguard原理分析，加个“摇一摇”解锁" data-tsina="" class="share clearfix">
+    </div>
+  </div>
+</footer>
+
+	</article>
+  
+
+
+<section class="comment">
+<div id="disqus_thread"></div>
+</section>
+<script>
+  <!-- detect whether Disuqs can load -->
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '//disqus.com/next/config.json?' + new Date().getTime(), true);
+  xhr.timeout = 3000; 
+
+  xhr.onload = function() { 
+
+
+var disqus_config = function () {
+this.page.url = "https://pkiller.com/android/android-systemui-keyguard/";
+this.page.identifier = "https://pkiller.com/android/android-systemui-keyguard/";
+};
+(function() { 
+var d = document, s = d.createElement('script');
+
+s.src = '//pkiller.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+}
+  xhr.ontimeout = function() {
+  <!-- cannot load Disqus, skip it. -->
+  return;
+}
+xhr.send(null);
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+</div>
+
+    <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
+<aside class="clearfix">
+  
+  
+  <div class="archiveslist">
+    <p class="asidetitle">目录</p>
+    <ul class="archive-list">
+      <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#基本知识">基本知识</a>
+<ul>
+<li><a href="#keyguard">Keyguard</a></li>
+<li><a href="#systemui">SystemUI</a></li>
+</ul></li>
+<li><a href="#a-systemui-gn-8003-m6">A、SystemUI - GN 8003(M6)</a>
+<ul>
+<li><a href="#一-快速认识keyguard">一、快速认识Keyguard</a></li>
+<li><a href="#二-启动流程">二、启动流程</a></li>
+<li><a href="#三-首次锁屏事件">三、首次锁屏事件</a></li>
+<li><a href="#四-关闭屏幕后的锁屏流程">四、关闭屏幕后的锁屏流程</a></li>
+<li><a href="#五-按键屏蔽">五、按键屏蔽</a></li>
+<li><a href="#六-amigo定制内容">六、Amigo定制内容</a></li>
+</ul></li>
+<li><a href="#b-android-systemui的事件派发框架">B、Android SystemUI的事件派发框架</a>
+<ul>
+<li><a href="#一-概括">一、概括</a></li>
+<li><a href="#二-代码分析">二、代码分析</a></li>
+<li><a href="#七-faq">七、FAQ</a>
+<ul>
+<li><a href="#1-本文所涉及的内容应该从哪里看起">1. 本文所涉及的内容应该从哪里看起？</a></li>
+<li><a href="#2-如何阻止keyguard的显示-关闭锁屏界面">2. 如何阻止keyguard的显示(关闭锁屏界面)？</a></li>
+<li><a href="#3-如何让指纹-图形-数字锁屏失效-滑动直接解锁">3. 如何让指纹/图形/数字锁屏失效, 滑动直接解锁？</a></li>
+<li><a href="#4-systemui跟ui相关的东西都在哪里">4. SystemUI跟UI相关的东西都在哪里？</a></li>
+<li><a href="#5-keyguardbouncer的界面在哪里被初始化">5. KeyguardBouncer的界面在哪里被初始化？</a></li>
+<li><a href="#6-如何增加一种新的解锁方式">6. 如何增加一种新的解锁方式？</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#总结">总结</a></li>
+</ul></li>
+</ul>
+</nav>
+    </ul>
+  </div>
+  
+
+
+  
+
+<div class="categorieslist">
+  <p class="asidetitle">分类</p>
+  <ul>
+    
+    <li><a href="https://pkiller.com/categories/about" title="about">about<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/android" title="android">android<sup>9</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/midi" title="midi">midi<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/%e6%b8%b8%e6%88%8f" title="游戏">游戏<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/%e9%a3%8e%e6%8e%a7" title="风控">风控<sup>1</sup></a></li>
+    
+  </ul>
+</div>
+
+
+
+  
+
+<div class="tagslist">
+	<p class="asidetitle">标签</p>
+		<ul class="clearfix">
+      
+			<li><a href="https://pkiller.com/tags/about" title="about">about<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>3</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/android" title="android">android<sup>8</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/android%e9%94%81%e5%b1%8f" title="android锁屏">android锁屏<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/arm" title="arm">arm<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/elf" title="elf">elf<sup>2</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/elf%e6%a0%bc%e5%bc%8f" title="elf格式">elf格式<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/getservice" title="getservice">getservice<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/getsystemservice" title="getsystemservice">getsystemservice<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/kernel" title="kernel">kernel<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/keyguard" title="keyguard">keyguard<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/linker" title="linker">linker<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/midi" title="midi">midi<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/oom" title="oom">oom<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/oom_adj" title="oom_adj">oom_adj<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/publishbinderservice" title="publishbinderservice">publishbinderservice<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/systemservice" title="systemservice">systemservice<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e6%b7%b7%e6%b7%86" title="混淆">混淆<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e6%b8%b8%e6%88%8f%e8%be%85%e5%8a%a9" title="游戏辅助">游戏辅助<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e7%81%b0%e4%ba%a7" title="灰产">灰产<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e7%8e%8b%e8%80%85%e8%8d%a3%e8%80%80" title="王者荣耀">王者荣耀<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e7%be%8a%e6%af%9b%e5%85%9a" title="羊毛党">羊毛党<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e8%84%b1%e5%a3%b3" title="脱壳">脱壳<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e9%bb%91%e4%ba%a7" title="黑产">黑产<sup>1</sup></a></li>
+      
+		</ul>
+</div>
+
+
+
+  
+  <div class="archiveslist">
+    <p class="asidetitle">归档</p>
+    <ul class="archive-list">
+      
+    </ul>
+
+  </div>
+
+
+  
+
+<div class="tagcloudlist">
+  <p class="asidetitle">标签云</p>
+  <div class="tagcloudlist clearfix">
+    
+    <a href="https://pkiller.com/tags/about" style="font-size: 12px;">about</a>
+    
+    <a href="https://pkiller.com/tags/addservice" style="font-size: 12px;">addservice</a>
+    
+    <a href="https://pkiller.com/tags/android" style="font-size: 12px;">android</a>
+    
+    <a href="https://pkiller.com/tags/android%e9%94%81%e5%b1%8f" style="font-size: 12px;">android锁屏</a>
+    
+    <a href="https://pkiller.com/tags/arm" style="font-size: 12px;">arm</a>
+    
+    <a href="https://pkiller.com/tags/elf" style="font-size: 12px;">elf</a>
+    
+    <a href="https://pkiller.com/tags/elf%e6%a0%bc%e5%bc%8f" style="font-size: 12px;">elf格式</a>
+    
+    <a href="https://pkiller.com/tags/getservice" style="font-size: 12px;">getservice</a>
+    
+    <a href="https://pkiller.com/tags/getsystemservice" style="font-size: 12px;">getsystemservice</a>
+    
+    <a href="https://pkiller.com/tags/kernel" style="font-size: 12px;">kernel</a>
+    
+    <a href="https://pkiller.com/tags/keyguard" style="font-size: 12px;">keyguard</a>
+    
+    <a href="https://pkiller.com/tags/linker" style="font-size: 12px;">linker</a>
+    
+    <a href="https://pkiller.com/tags/midi" style="font-size: 12px;">midi</a>
+    
+    <a href="https://pkiller.com/tags/oom" style="font-size: 12px;">oom</a>
+    
+    <a href="https://pkiller.com/tags/oom_adj" style="font-size: 12px;">oom_adj</a>
+    
+    <a href="https://pkiller.com/tags/publishbinderservice" style="font-size: 12px;">publishbinderservice</a>
+    
+    <a href="https://pkiller.com/tags/systemservice" style="font-size: 12px;">systemservice</a>
+    
+    <a href="https://pkiller.com/tags/systemui" style="font-size: 12px;">systemui</a>
+    
+    <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
+    
+    <a href="https://pkiller.com/tags/%e6%b7%b7%e6%b7%86" style="font-size: 12px;">混淆</a>
+    
+    <a href="https://pkiller.com/tags/%e6%b8%b8%e6%88%8f%e8%be%85%e5%8a%a9" style="font-size: 12px;">游戏辅助</a>
+    
+    <a href="https://pkiller.com/tags/%e7%81%b0%e4%ba%a7" style="font-size: 12px;">灰产</a>
+    
+    <a href="https://pkiller.com/tags/%e7%8e%8b%e8%80%85%e8%8d%a3%e8%80%80" style="font-size: 12px;">王者荣耀</a>
+    
+    <a href="https://pkiller.com/tags/%e7%be%8a%e6%af%9b%e5%85%9a" style="font-size: 12px;">羊毛党</a>
+    
+    <a href="https://pkiller.com/tags/%e8%84%b1%e5%a3%b3" style="font-size: 12px;">脱壳</a>
+    
+    <a href="https://pkiller.com/tags/%e9%bb%91%e4%ba%a7" style="font-size: 12px;">黑产</a>
+    
+  </div>
+</div>
+
+
+
+  
+
+</aside>
+</div>
+
+  </div>
+  <footer><div id="footer" >
+  
+  <div class="line">
+    <span></span>
+    <div style='background:no-repeat url("https://pkiller.com/images/avatar.jpeg") left top;-webkit-background-size:6.875em 6.875em;-moz-background-size:6.875em 6.875em;background-size:6.875em 6.875em;' class="author" ></div>
+  </div>
+  
+  
+  <section class="info">
+    <p>pkiller <br/> Android & IoT & Security</p>
+  </section>
+  
+  <div class="social-font clearfix">
+    
+    
+    
+    <a href="https://github.com/pkilller" target="_blank" title="github"></a>
+    
+    
+    
+  </div>
+  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2019
+    
+    <a href="https://pkiller.com/" title="pkiller">pkiller</a>
+    
+  </p>
+</div>
+</footer>
+  <script src="https://pkiller.com/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript">
+done = false;
+$(document).ready(function(){
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  $(window).resize(function(){
+    getSize();
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else
+    {
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+    }
+  });
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  $('form.search').on('submit', function (event) {
+    if (false === done) {
+      event.preventDefault();
+      var orgVal = $(this).find('#search').val();
+      $(this).find('#search').val('site:https:\/\/pkiller.com\/ ' + orgVal);
+      done = true;
+      $(this).submit();
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina');
+  var html = [
+  '<a href="#" class="overlay" id="qrcode"></a>',
+  '<div class="qrcode clearfix"><span>扫描二维码分享到微信朋友圈</span><a class="qrclose" href="#share"></a><strong>Loading...Please wait</strong><img id="qrcode-pic" data-src="http://b.bshare.cn/barCode?site=weixin&url=' + encodedUrl + '"/></div>',
+  '<a href="#textlogo" class="article-back-to-top" title="Top"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="QRcode"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="Weibo"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+  $('.article-share-qrcode').click(function(){
+    var imgSrc = $('#qrcode-pic').attr('data-src');
+    $('#qrcode-pic').attr('src', imgSrc);
+    $('#qrcode-pic').load(function(){
+        $('.qrcode strong').text(' ');
+    });
+  });
+});
+</script>
+
+
+
+
+
+</body>
+</html>

@@ -96,7 +96,7 @@ OPT_CFLAGS := -O2&quot;
 
 <h1 id="二-全局变量引用">二. 全局变量引用</h1>
 
-<pre><code>const char g_str0[] = &quot;hello world 0~&quot;;
+<pre><code class="language-c">const char g_str0[] = &quot;hello world 0~&quot;;
 const char g_str1[] = &quot;hello world 1~&quot;;
 const char g_str2[] = &quot;hello world 2~&quot;;
 int main(int argc, char *argv[])
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 
 <p><strong>objdump:</strong></p>
 
-<pre><code>adrp    x19, 11000      ; 这里的0x11000指向的是.data数据区
+<pre><code class="language-arm">adrp    x19, 11000      ; 这里的0x11000指向的是.data数据区
 add     x19, x19, #0x10 ; .data+0x10, 定位到&quot;hello world 0~&quot;
 mov     x0, x19
 bl      590 &lt;printf@plt&gt;
@@ -131,7 +131,7 @@ bl      590 &lt;printf@plt&gt;
 
 <p>下面的代码修改自<code>全局变量引用</code>,修改的部分只是将全局变量移入函数体并加入static修饰符</p>
 
-<pre><code>int main(int argc, char *argv[])
+<pre><code class="language-c">int main(int argc, char *argv[])
 {
     static char g_str0[] = &quot;hello world 0~&quot;;
     static char g_str1[] = &quot;hello world 1~&quot;;
@@ -145,7 +145,7 @@ bl      590 &lt;printf@plt&gt;
 
 <p><strong>objdump:</strong></p>
 
-<pre><code>; 编译后的结果与`全局变量引用`中的汇编完全相同.
+<pre><code class="language-arm">; 编译后的结果与`全局变量引用`中的汇编完全相同.
 adrp    x19, 11000
 add     x19, x19, #0x10
 mov     x0, x19
@@ -165,12 +165,12 @@ bl      590 &lt;printf@plt&gt;
 
 <p>表达式中存在多个常量的情况</p>
 
-<pre><code>int n = 1 + 1;
+<pre><code class="language-c">int n = 1 + 1;
 </code></pre>
 
 <p><strong>objdump:</strong></p>
 
-<pre><code>mov    w0, #0x2         ; 编译期间已得出结果.
+<pre><code class="language-arm">mov    w0, #0x2         ; 编译期间已得出结果.
 </code></pre>
 
 <p><strong>总结</strong></p>
@@ -181,17 +181,17 @@ bl      590 &lt;printf@plt&gt;
 
 <h2 id="a-2的幂">a. 2的幂</h2>
 
-<pre><code>int a = (int)argc * 4;
+<pre><code class="language-c">int a = (int)argc * 4;
 </code></pre>
 
 <p><strong>ida:</strong></p>
 
-<pre><code>UBFM    W1, W0, #0x1E, #0x1D
+<pre><code class="language-arm">UBFM    W1, W0, #0x1E, #0x1D
 </code></pre>
 
 <p><strong>objdump:</strong></p>
 
-<pre><code>LSL    W1, W0, #2
+<pre><code class="language-arm">LSL    W1, W0, #2
 </code></pre>
 
 <p><strong>总结</strong></p>
@@ -202,12 +202,12 @@ bl      590 &lt;printf@plt&gt;
 
 <h3 id="a-乘数-1后为2的幂">a). 乘数+1后为2的幂</h3>
 
-<pre><code>int a = (int)argc * 15;
+<pre><code class="language-c">int a = (int)argc * 15;
 </code></pre>
 
 <p><strong>ida:</strong></p>
 
-<pre><code>; W0 为 argc 
+<pre><code class="language-arm">; W0 为 argc 
 UBFM    W1, W0, #0x1C, #0x1B
 SUB     W1, W1, W0
 
@@ -215,35 +215,35 @@ SUB     W1, W1, W0
 
 <p>根据 <code>xBFM的别名转换与识别</code>可转换为:</p>
 
-<pre><code>LSL    W1, W0, #4    ;  a = argc * 16
+<pre><code class="language-c">LSL    W1, W0, #4    ;  a = argc * 16
 SUB    W1, W1, W0   ;  a = a - argc
 </code></pre>
 
 <h3 id="b-乘数-1后为2的幂">b). 乘数-1后为2的幂</h3>
 
-<pre><code>int a = (int)argc * 17;
+<pre><code class="language-c">int a = (int)argc * 17;
 </code></pre>
 
 <p><strong>ida:</strong></p>
 
-<pre><code>ADD    W1, W0, W0,LSL#4 ; a = argc*16 + argc
+<pre><code class="language-arm">ADD    W1, W0, W0,LSL#4 ; a = argc*16 + argc
 </code></pre>
 
 <h3 id="c-乘数-2-1为2的幂">c). 乘数/2-1为2的幂</h3>
 
-<pre><code>int a = (int)argc * 10;  
+<pre><code class="language-c">int a = (int)argc * 10;  
 </code></pre>
 
 <p><strong>ida:</strong></p>
 
-<pre><code>; W0 为 argc 
+<pre><code class="language-arm">; W0 为 argc 
 ADD     W1, W0, W0,LSL#2
 UBFM    W1, W1, #0x1F, #0x1E
 </code></pre>
 
 <p>转换为:</p>
 
-<pre><code>ADD    W1, W0, W0,LSL#2  ; a = argc * 5 
+<pre><code class="language-arm">ADD    W1, W0, W0,LSL#2  ; a = argc * 5 
 LSL    W1, W1, #1        ; a = a * 2
 </code></pre>
 
@@ -259,12 +259,12 @@ x的值为满足以下等式的值, 需要遍历尝试, 遍历范围为0到y:
 
 <p><strong>m=(2x+1)∗2(y−x)+1</strong></p>
 
-<pre><code>int a = (int)argc * 1041; 
+<pre><code class="language-c">int a = (int)argc * 1041; 
 </code></pre>
 
 <p><strong>ida解析:</strong></p>
 
-<pre><code>; W0 = argc = m = 1041
+<pre><code class="language-arm">; W0 = argc = m = 1041
 ; x = 10 = 6+4
 ADD    W1, W0, W0,LSL#6  ; 65 = (2^6 + 1)
 ADD    W1, W0, W1,LSL#4  ; 1041= 65 * 2^4 + 1
@@ -282,17 +282,17 @@ ADD    W1, W0, W1,LSL#4  ; 1041= 65 * 2^4 + 1
 
 <h2 id="a-2的幂-1">a. 2的幂</h2>
 
-<pre><code>int a = (int)argc / 4;
+<pre><code class="language-c">int a = (int)argc / 4;
 </code></pre>
 
 <p><strong>ida解析:</strong></p>
 
-<pre><code>SBFM    W1, W2, #2, #0x1F
+<pre><code class="language-arm">SBFM    W1, W2, #2, #0x1F
 </code></pre>
 
 <p><strong>objdump解析:</strong></p>
 
-<pre><code>asr     w1, w2, #2
+<pre><code class="language-arm">asr     w1, w2, #2
 </code></pre>
 
 <p><strong>总结</strong></p>
@@ -314,7 +314,7 @@ ADD    W1, W0, W1,LSL#4  ; 1041= 65 * 2^4 + 1
 
 <p>识别特征(这里直接通过操作数的特征来转为易读的汇编形式(属于土方子), 正规的方式在指令手册有详细描述):</p>
 
-<pre><code>if (is_word) // is Wx
+<pre><code class="language-c">if (is_word) // is Wx
 {
   if (immr-imms == 1){
     type = TP_LSL;
@@ -347,49 +347,49 @@ else if (is_Xword)
 
 <p>举例1, 有如下IDA汇编:</p>
 
-<pre><code>UBFM    W1, W0, #0x1E, #0x1D
+<pre><code class="language-arm">UBFM    W1, W0, #0x1E, #0x1D
 </code></pre>
 
 <p>可利用转化规则<code>LSL  W1, W0, #($32-immr)</code>, 得到如下LSL结果:</p>
 
-<pre><code>LSL    W1, W0, #2
+<pre><code class="language-arm">LSL    W1, W0, #2
 </code></pre>
 
 <p>举例2, 有如下IDA汇编:</p>
 
-<pre><code>SBFM    W1, W0, #2, #0x1F
+<pre><code class="language-arm">SBFM    W1, W0, #2, #0x1F
 </code></pre>
 
 <p>可以利用转化规则<code>ASR  W1, W0, $immr</code> (因为是Signed Bitfield Move, 所以转为ASR), 得到如下ASR结果:</p>
 
-<pre><code>ASR    W1, W0, #2
+<pre><code class="language-arm">ASR    W1, W0, #2
 </code></pre>
 
 <p>举例3, 有如下IDA汇编:</p>
 
-<pre><code>UBFM    X1, X0, #0x21, #0x20
+<pre><code class="language-arm">UBFM    X1, X0, #0x21, #0x20
 </code></pre>
 
 <p>可利用转化规则<code>LSL  X1, X0, #($64-immr)</code>, 得到如下LSL结果:</p>
 
-<pre><code>LSL    X1, X0, #31
+<pre><code class="language-arm">LSL    X1, X0, #31
 </code></pre>
 
 <p>举例4, 有如下IDA汇编:</p>
 
-<pre><code>SBFM    X1, X0, #0x32, #0x3F
+<pre><code class="language-arm">SBFM    X1, X0, #0x32, #0x3F
 </code></pre>
 
 <p>可利用转化规则<code>ASL  X1, X0, $immr</code>, 得到如下ASR (因为是SBFM, 所以采用ASR)结果:</p>
 
-<pre><code>ASR    X1, X0, #50
+<pre><code class="language-arm">ASR    X1, X0, #50
 </code></pre>
 
 <h1 id="八-类">八.类</h1>
 
 <p>本节以如下代码为例展开分析：</p>
 
-<pre><code>#include &lt;jni.h&gt;
+<pre><code class="language-c">#include &lt;jni.h&gt;
 #include &lt;string&gt;
 #include &lt;stdio.h&gt;
 #include &lt;android/log.h&gt;
@@ -554,7 +554,7 @@ Java_cplusplus_1test_example_com_myapplication_MainActivity_stringFromJNI(
 
 <li><p>将3个父类的虚表替换为Sub自身的虚表.</p>
 
-<pre><code>.text:0000000000008D14 ; __int64 __fastcall Sub::Sub(Sub *__hidden this)
+<pre><code class="language-arm">.text:0000000000008D14 ; __int64 __fastcall Sub::Sub(Sub *__hidden this)
 .text:0000000000008D14                 WEAK _ZN3SubC2Ev
 .text:0000000000008D14 _ZN3SubC2Ev                             ; CODE XREF: Sub::Sub(void)+Cj
 .text:0000000000008D14                                         ; DATA XREF: .got:_ZN3SubC2Ev_ptro
@@ -638,7 +638,7 @@ Java_cplusplus_1test_example_com_myapplication_MainActivity_stringFromJNI(
 
 <p>以上代码中共有4个类，但一共只有三个虚表。这是因为子类Sub的虚表与首个父类SuperA进行了合并。以下是三个虚表的分布和指向情况：</p>
 
-<pre><code># ============================== [off: 0x00] SuperA &amp; Sub =================================
+<pre><code class="language-arm"># ============================== [off: 0x00] SuperA &amp; Sub =================================
 .data.rel.ro:000000000003EF40 off_3EF40       DCQ _ZN3SubD2Ev         ; Sub::~Sub()    # 虚析构函数1
 .data.rel.ro:000000000003EF48                 DCQ _ZN3SubD0Ev         ; Sub::~Sub()    # 虚析构函数2 (该析构比`析构函数1`多了释放内存的操作，专供delete释放动态new出来的对象)
 .data.rel.ro:000000000003EF50                 DCQ _ZN3Sub4fun1Ei      ; Sub::fun1(int)    # 这里指向Sub::fun1(int)
@@ -670,7 +670,7 @@ Java_cplusplus_1test_example_com_myapplication_MainActivity_stringFromJNI(
 
 <p>以上<code>SuperB::fun2</code>与<code>SuperC::fun2</code>均被<code>Sub::fun2</code>覆盖， 所以该虚表项直接被替换为中转函数地址，将调用转到<code>Sub::fun2()</code>中以实现多态。该中转函数如下：</p>
 
-<pre><code>.text:00000000000097E4 ; __int64 __fastcall `non-virtual thunk to'Sub::fun2(Sub *__hidden this, int)
+<pre><code class="language-arm">.text:00000000000097E4 ; __int64 __fastcall `non-virtual thunk to'Sub::fun2(Sub *__hidden this, int)
 .text:00000000000097E4                 WEAK _ZThn16_N3Sub4fun2Ei
 .text:00000000000097E4 _ZThn16_N3Sub4fun2Ei                    ; DATA XREF: .data.rel.ro:000000000003EFA8o
 .text:00000000000097E4
@@ -698,12 +698,12 @@ Java_cplusplus_1test_example_com_myapplication_MainActivity_stringFromJNI(
 
 <p>C++代码：</p>
 
-<pre><code>sub-&gt;testB1((int)env-&gt;GetVersion());
+<pre><code class="language-c">sub-&gt;testB1((int)env-&gt;GetVersion());
 </code></pre>
 
 <p>对应汇编代码如下：</p>
 
-<pre><code>.text:0000000000008B74                 LDR             X8, [X21,#0x10]!   # 1. X21为this, this+0x10定位到SuperB的头部
+<pre><code class="language-arm">.text:0000000000008B74                 LDR             X8, [X21,#0x10]!   # 1. X21为this, this+0x10定位到SuperB的头部
 .text:0000000000008B78                 LDR             X9, [X19]
 .text:0000000000008B7C                 LDR             X22, [X8,#0x20]    # 2. X8为SuperB头部的虚表(构造时已被替换为Sub的)，[X8+0x20]即可得到SuperB::testB1的地址(对照上节`c.虚表`中的虚表内容即可证明)。
 .text:0000000000008B80                 LDR             X8, [X9,#0x20]
@@ -722,12 +722,12 @@ Java_cplusplus_1test_example_com_myapplication_MainActivity_stringFromJNI(
 
 <p>C++代码：</p>
 
-<pre><code>sub-&gt;fun2((int)env-&gt;GetVersion());
+<pre><code class="language-c">sub-&gt;fun2((int)env-&gt;GetVersion());
 </code></pre>
 
 <p>对应汇编代码如下：</p>
 
-<pre><code>.text:0000000000008AE0                 LDR             X8, [X20]    # 1. X20为this, 这里直接取出Sub/SuperA的虚表(因为Sub与SuperA的虚表混合为一体，并且该虚表已被Sub替换)
+<pre><code class="language-arm">.text:0000000000008AE0                 LDR             X8, [X20]    # 1. X20为this, 这里直接取出Sub/SuperA的虚表(因为Sub与SuperA的虚表混合为一体，并且该虚表已被Sub替换)
 .text:0000000000008AE4                 LDR             X9, [X19]
 .text:0000000000008AE8                 LDR             X21, [X8,#0x18]    # 2. 取出虚表中index为3的项， 里面存放这Sub::fun2的指针(对照上节`c.虚表`中的虚表内容即可证明)。
 .text:0000000000008AEC                 LDR             X8, [X9,#0x20]
@@ -875,7 +875,7 @@ xhr.send(null);
     
     <li><a href="https://pkiller.com/categories/about" title="about">about<sup>1</sup></a></li>
     
-    <li><a href="https://pkiller.com/categories/android" title="android">android<sup>8</sup></a></li>
+    <li><a href="https://pkiller.com/categories/android" title="android">android<sup>9</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/midi" title="midi">midi<sup>1</sup></a></li>
     
@@ -900,7 +900,9 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>3</sup></a></li>
       
-			<li><a href="https://pkiller.com/tags/android" title="android">android<sup>7</sup></a></li>
+			<li><a href="https://pkiller.com/tags/android" title="android">android<sup>8</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/android%e9%94%81%e5%b1%8f" title="android锁屏">android锁屏<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/arm" title="arm">arm<sup>1</sup></a></li>
       
@@ -914,6 +916,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/kernel" title="kernel">kernel<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/keyguard" title="keyguard">keyguard<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/linker" title="linker">linker<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/midi" title="midi">midi<sup>1</sup></a></li>
@@ -925,6 +929,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/publishbinderservice" title="publishbinderservice">publishbinderservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/systemservice" title="systemservice">systemservice<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
       
@@ -969,6 +975,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/android" style="font-size: 12px;">android</a>
     
+    <a href="https://pkiller.com/tags/android%e9%94%81%e5%b1%8f" style="font-size: 12px;">android锁屏</a>
+    
     <a href="https://pkiller.com/tags/arm" style="font-size: 12px;">arm</a>
     
     <a href="https://pkiller.com/tags/elf" style="font-size: 12px;">elf</a>
@@ -981,6 +989,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/kernel" style="font-size: 12px;">kernel</a>
     
+    <a href="https://pkiller.com/tags/keyguard" style="font-size: 12px;">keyguard</a>
+    
     <a href="https://pkiller.com/tags/linker" style="font-size: 12px;">linker</a>
     
     <a href="https://pkiller.com/tags/midi" style="font-size: 12px;">midi</a>
@@ -992,6 +1002,8 @@ xhr.send(null);
     <a href="https://pkiller.com/tags/publishbinderservice" style="font-size: 12px;">publishbinderservice</a>
     
     <a href="https://pkiller.com/tags/systemservice" style="font-size: 12px;">systemservice</a>
+    
+    <a href="https://pkiller.com/tags/systemui" style="font-size: 12px;">systemui</a>
     
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     

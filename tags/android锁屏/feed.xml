@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>android锁屏 on pkiller</title>
+    <link>https://pkiller.com/tags/android%E9%94%81%E5%B1%8F/</link>
+    <description>Recent content in android锁屏 on pkiller</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Fri, 23 Aug 2019 14:10:05 +0800</lastBuildDate>
+    
+	<atom:link href="https://pkiller.com/tags/android%E9%94%81%E5%B1%8F/feed.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Android SystemUI &amp; Keyguard原理分析，加个“摇一摇”解锁</title>
+      <link>https://pkiller.com/android/android-systemui-keyguard/</link>
+      <pubDate>Fri, 23 Aug 2019 14:10:05 +0800</pubDate>
+      
+      <guid>https://pkiller.com/android/android-systemui-keyguard/</guid>
+      <description>基本知识 本文的所有分析都基于Android 7.0. Keyguard 系统中并不存在Keyguard这个应用，Keyguard实际上是com.android.sys</description>
+    </item>
+    
+  </channel>
+</rss>
