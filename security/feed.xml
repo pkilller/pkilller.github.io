@@ -20,5 +20,14 @@
       <description>全面整体协同防御的思想在移动安全领域显得尤为重要，主要由于移动应用的价值全部依附于数据之上，而数据驱动的场景需求是目前互联网2C企业的核心价</description>
     </item>
     
+    <item>
+      <title>AI智能音箱攻击面分析</title>
+      <link>https://pkiller.com/security/ai%E6%99%BA%E8%83%BD%E9%9F%B3%E7%AE%B1%E6%94%BB%E5%87%BB%E9%9D%A2%E5%88%86%E6%9E%90/</link>
+      <pubDate>Tue, 04 Dec 2018 16:38:05 +0800</pubDate>
+      
+      <guid>https://pkiller.com/security/ai%E6%99%BA%E8%83%BD%E9%9F%B3%E7%AE%B1%E6%94%BB%E5%87%BB%E9%9D%A2%E5%88%86%E6%9E%90/</guid>
+      <description>由于AI在语音交互领域的相对成熟化，AI智能音箱这种新的交互形式产品被相继推出。具有代表性的如Google Home、Amazon Echo、H</description>
+    </item>
+    
   </channel>
 </rss>
