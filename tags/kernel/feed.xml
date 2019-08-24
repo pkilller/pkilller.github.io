@@ -12,11 +12,11 @@
     
     
     <item>
-      <title>kernel逆向分析准备工作</title>
-      <link>https://pkiller.com/android/kernel%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C/</link>
+      <title>Android Kernel 逆向分析准备</title>
+      <link>https://pkiller.com/android/android-kernel-%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87/</link>
       <pubDate>Sun, 13 May 2018 21:07:36 +0800</pubDate>
       
-      <guid>https://pkiller.com/android/kernel%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C/</guid>
+      <guid>https://pkiller.com/android/android-kernel-%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87/</guid>
       <description>步骤1、提取内核文件 提取内核有两种方式： 通过固件包提取，通常包含在KERNEL.img或boot.img之中。 通过root权限的手机提取。 A.</description>
     </item>
     

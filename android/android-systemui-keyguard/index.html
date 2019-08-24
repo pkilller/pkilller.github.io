@@ -104,9 +104,9 @@
 
 <p>系统应用com.android.systemui负责跟UI相关的显示工作,比如：StatusBar(状态栏)、NavigationBar(导航栏)等、通知栏(Notification)等等.其中也包含锁屏部分的功能.</p>
 
-<h2 id="a-systemui-gn-8003-m6">A、SystemUI - GN 8003(M6)</h2>
+<h2 id="a-systemui">A、SystemUI</h2>
 
-<p>本节以金立8003(M6)为目标进行Keyguard的分析</p>
+<p>本节以某国产手机为目标进行Keyguard的分析</p>
 
 <h3 id="一-快速认识keyguard">一、快速认识Keyguard</h3>
 
@@ -1336,14 +1336,20 @@ public class KeyguardShakeView extends FrameLayout implements SensorEventListene
 
 <p><img src="7.png" alt="img" title="img" /></p>
 
-<h2 id="总结">总结</h2>
+<h2 id="八-总结">八、总结</h2>
 
 <ol>
 <li>Keyguard作为SystemUI(com.android.systemui)的Library主要负责锁屏业务。</li>
-<li>amigo主要对Keyguard的UI部分进行了定制，核心功能并无改动。</li>
+<li>某厂商主要对Keyguard的UI部分进行了定制，核心功能并无改动。</li>
 <li>SystemUI的核心事件全部依靠PhoneWindowManager驱动。</li>
 <li>SystemUI的按键屏蔽由PhoneWindowManager实现。</li>
 </ol>
+
+<h2 id="八-参考资料">八、参考资料</h2>
+
+<p><a href="http://androidxref.com/7.0.0_r1/xref/frameworks/base/packages/Keyguard/">http://androidxref.com/7.0.0_r1/xref/frameworks/base/packages/Keyguard/</a>
+<a href="http://androidxref.com/7.0.0_r1/xref/frameworks/base/packages/SystemUI/">http://androidxref.com/7.0.0_r1/xref/frameworks/base/packages/SystemUI/</a>
+<a href="https://blog.csdn.net/otaku_627/article/details/53769473">https://blog.csdn.net/otaku_627/article/details/53769473</a></p>
 
     
 	</div>
@@ -1440,7 +1446,7 @@ xhr.send(null);
 <li><a href="#keyguard">Keyguard</a></li>
 <li><a href="#systemui">SystemUI</a></li>
 </ul></li>
-<li><a href="#a-systemui-gn-8003-m6">A、SystemUI - GN 8003(M6)</a>
+<li><a href="#a-systemui">A、SystemUI</a>
 <ul>
 <li><a href="#一-快速认识keyguard">一、快速认识Keyguard</a></li>
 <li><a href="#二-启动流程">二、启动流程</a></li>
@@ -1463,7 +1469,8 @@ xhr.send(null);
 <li><a href="#6-如何增加一种新的解锁方式">6. 如何增加一种新的解锁方式？</a></li>
 </ul></li>
 </ul></li>
-<li><a href="#总结">总结</a></li>
+<li><a href="#八-总结">八、总结</a></li>
+<li><a href="#八-参考资料">八、参考资料</a></li>
 </ul></li>
 </ul>
 </nav>

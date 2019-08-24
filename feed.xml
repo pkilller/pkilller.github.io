@@ -21,47 +21,47 @@
     </item>
     
     <item>
-      <title>移动应用-黑产对抗风控矩阵</title>
-      <link>https://pkiller.com/security/%E7%A7%BB%E5%8A%A8%E5%BA%94%E7%94%A8-%E9%BB%91%E4%BA%A7%E5%AF%B9%E6%8A%97%E9%A3%8E%E6%8E%A7%E7%9F%A9%E9%98%B5/</link>
+      <title>移动应用 - 黑产风控体系</title>
+      <link>https://pkiller.com/security/%E7%A7%BB%E5%8A%A8%E5%BA%94%E7%94%A8-%E9%BB%91%E4%BA%A7%E9%A3%8E%E6%8E%A7%E4%BD%93%E7%B3%BB/</link>
       <pubDate>Sun, 14 Apr 2019 23:00:48 +0800</pubDate>
       
-      <guid>https://pkiller.com/security/%E7%A7%BB%E5%8A%A8%E5%BA%94%E7%94%A8-%E9%BB%91%E4%BA%A7%E5%AF%B9%E6%8A%97%E9%A3%8E%E6%8E%A7%E7%9F%A9%E9%98%B5/</guid>
+      <guid>https://pkiller.com/security/%E7%A7%BB%E5%8A%A8%E5%BA%94%E7%94%A8-%E9%BB%91%E4%BA%A7%E9%A3%8E%E6%8E%A7%E4%BD%93%E7%B3%BB/</guid>
       <description>全面整体协同防御的思想在移动安全领域显得尤为重要，主要由于移动应用的价值全部依附于数据之上，而数据驱动的场景需求是目前互联网2C企业的核心价</description>
     </item>
     
     <item>
-      <title>Android Adb 原理及架构分析</title>
-      <link>https://pkiller.com/android/android-adb%E5%8E%9F%E7%90%86%E5%8F%8A%E6%9E%B6%E6%9E%84%E5%88%86%E6%9E%90/</link>
+      <title>Android Adb 架构及实现分析</title>
+      <link>https://pkiller.com/android/android-adb%E6%9E%B6%E6%9E%84%E5%8F%8A%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90/</link>
       <pubDate>Tue, 14 Aug 2018 23:00:48 +0800</pubDate>
       
-      <guid>https://pkiller.com/android/android-adb%E5%8E%9F%E7%90%86%E5%8F%8A%E6%9E%B6%E6%9E%84%E5%88%86%E6%9E%90/</guid>
+      <guid>https://pkiller.com/android/android-adb%E6%9E%B6%E6%9E%84%E5%8F%8A%E5%AE%9E%E7%8E%B0%E5%88%86%E6%9E%90/</guid>
       <description>一、基本概念 Adb(Android-Debug-Bridge)是为了方便Host与目标Android设备通讯而出现的一种套件，支持USB与T</description>
     </item>
     
     <item>
-      <title>kernel逆向分析准备工作</title>
-      <link>https://pkiller.com/android/kernel%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C/</link>
+      <title>Android Kernel 逆向分析准备</title>
+      <link>https://pkiller.com/android/android-kernel-%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87/</link>
       <pubDate>Sun, 13 May 2018 21:07:36 +0800</pubDate>
       
-      <guid>https://pkiller.com/android/kernel%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C/</guid>
+      <guid>https://pkiller.com/android/android-kernel-%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87/</guid>
       <description>步骤1、提取内核文件 提取内核有两种方式： 通过固件包提取，通常包含在KERNEL.img或boot.img之中。 通过root权限的手机提取。 A.</description>
     </item>
     
     <item>
-      <title>王者荣耀荣耀C#脚本的提取</title>
-      <link>https://pkiller.com/android/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80csharp%E8%84%9A%E6%9C%AC%E7%9A%84%E6%8F%90%E5%8F%96/</link>
+      <title>王者荣耀 - 脱壳及Unity3D脚本提取</title>
+      <link>https://pkiller.com/android/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80-%E8%84%B1%E5%A3%B3%E5%8F%8Aunity3d%E8%84%9A%E6%9C%AC%E6%8F%90%E5%8F%96/</link>
       <pubDate>Thu, 26 Apr 2018 11:07:43 +0800</pubDate>
       
-      <guid>https://pkiller.com/android/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80csharp%E8%84%9A%E6%9C%AC%E7%9A%84%E6%8F%90%E5%8F%96/</guid>
+      <guid>https://pkiller.com/android/%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80-%E8%84%B1%E5%A3%B3%E5%8F%8Aunity3d%E8%84%9A%E6%9C%AC%E6%8F%90%E5%8F%96/</guid>
       <description>王者荣耀采用流行的Unity3d框架开发，主要游戏逻辑使用C#编写， 但目前尚未确认是否有使用到Lua。 一、关于Unity3D Unity3D是</description>
     </item>
     
     <item>
-      <title>改造linker, 实现无痕加载so模块</title>
-      <link>https://pkiller.com/android/%E6%94%B9%E9%80%A0linker-%E5%AE%9E%E7%8E%B0%E6%97%A0%E7%97%95%E5%8A%A0%E8%BD%BDso%E6%A8%A1%E5%9D%97/</link>
+      <title>bionic linker 定制 - 无痕加载library</title>
+      <link>https://pkiller.com/android/bionic-linker-%E5%AE%9A%E5%88%B6-%E6%97%A0%E7%97%95%E5%8A%A0%E8%BD%BDso%E6%A8%A1%E5%9D%97/</link>
       <pubDate>Wed, 11 Apr 2018 10:06:24 +0800</pubDate>
       
-      <guid>https://pkiller.com/android/%E6%94%B9%E9%80%A0linker-%E5%AE%9E%E7%8E%B0%E6%97%A0%E7%97%95%E5%8A%A0%E8%BD%BDso%E6%A8%A1%E5%9D%97/</guid>
+      <guid>https://pkiller.com/android/bionic-linker-%E5%AE%9A%E5%88%B6-%E6%97%A0%E7%97%95%E5%8A%A0%E8%BD%BDso%E6%A8%A1%E5%9D%97/</guid>
       <description>最近研究了一些防内存检测方面的姿势, 异常so模块检测在对抗中占了挺重要的部分. 由于`Bionic/linker`完全是一个用户态的实现, 所以</description>
     </item>
     

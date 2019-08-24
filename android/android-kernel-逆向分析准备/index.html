@@ -13,18 +13,18 @@
 </script>
 
   <meta charset="UTF-8">
-  <title>安全 - pkiller</title>
+  <title>Android Kernel 逆向分析准备 - pkiller</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
+  <meta name="keywords" content="kernel,逆向,android kernel,android,">
+  <meta name="description" content="步骤1、提取内核文件 提取内核有两种方式： 通过固件包提取，通常包含在KERNEL.img或boot.img之中。 通过root权限的手机提取。 A.">
   
-  <meta name="description" content="安全">
-  
-  <meta itemprop="name" content="安全 - pkiller">
-  <meta itemprop="description" content="安全">
+  <meta itemprop="name" content="Android Kernel 逆向分析准备 - pkiller">
+  <meta itemprop="description" content="步骤1、提取内核文件 提取内核有两种方式： 通过固件包提取，通常包含在KERNEL.img或boot.img之中。 通过root权限的手机提取。 A.">
   <meta itemprop="image" content="https://pkiller.com/img/author.jpg">
   
   
   <meta name="twitter:description" content="">
-  <link rel="alternate" href="https://pkiller.com/feed.xml" title="pkiller" type="application/rss+xml"/>
+  
   <link rel="shortcut icon" href="https://pkiller.com/img/favicon.ico"/>
   <link rel="apple-touch-icon" href="https://pkiller.com/apple-touch-icon.png" />
   <link rel="apple-touch-icon-precomposed" href="https://pkiller.com/apple-touch-icon.png" />
@@ -73,26 +73,286 @@
 
   </header>
   <div id="container">
-    <div id="main">
-      
-      <h2 id="2019-04">2019-04</h2>
-      
-      <section class="post" itemscope itemprop="blogPost">
-    <a href="https://pkiller.com/security/%E7%A7%BB%E5%8A%A8%E5%BA%94%E7%94%A8-%E9%BB%91%E4%BA%A7%E9%A3%8E%E6%8E%A7%E4%BD%93%E7%B3%BB/" title="移动应用 - 黑产风控体系" itemprop="url">
-    <h1 itemprop="name">移动应用 - 黑产风控体系</h1>
-    <p itemprop="description">全面整体协同防御的思想在移动安全领域显得尤为重要，主要由于移动应用的价值全部依附于数据之上，而数据驱动的场景需求是目前互联网2C企业的核心价</p>
-    <time datetime="2019-04-14 23:00:48 &#43;0800 CST" itemprop="datePublished">2019年04月14日</time>
-  </a>
-</section>
+    <div id="main" class="post" itemscope itemprop="blogPost">
+	<article itemprop="articleBody">
+    <header class="article-info clearfix">
+  <h1 itemprop="name">
+      <a href="https://pkiller.com/android/android-kernel-%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87/" title="Android Kernel 逆向分析准备" itemprop="url">Android Kernel 逆向分析准备</a>
+  </h1>
+  <p class="article-author">By
+    
+      <a href="" title=""></a>
+    
+  </p>
+  <p class="article-time">
+    <time datetime="2018-05-13 21:07:36 &#43;0800 CST" itemprop="datePublished">2018年05月13日</time>
+  </p>
+</header>
 
-      
-      
+	<div class="article-content">
+    
+    
+
+<h1 id="步骤1-提取内核文件">步骤1、提取内核文件</h1>
+
+<p>提取内核有两种方式：</p>
+
+<ol>
+<li>通过固件包提取，通常包含在<code>KERNEL.img</code>或<code>boot.img</code>之中。</li>
+<li>通过root权限的手机提取。</li>
+</ol>
+
+<h2 id="a-通过root权限设备提取">A. 通过root权限设备提取</h2>
+
+<p>以Nexus 5为例子</p>
+
+<p><strong>1. 得到boot分区路径</strong></p>
+
+<pre><code class="language-bash">adb shell
+su
+cd /dev/block/platform/msm_sdcc.1/by-name
+ls -l boot
+</code></pre>
+
+<p><img src="1.png" alt="img" title="img" /></p>
+
+<p>boot 是个系统符号软链接，/dev/block/mmcblk0p19 就是boot分区.</p>
+
+<p><strong>2. 拷贝boot分区数据到sdcard</strong>
+用 dd 将其dump到sdcard文件夹下：</p>
+
+<pre><code class="language-bash">dd if=/dev/block/mmcblk0p19 of=/sdcard/boot.img
+</code></pre>
+
+<p>得到boot.img文件!</p>
+
+<h2 id="b-通过固件包提取">B. 通过固件包提取</h2>
+
+<p><strong>1. 解开固件包</strong>
+具体打包方法各厂商都不同，有些厂商还有加密。（如：OPPO)</p>
+
+<p><strong>2. 得到boot.img</strong>
+解包后可直接得到boot.img。大部分手机的固件都为<code>boot.img</code>，少数会有其他名称(如华为EMUI: <code>KERNEL.img</code>)</p>
+
+<h2 id="x-从-boot-img-kernel-img-中提取kernel">X. 从<code>boot.img</code> / <code>KERNEL.img</code>中提取kernel</h2>
+
+<p>可以借助工具，工具有：
+《binwalk》《mkboot》《unpackbootimg》</p>
+
+<pre><code class="language-bash">binwalk -e boot.img
+mkboot KERNEL.img ./output/   # 实际测试有些问题，提取出的kernel.gz不完整
+</code></pre>
+
+<p>也可直接根据特征提有，粗略特征为：</p>
+
+<p><strong>1. 定位boot.img / KERNEL.img 中KERNEL的部分：</strong></p>
+
+<p>搜索字符串<code>ANDROID!</code>先定位到头部，头部后紧跟kernel的描述信息：
+<img src="2.png" alt="img" title="img" /></p>
+
+<p><strong>2. 提出kernel.gz包文件：</strong></p>
+
+<p>接着以此为起点寻找&rdquo;1F 8B 08 00&rdquo;，即gzip的头部Magic。长度不管（直接从此处到文件尾)保存到新的文件如：kernel.gz。
+<img src="3.png" alt="img" title="img" /></p>
+
+<p><strong>3. 解压出kernel.gz中的真正raw文件：</strong></p>
+
+<p>然后用gzip命令解压出文件(用图形界面解压会报错)：</p>
+
+<pre><code class="language-bash">gzip -d kernel.gz
+</code></pre>
+
+<h1 id="步骤2-用ida加载">步骤2、用IDA加载</h1>
+
+<h2 id="arm64的内核">ARM64的内核</h2>
+
+<p>使用IDA64打开kernel文件，选择<code>ARM Little-endian [ARM]</code>:</p>
+
+<p><img src="4.png" alt="img" title="img" /></p>
+
+<p><img src="5.png" alt="img" title="img" /></p>
+
+<p>通常都在ARM64中，将kernel文件偏移0x1000加载到内存的0xffffffc000080000处：</p>
+
+<p><img src="6.png" alt="img" title="img" /></p>
+
+<h2 id="armv7的内核">ARMv7的内核</h2>
+
+<p><img src="7.png" alt="img" title="img" /></p>
+
+<p><img src="8.png" alt="img" title="img" /></p>
+
+<h1 id="步骤3-为ida中的内核增加符号支持">步骤3. 为IDA中的内核增加符号支持</h1>
+
+<p>以下脚本通过<code>cat /proc/kallsyms</code>的输出结果来对IDA中的内核函数sub_xxx进行重命名:</p>
+
+<p>(由于某个早期版本Android已经不再输出内核符号偏移地址全部以0填充，所以使用该方法前 需要修改kernel使其输出偏移地址。)</p>
+
+<pre><code class="language-python">// 使用一下IDA脚本(python)，将函数/符号名设到对应的sub_xxx上
+ksyms = open(&quot;syms.txt&quot;) 
+i = 0 
+for line in ksyms: 
+    i += 1 
+    addr = int(line[0:8],16)  
+    name = line[11:-1]  
+    idaapi.set_debug_name(addr,name)  
+    MakeNameEx(addr,name,SN_NOWARN)
+    add_func(addr)
+    if i % 100 == 0:
+        Message(&quot;cur: %d\n&quot; % i)
+    # Message(&quot;%08X:%sn&quot;%(addr,name))  
+</code></pre>
+
+<h1 id="注意事项">注意事项</h1>
+
+<p><strong>kernel加载地址的寻找：</strong></p>
+
+<p>以上的kernel加载地址0xffffffc000080000只是比较普遍的情况，如果以上地址不能正确分析，也有两个方法：</p>
+
+<ol>
+<li><p>可利用<code>cat /proc/kallsyms</code>输出的符号与IDA中的函数进行结合分析，尝试推算出加载地址。</p></li>
+
+<li><p>通过代码中对字符串的引用来推算出加载地址。</p></li>
+
+<li><p>通过内核源文件：boot/boardconfig.h中宏配置寻找内核加载地址。</p></li>
+</ol>
+
+<p><strong>文件偏移的寻找</strong>
+开头处寻找不为00的数据：</p>
+
+<p><img src="9.png" alt="img" title="img" /></p>
+
+<p><strong>加载后，默认为DCB数据，可以用一下脚本自动刷成代码：</strong></p>
+
+<p><img src="10.png" alt="img" title="img" /></p>
+
+<pre><code class="language-python">#! python
+def main():
+    start = AskAddr(MinEA(), &quot;欲转为Code的起始地址：&quot;)
+    end = AskAddr(MinEA(), &quot;欲转为Code的结束地址：&quot;)
+    if start &gt;= end:
+        print('输入的区间不正确～')
+        return
+
+    for cur_addr in range(start, end, 4):
+        flags = GetFlags(cur_addr)
+        print(&quot;[MSG] 0x%X 's flags: %x&quot; % (cur_addr, flags))
+        if Byte(cur_addr) and not (isCode(flags) and isTail(flags) and isUnknown(flags) and isHead(flags)):
+            print('[MSG] 0x%X is Data, Make to code.' % cur_addr)
+            MakeCode(cur_addr)
+main()
+</code></pre>
+
+<h1 id="参考资料">参考资料</h1>
+
+<p><a href="http://blog.csdn.net/qq1084283172/article/details/57074695">http://blog.csdn.net/qq1084283172/article/details/57074695</a></p>
+
+<p><a href="http://www.hhjack.com/arm64_zimage_reverseengineering_with_ida_pro/">http://www.hhjack.com/arm64_zimage_reverseengineering_with_ida_pro/</a></p>
+
+<p><a href="https://www.cnx-software.com/2015/12/07/how-to-extract-kernel-img-with-mkboot-script/">https://www.cnx-software.com/2015/12/07/how-to-extract-kernel-img-with-mkboot-script/</a></p>
+
+    
+	</div>
+  <footer class="article-footer clearfix">
+  
+
+<div class="article-tags">
+  <span></span>
+  
+  <a href="https://pkiller.com/tags/kernel">kernel</a>
+  
+  <a href="https://pkiller.com/tags/android">android</a>
+  
+</div>
+
+
+
+
+
+<div class="article-categories">
+  <span></span>
+  
+  <a class="article-category-link" href="https://pkiller.com/categories/android">android</a>
+  
+</div>
+
+
+
+  <div class="article-share" id="share">
+    <div data-url="https://pkiller.com/android/android-kernel-%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87/" data-title="Android Kernel 逆向分析准备" data-tsina="" class="share clearfix">
     </div>
+  </div>
+</footer>
+
+	</article>
+  
+
+
+<section class="comment">
+<div id="disqus_thread"></div>
+</section>
+<script>
+  <!-- detect whether Disuqs can load -->
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', '//disqus.com/next/config.json?' + new Date().getTime(), true);
+  xhr.timeout = 3000; 
+
+  xhr.onload = function() { 
+
+
+var disqus_config = function () {
+this.page.url = "https://pkiller.com/android/android-kernel-%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87/";
+this.page.identifier = "https://pkiller.com/android/android-kernel-%E9%80%86%E5%90%91%E5%88%86%E6%9E%90%E5%87%86%E5%A4%87/";
+};
+(function() { 
+var d = document, s = d.createElement('script');
+
+s.src = '//pkiller.disqus.com/embed.js';
+
+s.setAttribute('data-timestamp', +new Date());
+(d.head || d.body).appendChild(s);
+})();
+}
+  xhr.ontimeout = function() {
+  <!-- cannot load Disqus, skip it. -->
+  return;
+}
+xhr.send(null);
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+
+</div>
+
     <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
 <div id="asidepart">
 <div class="closeaside"><a class="closebutton" href="#" title="隐藏侧边栏"></a></div>
 <aside class="clearfix">
   
+  
+  <div class="archiveslist">
+    <p class="asidetitle">目录</p>
+    <ul class="archive-list">
+      <nav id="TableOfContents">
+<ul>
+<li><a href="#步骤1-提取内核文件">步骤1、提取内核文件</a>
+<ul>
+<li><a href="#a-通过root权限设备提取">A. 通过root权限设备提取</a></li>
+<li><a href="#b-通过固件包提取">B. 通过固件包提取</a></li>
+<li><a href="#x-从-boot-img-kernel-img-中提取kernel">X. 从<code>boot.img</code> / <code>KERNEL.img</code>中提取kernel</a></li>
+</ul></li>
+<li><a href="#步骤2-用ida加载">步骤2、用IDA加载</a>
+<ul>
+<li><a href="#arm64的内核">ARM64的内核</a></li>
+<li><a href="#armv7的内核">ARMv7的内核</a></li>
+</ul></li>
+<li><a href="#步骤3-为ida中的内核增加符号支持">步骤3. 为IDA中的内核增加符号支持</a></li>
+<li><a href="#注意事项">注意事项</a></li>
+<li><a href="#参考资料">参考资料</a></li>
+</ul>
+</nav>
+    </ul>
+  </div>
   
 
 
@@ -260,10 +520,6 @@
 
 
   
-<div class="rsspart">
-  <a rel="nofollow" href="https://pkiller.com/feed.xml" type="application/rss+xml" target="_blank">RSS 订阅</a>
-</div>
-
 
 </aside>
 </div>
