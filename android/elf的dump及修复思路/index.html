@@ -58,6 +58,8 @@
       
       <li><a href="/music">音乐</a></li>
       
+      <li><a href="/iot">IoT</a></li>
+      
       <li><a href="/other">杂项</a></li>
       
       <li><a href="/about">关于</a></li>
@@ -173,25 +175,25 @@
 
 <p>这里用某厂商加固中携带的so文件来试验:</p>
 
-<p><img src="1.png" alt="img" title="img" /></p>
+<p><img src="1.png" alt="elf unpack" title="elf unpack" /></p>
 
 <p>section只有一个有效项<code>.strtab</code>:</p>
 
-<p><img src="2.png" alt="img" title="img" /></p>
+<p><img src="2.png" alt="elf unpack" title="elf unpack" /></p>
 
 <p><strong>加载so后DUMP</strong></p>
 
 <p>dump后section已经丢失:</p>
 
-<p><img src="3.png" alt="img" title="img" /></p>
+<p><img src="3.png" alt="elf unpack" title="elf unpack" /></p>
 
 <p>用IDA打开后查看效果,首先依赖库信息丢失:</p>
 
-<p><img src="4.png" alt="img" title="img" /></p>
+<p><img src="4.png" alt="elf unpack" title="elf unpack" /></p>
 
 <p>其次Sections信息不全:</p>
 
-<p><img src="5.png" alt="img" title="img" /></p>
+<p><img src="5.png" alt="elf unpack" title="elf unpack" /></p>
 
 <p>该so外壳通过DT_INIT还原代码.</p>
 
@@ -323,7 +325,7 @@
 
 <p>然后.plt之后存放了与.rel.plt中Elf32_Rel数量相同的代码块,每个代码块0x0Cbyte(3条arm指令).代码块负责间接调用got项中的import函数.</p>
 
-<p><img src="6.png" alt="img" title="img" /></p>
+<p><img src="6.png" alt="elf unpack" title="elf unpack" /></p>
 
 <h3 id="got的重建">.got的重建</h3>
 
@@ -335,11 +337,11 @@
 
 <p>第一个文件,以第一个有效项为.got的开始位置:</p>
 
-<p><img src="7.png" alt="img" title="img" /></p>
+<p><img src="7.png" alt="elf unpack" title="elf unpack" /></p>
 
 <p>第二个文件,却以R_ARM_RELATIVE为开始位置,没有掌握规律:</p>
 
-<p><img src="8.png" alt="img" title="img" /></p>
+<p><img src="8.png" alt="elf unpack" title="elf unpack" /></p>
 
 <p><strong>按照以上任一的方法来确定.got,都无法兼容所有情况. 所以针对.got的位置确定, 更换一种思路: 使用前后关系来确定.got区域:</strong></p>
 
@@ -357,7 +359,7 @@
 
 <p>可得到关系: .got 起始于.dynamic, 并终于PT_UNK_700000001h. 用此方法对脱壳的so进行验证: .got确定成功.</p>
 
-<p><img src="9.png" alt="img" title="img" /></p>
+<p><img src="9.png" alt="elf unpack" title="elf unpack" /></p>
 
 <h4 id="got大小">.got大小</h4>
 
@@ -377,7 +379,7 @@
   } [0x4003h]PT_LOAD(1)
 </code></pre>
 
-<p><img src="10.png" alt="img" title="img" /></p>
+<p><img src="10.png" alt="elf unpack" title="elf unpack" /></p>
 
 <h4 id="data大小">.data大小</h4>
 
@@ -397,7 +399,7 @@
   } [0x2d2fh]PT_LOAD(0)
 </code></pre>
 
-<p><img src="11.png" alt="img" title="img" /></p>
+<p><img src="11.png" alt="elf unpack" title="elf unpack" /></p>
 
 <h4 id="rodata的长度">.rodata的长度</h4>
 
@@ -424,24 +426,24 @@
 
 <p>根据以上思路写一个简单的dump+repair的辅助脱壳工具:</p>
 
-<p><img src="12.png" alt="img" title="img" /></p>
+<p><img src="12.png" alt="elf unpack" title="elf unpack" /></p>
 
 <p>最终修复完成的效果:
 DT_NEEDED</p>
 
-<p><img src="13.png" alt="img" title="img" /></p>
+<p><img src="13.png" alt="elf unpack" title="elf unpack" /></p>
 
 <p>.plt</p>
 
-<p><img src="14.png" alt="img" title="img" /></p>
+<p><img src="14.png" alt="elf unpack" title="elf unpack" /></p>
 
 <p>.got</p>
 
-<p><img src="15.png" alt="img" title="img" /></p>
+<p><img src="15.png" alt="elf unpack" title="elf unpack" /></p>
 
 <p>全部section</p>
 
-<p><img src="16.png" alt="img" title="img" /></p>
+<p><img src="16.png" alt="elf unpack" title="elf unpack" /></p>
 
 <p><strong>全文完~</strong></p>
 
@@ -591,6 +593,8 @@ xhr.send(null);
     
     <li><a href="https://pkiller.com/categories/midi" title="midi">midi<sup>1</sup></a></li>
     
+    <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+    
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
@@ -657,6 +661,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -745,6 +751,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
+    <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6%e8%a7%a3%e5%8c%85" style="font-size: 12px;">固件解包</a>
@@ -801,7 +809,7 @@ xhr.send(null);
     
     
   </div>
-  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2019
+  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2020
     
     <a href="https://pkiller.com/" title="pkiller">pkiller</a>
     

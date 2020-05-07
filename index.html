@@ -59,6 +59,8 @@
       
       <li><a href="/music">音乐</a></li>
       
+      <li><a href="/iot">IoT</a></li>
+      
       <li><a href="/other">杂项</a></li>
       
       <li><a href="/about">关于</a></li>
@@ -77,6 +79,15 @@
   </header>
   <div id="container">
     <div id="main">
+      
+      <section class="post" itemscope itemprop="blogPost">
+    <a href="https://pkiller.com/iot/zigbee-basic/" title="ZigBee基础知识" itemprop="url">
+    <h1 itemprop="name">ZigBee基础知识</h1>
+    <p itemprop="description">查看原图</p>
+    <time datetime="2020-05-07 18:30:31 &#43;0800 CST" itemprop="datePublished">2020年05月07日</time>
+  </a>
+</section>
+
       
       <section class="post" itemscope itemprop="blogPost">
     <a href="https://pkiller.com/android/android-systemui-keyguard/" title="Android SystemUI &amp; Keyguard原理分析，加个“摇一摇”解锁" itemprop="url">
@@ -168,8 +179,71 @@
 </section>
 
       
+      <section class="post" itemscope itemprop="blogPost">
+    <a href="https://pkiller.com/android/android%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E5%8F%8A%E8%8E%B7%E5%8F%96/" title="Android服务注册及获取" itemprop="url">
+    <h1 itemprop="name">Android服务注册及获取</h1>
+    <p itemprop="description">本文以Android 5.1为例展开，在7.0上细节会略有差异，但基本一致： Service大致分为两种 1. 系统服务SystemService // 以</p>
+    <time datetime="2017-05-14 18:32:05 &#43;0800 CST" itemprop="datePublished">2017年05月14日</time>
+  </a>
+</section>
+
+      
+      <section class="post" itemscope itemprop="blogPost">
+    <a href="https://pkiller.com/music/midi%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/" title="MIDI文件结构" itemprop="url">
+    <h1 itemprop="name">MIDI文件结构</h1>
+    <p itemprop="description">Chunks 一个MIDI文件由多个Chunk(块)构成. 1个Chunk包含以下信息: type length data 4byte 4byte length bytes type: 4-byte, 表示该chunk的类型 length: 4-byte, 表示该chunk中da</p>
+    <time datetime="2017-04-14 23:37:31 &#43;0800 CST" itemprop="datePublished">2017年04月14日</time>
+  </a>
+</section>
+
+      
+      <section class="post" itemscope itemprop="blogPost">
+    <a href="https://pkiller.com/about/" title="ABOUT ME." itemprop="url">
+    <h1 itemprop="name">ABOUT ME.</h1>
+    <p itemprop="description">pkiller (Peanut Killer). 本人从事Android、IoT及智能硬件相关安全研究。 Email: pkilller@outlook.com</p>
+    <time datetime="2017-04-14 23:00:48 &#43;0800 CST" itemprop="datePublished">2017年04月14日</time>
+  </a>
+</section>
+
+      
+      <section class="post" itemscope itemprop="blogPost">
+    <a href="https://pkiller.com/android/android-%E8%BF%9B%E7%A8%8B%E7%BA%A7%E5%88%AB-%E5%92%8C-oom_adj%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB/" title="Android进程级别和oom_adj对应关系" itemprop="url">
+    <h1 itemprop="name">Android进程级别和oom_adj对应关系</h1>
+    <p itemprop="description">oom_adj 数值越小证明优先级越高, 被干掉的时间越晚. 如果大于 8 一般就是属于 backgroud 随时可能被干掉. -100为system进程的值, 表示绝不会被干掉. [oom_adj=0] 前台</p>
+    <time datetime="2017-02-26 12:56:34 &#43;0800 CST" itemprop="datePublished">2017年02月26日</time>
+  </a>
+</section>
+
+      
+      <section class="post" itemscope itemprop="blogPost">
+    <a href="https://pkiller.com/android/elf%E7%9A%84dump%E5%8F%8A%E4%BF%AE%E5%A4%8D%E6%80%9D%E8%B7%AF/" title="ELF的DUMP及修复思路" itemprop="url">
+    <h1 itemprop="name">ELF的DUMP及修复思路</h1>
+    <p itemprop="description">加壳后ELF的section基本是被抹掉或是被写垃圾数据的, 但section对于静态分析来讲又非常重要, 所以DUMP后有必要重建sectio</p>
+    <time datetime="2016-07-12 11:02:04 &#43;0800 CST" itemprop="datePublished">2016年07月12日</time>
+  </a>
+</section>
+
+      
+      <section class="post" itemscope itemprop="blogPost">
+    <a href="https://pkiller.com/android/elf32-android-arm/" title="ELF32 (Android ARM)" itemprop="url">
+    <h1 itemprop="name">ELF32 (Android ARM)</h1>
+    <p itemprop="description">首先勘误： 下图中 用STB_WEAK 来表示导出函数是错误的。 1. .rel.dyn(DT_REL) 和 .rel.plt(DT_JMPREL) 的区别. 在任意位置 使用静态方式 调用导入函数(API) 引用项会出现在.rel</p>
+    <time datetime="2016-06-18 08:36:15 &#43;0800 CST" itemprop="datePublished">2016年06月18日</time>
+  </a>
+</section>
+
+      
+      <section class="post" itemscope itemprop="blogPost">
+    <a href="https://pkiller.com/android/java%E6%B7%B7%E6%B7%86%E6%8A%80%E5%B7%A7-%E5%8F%8D%E6%B7%B7%E6%B7%86-%E5%8A%A0%E5%9B%BA-%E6%80%BB%E7%BB%93/" title="Java混淆/反混淆/加固 总结" itemprop="url">
+    <h1 itemprop="name">Java混淆/反混淆/加固 总结</h1>
+    <p itemprop="description">混淆手段 定义超长类名 可以造成超长文件名, 造成常规反编译工具失败(路径太长). 例子: oooooooooooooo 找茬 OoOoOoooOOooo $$_$$$$$ 使用Java关键字 java对关键字检查操作在编译</p>
+    <time datetime="2016-06-18 08:36:15 &#43;0800 CST" itemprop="datePublished">2016年06月18日</time>
+  </a>
+</section>
+
+      
       <nav id="page-nav" class="clearfix">
-        <a class="page-number" href="https://pkiller.com/post/">More...</a>
+        
       </nav>
     </div>
     <div class="openaside"><a class="navbutton" href="#" title="显示侧边栏"></a></div>
@@ -191,6 +265,8 @@
     <li><a href="https://pkiller.com/categories/android" title="android">android<sup>11</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/midi" title="midi">midi<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
     
@@ -258,6 +334,8 @@
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -346,6 +424,8 @@
     
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
+    <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6%e8%a7%a3%e5%8c%85" style="font-size: 12px;">固件解包</a>
@@ -406,7 +486,7 @@
     
     
   </div>
-  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2019
+  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2020
     
     <a href="https://pkiller.com/" title="pkiller">pkiller</a>
     

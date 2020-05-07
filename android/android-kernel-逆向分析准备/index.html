@@ -58,6 +58,8 @@
       
       <li><a href="/music">音乐</a></li>
       
+      <li><a href="/iot">IoT</a></li>
+      
       <li><a href="/other">杂项</a></li>
       
       <li><a href="/about">关于</a></li>
@@ -116,7 +118,7 @@ cd /dev/block/platform/msm_sdcc.1/by-name
 ls -l boot
 </code></pre>
 
-<p><img src="1.png" alt="img" title="img" /></p>
+<p><img src="1.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
 
 <p>boot 是个系统符号软链接，/dev/block/mmcblk0p19 就是boot分区.</p>
 
@@ -150,12 +152,12 @@ mkboot KERNEL.img ./output/   # 实际测试有些问题，提取出的kernel.gz
 <p><strong>1. 定位boot.img / KERNEL.img 中KERNEL的部分：</strong></p>
 
 <p>搜索字符串<code>ANDROID!</code>先定位到头部，头部后紧跟kernel的描述信息：
-<img src="2.png" alt="img" title="img" /></p>
+<img src="2.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
 
 <p><strong>2. 提出kernel.gz包文件：</strong></p>
 
 <p>接着以此为起点寻找&rdquo;1F 8B 08 00&rdquo;，即gzip的头部Magic。长度不管（直接从此处到文件尾)保存到新的文件如：kernel.gz。
-<img src="3.png" alt="img" title="img" /></p>
+<img src="3.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
 
 <p><strong>3. 解压出kernel.gz中的真正raw文件：</strong></p>
 
@@ -170,19 +172,19 @@ mkboot KERNEL.img ./output/   # 实际测试有些问题，提取出的kernel.gz
 
 <p>使用IDA64打开kernel文件，选择<code>ARM Little-endian [ARM]</code>:</p>
 
-<p><img src="4.png" alt="img" title="img" /></p>
+<p><img src="4.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
 
-<p><img src="5.png" alt="img" title="img" /></p>
+<p><img src="5.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
 
 <p>通常都在ARM64中，将kernel文件偏移0x1000加载到内存的0xffffffc000080000处：</p>
 
-<p><img src="6.png" alt="img" title="img" /></p>
+<p><img src="6.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
 
 <h2 id="armv7的内核">ARMv7的内核</h2>
 
-<p><img src="7.png" alt="img" title="img" /></p>
+<p><img src="7.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
 
-<p><img src="8.png" alt="img" title="img" /></p>
+<p><img src="8.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
 
 <h1 id="步骤3-为ida中的内核增加符号支持">步骤3. 为IDA中的内核增加符号支持</h1>
 
@@ -222,11 +224,11 @@ for line in ksyms:
 <p><strong>文件偏移的寻找</strong>
 开头处寻找不为00的数据：</p>
 
-<p><img src="9.png" alt="img" title="img" /></p>
+<p><img src="9.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
 
 <p><strong>加载后，默认为DCB数据，可以用一下脚本自动刷成代码：</strong></p>
 
-<p><img src="10.png" alt="img" title="img" /></p>
+<p><img src="10.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
 
 <pre><code class="language-python">#! python
 def main():
@@ -370,6 +372,8 @@ xhr.send(null);
     
     <li><a href="https://pkiller.com/categories/midi" title="midi">midi<sup>1</sup></a></li>
     
+    <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+    
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
@@ -436,6 +440,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -524,6 +530,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
+    <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6%e8%a7%a3%e5%8c%85" style="font-size: 12px;">固件解包</a>
@@ -580,7 +588,7 @@ xhr.send(null);
     
     
   </div>
-  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2019
+  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2020
     
     <a href="https://pkiller.com/" title="pkiller">pkiller</a>
     

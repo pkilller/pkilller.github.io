@@ -3,12 +3,47 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://pkiller.com/tags/android/</loc>
-    <lastmod>2019-08-23T14:10:05+08:00</lastmod>
+    <loc>https://pkiller.com/categories/</loc>
+    <lastmod>2020-05-07T18:30:31+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pkiller.com/iot/</loc>
+    <lastmod>2020-05-07T18:30:31+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pkiller.com/</loc>
+    <lastmod>2020-05-07T18:30:31+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pkiller.com/tags/</loc>
+    <lastmod>2020-05-07T18:30:31+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pkiller.com/categories/zigbee/</loc>
+    <lastmod>2020-05-07T18:30:31+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pkiller.com/tags/zigbee/</loc>
+    <lastmod>2020-05-07T18:30:31+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pkiller.com/iot/zigbee-basic/</loc>
+    <lastmod>2020-05-07T18:30:31+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://pkiller.com/categories/android/</loc>
+    <lastmod>2019-08-23T14:10:05+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pkiller.com/tags/android/</loc>
     <lastmod>2019-08-23T14:10:05+08:00</lastmod>
   </url>
   
@@ -28,27 +63,12 @@
   </url>
   
   <url>
-    <loc>https://pkiller.com/categories/</loc>
-    <lastmod>2019-08-23T14:10:05+08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://pkiller.com/tags/keyguard/</loc>
     <lastmod>2019-08-23T14:10:05+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://pkiller.com/</loc>
-    <lastmod>2019-08-23T14:10:05+08:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://pkiller.com/tags/systemui/</loc>
-    <lastmod>2019-08-23T14:10:05+08:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://pkiller.com/tags/</loc>
     <lastmod>2019-08-23T14:10:05+08:00</lastmod>
   </url>
   
@@ -253,12 +273,12 @@
   </url>
   
   <url>
-    <loc>https://pkiller.com/categories/midi/</loc>
+    <loc>https://pkiller.com/tags/midi/</loc>
     <lastmod>2017-04-14T23:37:31+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://pkiller.com/tags/midi/</loc>
+    <loc>https://pkiller.com/categories/midi/</loc>
     <lastmod>2017-04-14T23:37:31+08:00</lastmod>
   </url>
   
@@ -273,12 +293,12 @@
   </url>
   
   <url>
-    <loc>https://pkiller.com/categories/about/</loc>
+    <loc>https://pkiller.com/tags/about/</loc>
     <lastmod>2017-04-14T23:00:48+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://pkiller.com/tags/about/</loc>
+    <loc>https://pkiller.com/categories/about/</loc>
     <lastmod>2017-04-14T23:00:48+08:00</lastmod>
   </url>
   

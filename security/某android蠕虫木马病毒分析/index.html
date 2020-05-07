@@ -58,6 +58,8 @@
       
       <li><a href="/music">音乐</a></li>
       
+      <li><a href="/iot">IoT</a></li>
+      
       <li><a href="/other">杂项</a></li>
       
       <li><a href="/about">关于</a></li>
@@ -103,7 +105,7 @@
 
 <p>伪装成中国移动客户端,在初次启动时设置自身为设备管理器以防止自身被卸载。其中利用了设备管理器的一个漏洞，导致用户无法取消激活该样本，从而达到不被卸载的目的。</p>
 
-<p><img src="1.png" alt="img" title="img" /></p>
+<p><img src="1.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
 <h2 id="受害情况分析">受害情况分析</h2>
 
@@ -116,23 +118,23 @@
 
 <p><strong>经过对以上邮箱的登录验证，该邮箱内有近<code>两千两百多份</code>邮件：</strong></p>
 
-<p><img src="2.png" alt="img" title="img" /></p>
+<p><img src="2.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
 <p><strong>邮件内的联系人信息</strong></p>
 
-<p><img src="3.png" alt="img" title="img" /></p>
+<p><img src="3.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
 <p><strong>邮件内的短信内容</strong></p>
 
 <p>// 其中包含大量网银或个人账户的验证码短信</p>
 
-<p><img src="4.png" alt="img" title="img" /></p>
+<p><img src="4.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
-<p><img src="5.png" alt="img" title="img" /></p>
+<p><img src="5.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
-<p><img src="6.png" alt="img" title="img" /></p>
+<p><img src="6.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
-<p><img src="7.png" alt="img" title="img" /></p>
+<p><img src="7.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
 <h2 id="传播途径分析">传播途径分析</h2>
 
@@ -194,7 +196,7 @@ wap.10086gus.com
 www.10086kdj.com
 </code></pre>
 
-<p><img src="8.png" alt="img" title="img" /></p>
+<p><img src="8.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
 <p>并且根据收信邮箱内的邮件格式可以推断，该邮箱的收信来源样本至少还有另外1个变种正处于活跃期。并且根据网络上的同类样本分析文章，此类型样本至少有不下3个变种：</p>
 
@@ -203,11 +205,11 @@ www.10086kdj.com
 看雪论坛: <a href="http://bbs.pediy.com/showthread.php?t=209408">http://bbs.pediy.com/showthread.php?t=209408</a></p>
 </blockquote>
 
-<p><img src="9.png" alt="img" title="img" /></p>
+<p><img src="9.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
-<p><img src="10.png" alt="img" title="img" /></p>
+<p><img src="10.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
-<p><img src="11.png" alt="img" title="img" /></p>
+<p><img src="11.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
 <h2 id="样本具体行为">样本具体行为</h2>
 
@@ -215,29 +217,29 @@ www.10086kdj.com
 
 <p><strong>首先使用DES解密邮件账户和密码,key: staker</strong></p>
 
-<p><img src="12.png" alt="img" title="img" /></p>
+<p><img src="12.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
-<p><img src="13.png" alt="img" title="img" /></p>
+<p><img src="13.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
 <p><strong>通过邮件上报安装成功的消息</strong></p>
 
-<p><img src="14.png" alt="img" title="img" /></p>
+<p><img src="14.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
 <p><strong>遍历手机内所有短信,并上传至邮箱</strong></p>
 
-<p><img src="15.png" alt="img" title="img" /></p>
+<p><img src="15.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
 <p><strong>遍历手机内所有联系人,并上传至邮箱</strong></p>
 
-<p><img src="16.png" alt="img" title="img" /></p>
+<p><img src="16.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
 <p><strong>随后启动后台Service监听和拦截短信</strong></p>
 
-<p><img src="17.png" alt="img" title="img" /></p>
+<p><img src="17.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
 <p><strong>接收远程短信命令</strong></p>
 
-<p><img src="18.png" alt="img" title="img" /></p>
+<p><img src="18.png" alt="android 病毒木马" title="android 病毒木马" /></p>
 
 <p>其中当短信发送方号码包含<code>3247</code>或<code>288</code>时(其中已知黑客使用的号码之一: <code>13482173247</code>), 开始接收并执行命令:</p>
 
@@ -367,6 +369,8 @@ xhr.send(null);
     
     <li><a href="https://pkiller.com/categories/midi" title="midi">midi<sup>1</sup></a></li>
     
+    <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+    
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
@@ -433,6 +437,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -521,6 +527,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
+    <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6%e8%a7%a3%e5%8c%85" style="font-size: 12px;">固件解包</a>
@@ -577,7 +585,7 @@ xhr.send(null);
     
     
   </div>
-  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2019
+  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2020
     
     <a href="https://pkiller.com/" title="pkiller">pkiller</a>
     

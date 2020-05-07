@@ -58,6 +58,8 @@
       
       <li><a href="/music">音乐</a></li>
       
+      <li><a href="/iot">IoT</a></li>
+      
       <li><a href="/other">杂项</a></li>
       
       <li><a href="/about">关于</a></li>
@@ -100,9 +102,9 @@
 <p>Adb(Android-Debug-Bridge)是为了方便Host与目标Android设备通讯而出现的一种套件，支持USB与TCP/IP的通讯的方式。Adb分为三个端：Client &amp; Server &amp; Mobile。Adb的部分源代码是混在一起的，很多部分的功能可以重用，各端独立的逻辑使用预编译指令来分隔离。源码中通常使用预编译定义<code>ADB_HOST</code>来表示PC上的代码，其他#else块中表示Mobile代码，其他的表示为3端共享的代码。
 在本文中我们将adb一共分为三部分，但实际上在Mobile中也包含adb, 即Client和Server端。也就是说可以使用Mobile调试Mobile。但是为了便于理解，不混淆概念故将其简化为Mobile和PC端。实际应当以HOST来表示adb也就是调试人员所使用的机器。源码中也会用<code>HOST_ON_TARGET</code>预编译定义来表示运行在Mobile设备中的adb(Server&amp;Client).</p>
 
-<p><img src="1.png" alt="img" title="img" /></p>
+<p><img src="1.png" alt="adb" title="adb" /></p>
 
-<p><img src="2.png" alt="img" title="img" /></p>
+<p><img src="2.png" alt="adb" title="adb" /></p>
 
 <h3 id="a-pc端">A. PC端</h3>
 
@@ -305,7 +307,7 @@ int adb_main(int is_daemon, int server_port)
 
 <p>在Android中，当Mobile通过USB连接到PC后，到底开启哪些功能(如：adbd、midi、mtp等) 都是由<code>UsbDeviceManager</code>来做总控的。而<code>UsbDeviceManager</code>对这些功能控制的方式就是通过修改<code>property</code>。adbd会根据相关preoperty项作出相应操作，从而决定是否被打开。那么adbd是如何响应property的更改呢？ 这主要依赖<code>init.usb.rc</code>或<code>init.*.usb.rc</code>在一开机就注册好的property事件，当指定的property项如<code>sys.usb.config</code>的值被设为<code>mtp,usb</code>时，就会触发启动adbd的命令。</p>
 
-<p><img src="3.png" alt="img" title="img" /></p>
+<p><img src="3.png" alt="adb" title="adb" /></p>
 
 <p><strong>首先介绍打开adb的大体流程：</strong></p>
 
@@ -388,7 +390,7 @@ int adb_main(int is_daemon, int server_port)
 
 <h2 id="五-adbd-与-server-的授权过程">五、Adbd 与 Server 的授权过程</h2>
 
-<p><img src="4.png" alt="img" title="img" /></p>
+<p><img src="4.png" alt="adb" title="adb" /></p>
 
 <ul>
 <li><p>当Mobile插入PC后，双方检测到Adb连接发生：</p></li>
@@ -398,13 +400,13 @@ int adb_main(int is_daemon, int server_port)
 <li><p>2.PC收到<code>AUTH TOKEN</code>后使用私钥(<code>~/.android/adbkey</code>)对Token计算<code>SIGNATURE</code>, 并计算Tokne的SHA-1，将结果发回Mobile.</p></li>
 </ul>
 
-<p><img src="5.png" alt="img" title="img" /></p>
+<p><img src="5.png" alt="adb" title="adb" /></p>
 
 <ul>
 <li>3.Mobile根据PC名检查是否<code>保存过/授权过</code>PC的公钥(从<code>/data/misc/adb/adb_keys</code>中读取已保存的授权)。如果已授权过，流程直接跳到第7步。否则到下一步进行新授权.</li>
 </ul>
 
-<p><img src="6.png" alt="img" title="img" /></p>
+<p><img src="6.png" alt="adb" title="adb" /></p>
 
 <ul>
 <li>4.Mobile发送<code>UNAUTHORIZED</code>到PC</li>
@@ -413,9 +415,9 @@ int adb_main(int is_daemon, int server_port)
 <li>7.Mobile向PC发送<code>ONLINE</code>状态，双方授权验证完成，连接成功</li>
 </ul>
 
-<p><img src="7.png" alt="img" title="img" /></p>
+<p><img src="7.png" alt="adb" title="adb" /></p>
 
-<p><img src="8.png" alt="img" title="img" /></p>
+<p><img src="8.png" alt="adb" title="adb" /></p>
 
 <h2 id="六-pc端adb-server流程">六、PC端Adb Server流程</h2>
 
@@ -1130,6 +1132,8 @@ xhr.send(null);
     
     <li><a href="https://pkiller.com/categories/midi" title="midi">midi<sup>1</sup></a></li>
     
+    <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+    
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
@@ -1196,6 +1200,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -1284,6 +1290,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
+    <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6%e8%a7%a3%e5%8c%85" style="font-size: 12px;">固件解包</a>
@@ -1340,7 +1348,7 @@ xhr.send(null);
     
     
   </div>
-  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2019
+  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2020
     
     <a href="https://pkiller.com/" title="pkiller">pkiller</a>
     

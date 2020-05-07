@@ -57,6 +57,8 @@
       
       <li><a href="/music">音乐</a></li>
       
+      <li><a href="/iot">IoT</a></li>
+      
       <li><a href="/other">杂项</a></li>
       
       <li><a href="/about">关于</a></li>
@@ -112,7 +114,7 @@
 
 <h3 id="一-快速认识keyguard">一、快速认识Keyguard</h3>
 
-<p><img src="1.png" alt="img" title="img" /></p>
+<p><img src="1.png" alt="android keyguard systemui" title="android keyguard systemui" /></p>
 
 <p><strong>SystemUI布局</strong></p>
 
@@ -167,7 +169,7 @@ FrameLayout
 <p><strong>KeyguardHostView</strong>
 为锁屏界面的绑定类： R.id.keyguard_host_view，其继承自：FrameLayout，implements SecurityCallback。keyguard_host_view对应如下区域:</p>
 
-<p><img src="2.png" alt="img" title="img" /></p>
+<p><img src="2.png" alt="android keyguard systemui" title="android keyguard systemui" /></p>
 
 <h3 id="二-启动流程">二、启动流程</h3>
 
@@ -251,7 +253,7 @@ private void setupLocked() {
 
 <h3 id="三-首次锁屏事件">三、首次锁屏事件</h3>
 
-<p><img src="3.png" alt="img" title="img" /></p>
+<p><img src="3.png" alt="android keyguard systemui" title="android keyguard systemui" /></p>
 
 <p><strong>开机显示keyguard的总结：</strong></p>
 
@@ -285,7 +287,7 @@ private void setupLocked() {
 
 <p>关闭屏幕后SystemUI会第一时间将锁屏界面准备好，以便用户点亮后能够即使显示。  所以关闭屏幕的第一件事就是进行锁屏。 下图描述了整个过程，在后半段的流程与以上的<code>首次锁屏事件</code>完全一样。</p>
 
-<p><img src="4.png" alt="img" title="img" /></p>
+<p><img src="4.png" alt="android keyguard systemui" title="android keyguard systemui" /></p>
 
 <p><strong>关闭屏幕keyguard流程总结：</strong>
 1、不管是按Power键还是自动灭屏，都会执行到PowerManagerService.java的gotoSleep()方法;
@@ -323,7 +325,7 @@ public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int p
 
 <h3 id="六-amigo定制内容">六、Amigo定制内容</h3>
 
-<p><img src="5.png" alt="img" title="img" /></p>
+<p><img src="5.png" alt="android keyguard systemui" title="android keyguard systemui" /></p>
 
 <p><strong>新增HostViewHost</strong>
 Amigo自行增加了一个KeyguardViewHost的类(android原始版本中称为KeyguardHostView)，然后在StatusBarKeyguardViewManager::registerStatusBar()中增加代码来初始化和注册。
@@ -341,7 +343,7 @@ KeyguardInterfaceManager内部最终利用反射来调用<code>com.amigo.keyguar
 
 <p>本节基于Android_7.1.1源码进行(android 6与之大同小异)，主要分析整个SystemUI的事件(如：按下关机键、电量改变、解锁成功等)派发框架(顺便指出GIONEE-S10(Amigo)在SystemUI上的一些定制点)。本节不会对指纹、图形锁、密码等鉴权细节做深入，涉及指纹等其他细节将在后续章节中作详细描述。</p>
 
-<p><img src="6.png" alt="img" title="img" /></p>
+<p><img src="6.png" alt="android keyguard systemui" title="android keyguard systemui" /></p>
 
 <h3 id="一-概括">一、概括</h3>
 
@@ -1336,7 +1338,7 @@ public class KeyguardShakeView extends FrameLayout implements SensorEventListene
 
 <p>解锁效果图：</p>
 
-<p><img src="7.png" alt="img" title="img" /></p>
+<p><img src="7.png" alt="android keyguard systemui" title="android keyguard systemui" /></p>
 
 <h2 id="八-总结">八、总结</h2>
 
@@ -1495,6 +1497,8 @@ xhr.send(null);
     
     <li><a href="https://pkiller.com/categories/midi" title="midi">midi<sup>1</sup></a></li>
     
+    <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+    
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
@@ -1561,6 +1565,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -1649,6 +1655,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
+    <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6%e8%a7%a3%e5%8c%85" style="font-size: 12px;">固件解包</a>
@@ -1705,7 +1713,7 @@ xhr.send(null);
     
     
   </div>
-  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2019
+  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2020
     
     <a href="https://pkiller.com/" title="pkiller">pkiller</a>
     

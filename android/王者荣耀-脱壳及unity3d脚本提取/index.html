@@ -57,6 +57,8 @@
       
       <li><a href="/music">音乐</a></li>
       
+      <li><a href="/iot">IoT</a></li>
+      
       <li><a href="/other">杂项</a></li>
       
       <li><a href="/about">关于</a></li>
@@ -106,19 +108,19 @@
 
 <p>mono (<a href="https://github.com/mono/mono">https://github.com/mono/mono</a>, <code>在apk的lib下面有一个名为libmono.so就是使用了mono项目的特征</code>)。</p>
 
-<p><img src="1.png" alt="img" title="img" /></p>
+<p><img src="1.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
 
 <p>Unity3D编译好后，最终的C#文件保存在<code>×.apk/assets/bin/Data/Managed/中的Assembly-CSharp.dll</code> 和 <code>Assembly-Csharp-firstpass.dll</code> 两个文件，其都是编译好的C#文件。</p>
 
-<p><img src="2.png" alt="img" title="img" /></p>
+<p><img src="2.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
 
 <p>对Unity3D游戏逻辑的修改最后就是针对以上这两个dll文件，<code>这两个dll文件是windows上的PE格式</code></p>
 
-<p><img src="3.png" alt="img" title="img" /></p>
+<p><img src="3.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
 
 <p>正常无保护的情况下可以很明显的看出以上两个文件的特征，使用一些C#的反编译工具(如:<code>.Net Reflector、ILSpy</code>)可以很容易的得到源码逻辑：</p>
 
-<p><img src="4.png" alt="img" title="img" /></p>
+<p><img src="4.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
 
 <p>最后利用如.NetReflector工具对 dll文件中的游戏逻辑做修改，并替换dll文件后打包。便完成了游戏的修改。</p>
 
@@ -126,11 +128,11 @@
 
 <p><strong>1. 在王者荣耀中，这两个文件(<code>Assembly-CSharp.dll</code> 和 <code>Assembly-Csharp-firstpass.dll</code>)均被加密保护，已经无法看到标准的PE头。</strong></p>
 
-<p><img src="5.png" alt="img" title="img" /></p>
+<p><img src="5.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
 
 <p><strong>2. C#解析引擎libmono.so也被加壳混淆。</strong></p>
 
-<p><img src="6.png" alt="img" title="img" /></p>
+<p><img src="6.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
 
 <p><strong>3. 游戏存在反调试保护，无法用断点断到关键函数，会自动退出。</strong></p>
 
@@ -152,7 +154,7 @@
 
 <p>说明调用到<code>mono_image_open_from_data_with_name</code>后参数中的一定是明文dll数据。</p>
 
-<p><img src="7.png" alt="img" title="img" /></p>
+<p><img src="7.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
 
 <p>既然没有定制libmono.so，所以直接采用hook方式进行(可使用开源项目adbi、或自己开发)hook这个函数(<code>mono_image_open_from_data_with_name</code>)
 但由于Assembly-*.dll文件在游戏启动时就被加载，所以需要考虑hook时机：</p>
@@ -165,7 +167,7 @@
 
 <p><strong>5. DUMP成功后的脚本，使用反编译工具可以看到游戏逻辑，并可以修改：</strong></p>
 
-<p><img src="8.png" alt="img" title="img" /></p>
+<p><img src="8.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
 
 <p>本次分析验证到此。</p>
 
@@ -289,6 +291,8 @@ xhr.send(null);
     
     <li><a href="https://pkiller.com/categories/midi" title="midi">midi<sup>1</sup></a></li>
     
+    <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+    
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
@@ -355,6 +359,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -443,6 +449,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
+    <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6%e8%a7%a3%e5%8c%85" style="font-size: 12px;">固件解包</a>
@@ -499,7 +507,7 @@ xhr.send(null);
     
     
   </div>
-  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2019
+  <p class="copyright">Powered by <a href="http://gohugo.io" target="_blank" title="hugo">hugo</a> and Theme by <a href="https://github.com/coderzh/hugo-pacman-theme" target="_blank" title="hugo-pacman-theme">hugo-pacman-theme</a> © 2020
     
     <a href="https://pkiller.com/" title="pkiller">pkiller</a>
     

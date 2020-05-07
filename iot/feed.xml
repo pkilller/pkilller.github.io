@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Iots on pkiller</title>
+    <link>https://pkiller.com/iot/</link>
+    <description>Recent content in Iots on pkiller</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Thu, 07 May 2020 18:30:31 +0800</lastBuildDate>
+    
+	<atom:link href="https://pkiller.com/iot/feed.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>ZigBee基础知识</title>
+      <link>https://pkiller.com/iot/zigbee-basic/</link>
+      <pubDate>Thu, 07 May 2020 18:30:31 +0800</pubDate>
+      
+      <guid>https://pkiller.com/iot/zigbee-basic/</guid>
+      <description>查看原图</description>
+    </item>
+    
+  </channel>
+</rss>
