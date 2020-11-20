@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Androids on pkiller</title>
@@ -6,10 +6,19 @@
     <description>Recent content in Androids on pkiller</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Fri, 23 Aug 2019 14:10:05 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 16 Nov 2020 15:07:23 +0800</lastBuildDate>
     
 	<atom:link href="https://pkiller.com/android/feed.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>逆向专版 super-jadx v1.0.0 发布（jadx反编译工具增强版），支持类、方法、字段、变量重命名</title>
+      <link>https://pkiller.com/android/super-jadx_v1.0.0/</link>
+      <pubDate>Mon, 16 Nov 2020 15:07:23 +0800</pubDate>
+      
+      <guid>https://pkiller.com/android/super-jadx_v1.0.0/</guid>
+      <description>几天前jadx作者放出了最新的1.2.0版本，首度支持了类、方法、字段的重命名特性。但仍有一些不足和缺陷，所以放出本人对jadx增强后的版本</description>
+    </item>
     
     <item>
       <title>Android SystemUI &amp; Keyguard原理分析，加个“摇一摇”解锁</title>
@@ -107,7 +116,7 @@
       <pubDate>Sat, 18 Jun 2016 08:36:15 +0800</pubDate>
       
       <guid>https://pkiller.com/android/java%E6%B7%B7%E6%B7%86%E6%8A%80%E5%B7%A7-%E5%8F%8D%E6%B7%B7%E6%B7%86-%E5%8A%A0%E5%9B%BA-%E6%80%BB%E7%BB%93/</guid>
-      <description>混淆手段 定义超长类名 可以造成超长文件名, 造成常规反编译工具失败(路径太长). 例子: oooooooooooooo 找茬 OoOoOoooOOooo $$_$$$$$ 使用Java关键字 java对关键字检查操作在编译</description>
+      <description>混淆手段 定义超长类名 可以造成超长文件名, 造成常规反编译工具失败(路径太长). 例子: oooooooooooooo 找茬 OoOoOoooOOooo _$$_$$__$_$$ 使用Java关键字 java对关键字检查操作在编译</description>
     </item>
     
   </channel>

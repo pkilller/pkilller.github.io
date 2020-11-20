@@ -94,89 +94,57 @@
 
 	<div class="article-content">
     
-    
-
-<p>王者荣耀采用流行的Unity3d框架开发，主要游戏逻辑使用C#编写， 但目前尚未确认是否有使用到Lua。</p>
-
-<h2 id="一-关于unity3d">一、关于Unity3D</h2>
-
+    <p>王者荣耀采用流行的Unity3d框架开发，主要游戏逻辑使用C#编写， 但目前尚未确认是否有使用到Lua。</p>
+<h2 id="一关于unity3d">一、关于Unity3D</h2>
 <p>Unity3D是一款专用于3D游戏开发的跨平台框架，支持Lua、C#、JS脚本语言开发游戏逻辑。但目前使用较为广泛的还是C#，而王者荣耀也不例外。</p>
-
-<h2 id="二-unity3d-with-c-手游的通用修改方案">二、Unity3D with C#手游的通用修改方案</h2>
-
+<h2 id="二unity3d-with-c手游的通用修改方案">二、Unity3D with C#手游的通用修改方案</h2>
 <p>先来看下通用的脚本提取方法。Unity3D只是提供3D框架，其对C#脚本的支持能力完全依赖开源项：</p>
-
-<p>mono (<a href="https://github.com/mono/mono">https://github.com/mono/mono</a>, <code>在apk的lib下面有一个名为libmono.so就是使用了mono项目的特征</code>)。</p>
-
-<p><img src="1.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
-
+<p>mono (<a href="https://github.com/mono/mono,">https://github.com/mono/mono,</a> <code>在apk的lib下面有一个名为libmono.so就是使用了mono项目的特征</code>)。</p>
+<p><img src="1.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取"></p>
 <p>Unity3D编译好后，最终的C#文件保存在<code>×.apk/assets/bin/Data/Managed/中的Assembly-CSharp.dll</code> 和 <code>Assembly-Csharp-firstpass.dll</code> 两个文件，其都是编译好的C#文件。</p>
-
-<p><img src="2.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
-
+<p><img src="2.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取"></p>
 <p>对Unity3D游戏逻辑的修改最后就是针对以上这两个dll文件，<code>这两个dll文件是windows上的PE格式</code></p>
-
-<p><img src="3.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
-
+<p><img src="3.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取"></p>
 <p>正常无保护的情况下可以很明显的看出以上两个文件的特征，使用一些C#的反编译工具(如:<code>.Net Reflector、ILSpy</code>)可以很容易的得到源码逻辑：</p>
-
-<p><img src="4.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
-
+<p><img src="4.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取"></p>
 <p>最后利用如.NetReflector工具对 dll文件中的游戏逻辑做修改，并替换dll文件后打包。便完成了游戏的修改。</p>
-
-<h2 id="三-对王者荣耀进行分析">三、对王者荣耀进行分析</h2>
-
+<h2 id="三对王者荣耀进行分析">三、对王者荣耀进行分析</h2>
 <p><strong>1. 在王者荣耀中，这两个文件(<code>Assembly-CSharp.dll</code> 和 <code>Assembly-Csharp-firstpass.dll</code>)均被加密保护，已经无法看到标准的PE头。</strong></p>
-
-<p><img src="5.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
-
+<p><img src="5.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取"></p>
 <p><strong>2. C#解析引擎libmono.so也被加壳混淆。</strong></p>
-
-<p><img src="6.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
-
+<p><img src="6.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取"></p>
 <p><strong>3. 游戏存在反调试保护，无法用断点断到关键函数，会自动退出。</strong></p>
-
 <p>根据阅读mono开源项目得知其的加载assembly文件的方法名为：</p>
-
 <p>mono_image_open_from_data_with_name(<code>char *data, guint32 data_len</code>, gboolean need_copy, MonoImageOpenStatus *status, gboolean refonly, const char *name)</p>
-
 <p>并且该函数在libmono.so中对外导出</p>
-
 <ul>
-<li><p>第1个参数data, 指向的是Assembly-*.dll的完整文件数据。</p></li>
-
-<li><p>第2个参数是data_len，是数据长度。</p></li>
+<li>
+<p>第1个参数data, 指向的是Assembly-*.dll的完整文件数据。</p>
+</li>
+<li>
+<p>第2个参数是data_len，是数据长度。</p>
+</li>
 </ul>
-
 <p>首先查看libmono.so中的<code>mono_image_open_from_data_with_name</code>导出函数，发现已被加密混淆。怀疑TX可能对mono做了特殊的定制(如果是的话会比较棘手)</p>
-
 <p><strong>4. 通过进程注入对libmono.so脱壳还原代码后发现并无特殊定制：</strong></p>
-
 <p>说明调用到<code>mono_image_open_from_data_with_name</code>后参数中的一定是明文dll数据。</p>
-
-<p><img src="7.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
-
+<p><img src="7.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取"></p>
 <p>既然没有定制libmono.so，所以直接采用hook方式进行(可使用开源项目adbi、或自己开发)hook这个函数(<code>mono_image_open_from_data_with_name</code>)
 但由于Assembly-*.dll文件在游戏启动时就被加载，所以需要考虑hook时机：</p>
-
 <p>1.使用debug模式启动王者荣耀，使其处于等待调试状态&hellip;</p>
-
 <p>2.先hook住libc.so中的__openat函数，当发现有Assembly-*.dll文件被打开时，再对libmono.so中的<code>mono_image_open_from_data_with_name</code>挂钩，这样可以保证hook不错过时机，并且外壳代码已经还原完毕。</p>
-
 <p>3.最后将<code>mono_image_open_from_data_with_name</code> 的数据写出文件。</p>
-
 <p><strong>5. DUMP成功后的脚本，使用反编译工具可以看到游戏逻辑，并可以修改：</strong></p>
-
-<p><img src="8.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取" /></p>
-
+<p><img src="8.png" alt="王者荣耀脚本提取" title="王者荣耀脚本提取"></p>
 <p>本次分析验证到此。</p>
-
-<h2 id="四-基于此开发辅助的思路">四、基于此开发辅助的思路</h2>
-
+<h2 id="四基于此开发辅助的思路">四、基于此开发辅助的思路</h2>
 <ul>
-<li><p>定位到游戏关键逻辑后，使用C#反编译修改工具(如:<code>.Net Reflector、ILSpy</code>)对脚本进行修改。</p></li>
-
-<li><p>在加载脚本时用hook将修改后的脚本替换进去，游戏的逻辑也随之被修改。</p></li>
+<li>
+<p>定位到游戏关键逻辑后，使用C#反编译修改工具(如:<code>.Net Reflector、ILSpy</code>)对脚本进行修改。</p>
+</li>
+<li>
+<p>在加载脚本时用hook将修改后的脚本替换进去，游戏的逻辑也随之被修改。</p>
+</li>
 </ul>
 
     
@@ -264,15 +232,12 @@ xhr.send(null);
     <p class="asidetitle">目录</p>
     <ul class="archive-list">
       <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#一-关于unity3d">一、关于Unity3D</a></li>
-<li><a href="#二-unity3d-with-c-手游的通用修改方案">二、Unity3D with C#手游的通用修改方案</a></li>
-<li><a href="#三-对王者荣耀进行分析">三、对王者荣耀进行分析</a></li>
-<li><a href="#四-基于此开发辅助的思路">四、基于此开发辅助的思路</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#一关于unity3d">一、关于Unity3D</a></li>
+    <li><a href="#二unity3d-with-c手游的通用修改方案">二、Unity3D with C#手游的通用修改方案</a></li>
+    <li><a href="#三对王者荣耀进行分析">三、对王者荣耀进行分析</a></li>
+    <li><a href="#四基于此开发辅助的思路">四、基于此开发辅助的思路</a></li>
+  </ul>
 </nav>
     </ul>
   </div>
@@ -294,6 +259,8 @@ xhr.send(null);
     <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
     
@@ -324,7 +291,7 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/adb" title="adb">adb<sup>1</sup></a></li>
       
-			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>3</sup></a></li>
+			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/android" title="android">android<sup>9</sup></a></li>
       
@@ -340,6 +307,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/getsystemservice" title="getsystemservice">getsystemservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/jadx" title="jadx">jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/kernel" title="kernel">kernel<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/keyguard" title="keyguard">keyguard<sup>1</sup></a></li>
@@ -354,6 +323,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/publishbinderservice" title="publishbinderservice">publishbinderservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/super-jadx" title="super-jadx">super-jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/systemservice" title="systemservice">systemservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
@@ -361,6 +332,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -429,6 +402,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/getsystemservice" style="font-size: 12px;">getsystemservice</a>
     
+    <a href="https://pkiller.com/tags/jadx" style="font-size: 12px;">jadx</a>
+    
     <a href="https://pkiller.com/tags/kernel" style="font-size: 12px;">kernel</a>
     
     <a href="https://pkiller.com/tags/keyguard" style="font-size: 12px;">keyguard</a>
@@ -443,6 +418,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/publishbinderservice" style="font-size: 12px;">publishbinderservice</a>
     
+    <a href="https://pkiller.com/tags/super-jadx" style="font-size: 12px;">super-jadx</a>
+    
     <a href="https://pkiller.com/tags/systemservice" style="font-size: 12px;">systemservice</a>
     
     <a href="https://pkiller.com/tags/systemui" style="font-size: 12px;">systemui</a>
@@ -450,6 +427,8 @@ xhr.send(null);
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
     <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
+    <a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" style="font-size: 12px;">反编译工具</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     

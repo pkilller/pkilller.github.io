@@ -95,164 +95,108 @@
 
 	<div class="article-content">
     
-    
-
-<h1 id="步骤1-提取内核文件">步骤1、提取内核文件</h1>
-
+    <h1 id="步骤1提取内核文件">步骤1、提取内核文件</h1>
 <p>提取内核有两种方式：</p>
-
 <ol>
 <li>通过固件包提取，通常包含在<code>KERNEL.img</code>或<code>boot.img</code>之中。</li>
 <li>通过root权限的手机提取。</li>
 </ol>
-
 <h2 id="a-通过root权限设备提取">A. 通过root权限设备提取</h2>
-
 <p>以Nexus 5为例子</p>
-
 <p><strong>1. 得到boot分区路径</strong></p>
-
-<pre><code class="language-bash">adb shell
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">adb shell
 su
-cd /dev/block/platform/msm_sdcc.1/by-name
+<span class="nb">cd</span> /dev/block/platform/msm_sdcc.1/by-name
 ls -l boot
-</code></pre>
-
-<p><img src="1.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
-
+</code></pre></div><p><img src="1.png" alt="Android Kernel 逆向" title="Android Kernel 逆向"></p>
 <p>boot 是个系统符号软链接，/dev/block/mmcblk0p19 就是boot分区.</p>
-
 <p><strong>2. 拷贝boot分区数据到sdcard</strong>
 用 dd 将其dump到sdcard文件夹下：</p>
-
-<pre><code class="language-bash">dd if=/dev/block/mmcblk0p19 of=/sdcard/boot.img
-</code></pre>
-
-<p>得到boot.img文件!</p>
-
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">dd <span class="k">if</span><span class="o">=</span>/dev/block/mmcblk0p19 <span class="nv">of</span><span class="o">=</span>/sdcard/boot.img
+</code></pre></div><p>得到boot.img文件!</p>
 <h2 id="b-通过固件包提取">B. 通过固件包提取</h2>
-
 <p><strong>1. 解开固件包</strong>
 具体打包方法各厂商都不同，有些厂商还有加密。（如：OPPO)</p>
-
 <p><strong>2. 得到boot.img</strong>
 解包后可直接得到boot.img。大部分手机的固件都为<code>boot.img</code>，少数会有其他名称(如华为EMUI: <code>KERNEL.img</code>)</p>
-
-<h2 id="x-从-boot-img-kernel-img-中提取kernel">X. 从<code>boot.img</code> / <code>KERNEL.img</code>中提取kernel</h2>
-
+<h2 id="x-从bootimg--kernelimg中提取kernel">X. 从<code>boot.img</code> / <code>KERNEL.img</code>中提取kernel</h2>
 <p>可以借助工具，工具有：
 《binwalk》《mkboot》《unpackbootimg》</p>
-
-<pre><code class="language-bash">binwalk -e boot.img
-mkboot KERNEL.img ./output/   # 实际测试有些问题，提取出的kernel.gz不完整
-</code></pre>
-
-<p>也可直接根据特征提有，粗略特征为：</p>
-
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">binwalk -e boot.img
+mkboot KERNEL.img ./output/   <span class="c1"># 实际测试有些问题，提取出的kernel.gz不完整</span>
+</code></pre></div><p>也可直接根据特征提有，粗略特征为：</p>
 <p><strong>1. 定位boot.img / KERNEL.img 中KERNEL的部分：</strong></p>
-
 <p>搜索字符串<code>ANDROID!</code>先定位到头部，头部后紧跟kernel的描述信息：
-<img src="2.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
-
+<img src="2.png" alt="Android Kernel 逆向" title="Android Kernel 逆向"></p>
 <p><strong>2. 提出kernel.gz包文件：</strong></p>
-
-<p>接着以此为起点寻找&rdquo;1F 8B 08 00&rdquo;，即gzip的头部Magic。长度不管（直接从此处到文件尾)保存到新的文件如：kernel.gz。
-<img src="3.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
-
+<p>接着以此为起点寻找&quot;1F 8B 08 00&rdquo;，即gzip的头部Magic。长度不管（直接从此处到文件尾)保存到新的文件如：kernel.gz。
+<img src="3.png" alt="Android Kernel 逆向" title="Android Kernel 逆向"></p>
 <p><strong>3. 解压出kernel.gz中的真正raw文件：</strong></p>
-
 <p>然后用gzip命令解压出文件(用图形界面解压会报错)：</p>
-
-<pre><code class="language-bash">gzip -d kernel.gz
-</code></pre>
-
-<h1 id="步骤2-用ida加载">步骤2、用IDA加载</h1>
-
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">gzip -d kernel.gz
+</code></pre></div><h1 id="步骤2用ida加载">步骤2、用IDA加载</h1>
 <h2 id="arm64的内核">ARM64的内核</h2>
-
 <p>使用IDA64打开kernel文件，选择<code>ARM Little-endian [ARM]</code>:</p>
-
-<p><img src="4.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
-
-<p><img src="5.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
-
+<p><img src="4.png" alt="Android Kernel 逆向" title="Android Kernel 逆向"></p>
+<p><img src="5.png" alt="Android Kernel 逆向" title="Android Kernel 逆向"></p>
 <p>通常都在ARM64中，将kernel文件偏移0x1000加载到内存的0xffffffc000080000处：</p>
-
-<p><img src="6.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
-
+<p><img src="6.png" alt="Android Kernel 逆向" title="Android Kernel 逆向"></p>
 <h2 id="armv7的内核">ARMv7的内核</h2>
-
-<p><img src="7.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
-
-<p><img src="8.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
-
+<p><img src="7.png" alt="Android Kernel 逆向" title="Android Kernel 逆向"></p>
+<p><img src="8.png" alt="Android Kernel 逆向" title="Android Kernel 逆向"></p>
 <h1 id="步骤3-为ida中的内核增加符号支持">步骤3. 为IDA中的内核增加符号支持</h1>
-
 <p>以下脚本通过<code>cat /proc/kallsyms</code>的输出结果来对IDA中的内核函数sub_xxx进行重命名:</p>
-
 <p>(由于某个早期版本Android已经不再输出内核符号偏移地址全部以0填充，所以使用该方法前 需要修改kernel使其输出偏移地址。)</p>
-
-<pre><code class="language-python">// 使用一下IDA脚本(python)，将函数/符号名设到对应的sub_xxx上
-ksyms = open(&quot;syms.txt&quot;) 
-i = 0 
-for line in ksyms: 
-    i += 1 
-    addr = int(line[0:8],16)  
-    name = line[11:-1]  
-    idaapi.set_debug_name(addr,name)  
-    MakeNameEx(addr,name,SN_NOWARN)
-    add_func(addr)
-    if i % 100 == 0:
-        Message(&quot;cur: %d\n&quot; % i)
-    # Message(&quot;%08X:%sn&quot;%(addr,name))  
-</code></pre>
-
-<h1 id="注意事项">注意事项</h1>
-
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="o">//</span> <span class="err">使用一下</span><span class="n">IDA脚本</span><span class="p">(</span><span class="n">python</span><span class="p">)</span><span class="err">，将函数</span><span class="o">/</span><span class="err">符号名设到对应的</span><span class="n">sub_xxx上</span>
+<span class="n">ksyms</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&#34;syms.txt&#34;</span><span class="p">)</span> 
+<span class="n">i</span> <span class="o">=</span> <span class="mi">0</span> 
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">ksyms</span><span class="p">:</span> 
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span> 
+    <span class="n">addr</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">8</span><span class="p">],</span><span class="mi">16</span><span class="p">)</span>  
+    <span class="n">name</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">11</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  
+    <span class="n">idaapi</span><span class="o">.</span><span class="n">set_debug_name</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>  
+    <span class="n">MakeNameEx</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">SN_NOWARN</span><span class="p">)</span>
+    <span class="n">add_func</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">Message</span><span class="p">(</span><span class="s2">&#34;cur: </span><span class="si">%d</span><span class="se">\n</span><span class="s2">&#34;</span> <span class="o">%</span> <span class="n">i</span><span class="p">)</span>
+    <span class="c1"># Message(&#34;%08X:%sn&#34;%(addr,name))  </span>
+</code></pre></div><h1 id="注意事项">注意事项</h1>
 <p><strong>kernel加载地址的寻找：</strong></p>
-
 <p>以上的kernel加载地址0xffffffc000080000只是比较普遍的情况，如果以上地址不能正确分析，也有两个方法：</p>
-
 <ol>
-<li><p>可利用<code>cat /proc/kallsyms</code>输出的符号与IDA中的函数进行结合分析，尝试推算出加载地址。</p></li>
-
-<li><p>通过代码中对字符串的引用来推算出加载地址。</p></li>
-
-<li><p>通过内核源文件：boot/boardconfig.h中宏配置寻找内核加载地址。</p></li>
+<li>
+<p>可利用<code>cat /proc/kallsyms</code>输出的符号与IDA中的函数进行结合分析，尝试推算出加载地址。</p>
+</li>
+<li>
+<p>通过代码中对字符串的引用来推算出加载地址。</p>
+</li>
+<li>
+<p>通过内核源文件：boot/boardconfig.h中宏配置寻找内核加载地址。</p>
+</li>
 </ol>
-
 <p><strong>文件偏移的寻找</strong>
 开头处寻找不为00的数据：</p>
-
-<p><img src="9.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
-
+<p><img src="9.png" alt="Android Kernel 逆向" title="Android Kernel 逆向"></p>
 <p><strong>加载后，默认为DCB数据，可以用一下脚本自动刷成代码：</strong></p>
+<p><img src="10.png" alt="Android Kernel 逆向" title="Android Kernel 逆向"></p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="ch">#! python</span>
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">AskAddr</span><span class="p">(</span><span class="n">MinEA</span><span class="p">(),</span> <span class="s2">&#34;欲转为Code的起始地址：&#34;</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">AskAddr</span><span class="p">(</span><span class="n">MinEA</span><span class="p">(),</span> <span class="s2">&#34;欲转为Code的结束地址：&#34;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="n">end</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;输入的区间不正确～&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
 
-<p><img src="10.png" alt="Android Kernel 逆向" title="Android Kernel 逆向" /></p>
-
-<pre><code class="language-python">#! python
-def main():
-    start = AskAddr(MinEA(), &quot;欲转为Code的起始地址：&quot;)
-    end = AskAddr(MinEA(), &quot;欲转为Code的结束地址：&quot;)
-    if start &gt;= end:
-        print('输入的区间不正确～')
-        return
-
-    for cur_addr in range(start, end, 4):
-        flags = GetFlags(cur_addr)
-        print(&quot;[MSG] 0x%X 's flags: %x&quot; % (cur_addr, flags))
-        if Byte(cur_addr) and not (isCode(flags) and isTail(flags) and isUnknown(flags) and isHead(flags)):
-            print('[MSG] 0x%X is Data, Make to code.' % cur_addr)
-            MakeCode(cur_addr)
-main()
-</code></pre>
-
-<h1 id="参考资料">参考资料</h1>
-
+    <span class="k">for</span> <span class="n">cur_addr</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">GetFlags</span><span class="p">(</span><span class="n">cur_addr</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&#34;[MSG] 0x</span><span class="si">%X</span><span class="s2"> &#39;s flags: </span><span class="si">%x</span><span class="s2">&#34;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cur_addr</span><span class="p">,</span> <span class="n">flags</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">Byte</span><span class="p">(</span><span class="n">cur_addr</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">isCode</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="ow">and</span> <span class="n">isTail</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="ow">and</span> <span class="n">isUnknown</span><span class="p">(</span><span class="n">flags</span><span class="p">)</span> <span class="ow">and</span> <span class="n">isHead</span><span class="p">(</span><span class="n">flags</span><span class="p">)):</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;[MSG] 0x</span><span class="si">%X</span><span class="s1"> is Data, Make to code.&#39;</span> <span class="o">%</span> <span class="n">cur_addr</span><span class="p">)</span>
+            <span class="n">MakeCode</span><span class="p">(</span><span class="n">cur_addr</span><span class="p">)</span>
+<span class="n">main</span><span class="p">()</span>
+</code></pre></div><h1 id="参考资料">参考资料</h1>
 <p><a href="http://blog.csdn.net/qq1084283172/article/details/57074695">http://blog.csdn.net/qq1084283172/article/details/57074695</a></p>
-
 <p><a href="http://www.hhjack.com/arm64_zimage_reverseengineering_with_ida_pro/">http://www.hhjack.com/arm64_zimage_reverseengineering_with_ida_pro/</a></p>
-
 <p><a href="https://www.cnx-software.com/2015/12/07/how-to-extract-kernel-img-with-mkboot-script/">https://www.cnx-software.com/2015/12/07/how-to-extract-kernel-img-with-mkboot-script/</a></p>
 
     
@@ -338,22 +282,16 @@ xhr.send(null);
     <p class="asidetitle">目录</p>
     <ul class="archive-list">
       <nav id="TableOfContents">
-<ul>
-<li><a href="#步骤1-提取内核文件">步骤1、提取内核文件</a>
-<ul>
-<li><a href="#a-通过root权限设备提取">A. 通过root权限设备提取</a></li>
-<li><a href="#b-通过固件包提取">B. 通过固件包提取</a></li>
-<li><a href="#x-从-boot-img-kernel-img-中提取kernel">X. 从<code>boot.img</code> / <code>KERNEL.img</code>中提取kernel</a></li>
-</ul></li>
-<li><a href="#步骤2-用ida加载">步骤2、用IDA加载</a>
-<ul>
-<li><a href="#arm64的内核">ARM64的内核</a></li>
-<li><a href="#armv7的内核">ARMv7的内核</a></li>
-</ul></li>
-<li><a href="#步骤3-为ida中的内核增加符号支持">步骤3. 为IDA中的内核增加符号支持</a></li>
-<li><a href="#注意事项">注意事项</a></li>
-<li><a href="#参考资料">参考资料</a></li>
-</ul>
+  <ul>
+    <li><a href="#a-通过root权限设备提取">A. 通过root权限设备提取</a></li>
+    <li><a href="#b-通过固件包提取">B. 通过固件包提取</a></li>
+    <li><a href="#x-从bootimg--kernelimg中提取kernel">X. 从<code>boot.img</code> / <code>KERNEL.img</code>中提取kernel</a></li>
+  </ul>
+
+  <ul>
+    <li><a href="#arm64的内核">ARM64的内核</a></li>
+    <li><a href="#armv7的内核">ARMv7的内核</a></li>
+  </ul>
 </nav>
     </ul>
   </div>
@@ -375,6 +313,8 @@ xhr.send(null);
     <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
     
@@ -405,7 +345,7 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/adb" title="adb">adb<sup>1</sup></a></li>
       
-			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>3</sup></a></li>
+			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/android" title="android">android<sup>9</sup></a></li>
       
@@ -421,6 +361,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/getsystemservice" title="getsystemservice">getsystemservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/jadx" title="jadx">jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/kernel" title="kernel">kernel<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/keyguard" title="keyguard">keyguard<sup>1</sup></a></li>
@@ -435,6 +377,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/publishbinderservice" title="publishbinderservice">publishbinderservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/super-jadx" title="super-jadx">super-jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/systemservice" title="systemservice">systemservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
@@ -442,6 +386,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -510,6 +456,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/getsystemservice" style="font-size: 12px;">getsystemservice</a>
     
+    <a href="https://pkiller.com/tags/jadx" style="font-size: 12px;">jadx</a>
+    
     <a href="https://pkiller.com/tags/kernel" style="font-size: 12px;">kernel</a>
     
     <a href="https://pkiller.com/tags/keyguard" style="font-size: 12px;">keyguard</a>
@@ -524,6 +472,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/publishbinderservice" style="font-size: 12px;">publishbinderservice</a>
     
+    <a href="https://pkiller.com/tags/super-jadx" style="font-size: 12px;">super-jadx</a>
+    
     <a href="https://pkiller.com/tags/systemservice" style="font-size: 12px;">systemservice</a>
     
     <a href="https://pkiller.com/tags/systemui" style="font-size: 12px;">systemui</a>
@@ -531,6 +481,8 @@ xhr.send(null);
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
     <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
+    <a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" style="font-size: 12px;">反编译工具</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     

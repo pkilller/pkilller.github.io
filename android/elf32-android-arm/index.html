@@ -95,92 +95,52 @@
 
 	<div class="article-content">
     
-    
-
-<p>首先勘误： 下图中 用STB_WEAK 来表示导出函数是错误的。</p>
-
-<p><img src="1.png" alt="elf format" title="elf format" /></p>
-
-<h2 id="1-rel-dyn-dt-rel-和-rel-plt-dt-jmprel-的区别">1. <code>.rel.dyn(DT_REL)</code> 和 <code>.rel.plt(DT_JMPREL)</code> 的区别.</h2>
-
+    <p>首先勘误： 下图中 用STB_WEAK 来表示导出函数是错误的。</p>
+<p><img src="1.png" alt="elf format" title="elf format"></p>
+<h2 id="1-reldyndt_rel-和-relpltdt_jmprel-的区别">1. <code>.rel.dyn(DT_REL)</code> 和 <code>.rel.plt(DT_JMPREL)</code> 的区别.</h2>
 <p><strong>在任意位置 使用静态方式 调用导入函数(API)</strong></p>
-
 <p>引用项会出现在.rel.plt(DT_JMPREL)中, TYPE为R_ARM_JUMP_SLOT</p>
-
 <p>例子:</p>
+<div class="highlight"><pre class="chroma"><code class="language-c" data-lang="c">      <span class="n">exit</span> <span class="p">(</span><span class="mi">0</span><span class="p">);</span>
 
-<pre><code class="language-c">      exit (0);
-
-</code></pre>
-
-<p><strong>在函数内 使用指针方式 调用导入函数(API)</strong></p>
-
+</code></pre></div><p><strong>在函数内 使用指针方式 调用导入函数(API)</strong></p>
 <p>引用项会出现在.rel.dyn(DT_REL)中, TYPE为R_ARM_GLOB_DAT</p>
-
 <p>例子:</p>
+<div class="highlight"><pre class="chroma"><code class="language-c" data-lang="c"> <span class="kt">void</span> <span class="nf">fun</span><span class="p">(){</span>
 
-<pre><code class="language-c"> void fun(){
+    <span class="k">typedef</span> <span class="kt">void</span> <span class="o">*</span><span class="p">(</span><span class="o">*</span><span class="n">my_exit</span> <span class="p">)(</span><span class="kt">int</span><span class="p">);</span>
 
-    typedef void *(*my_exit )(int);
+    <span class="n">my_exit</span> <span class="n">exit_ptr</span> <span class="o">=</span> <span class="p">(</span><span class="n">my_exit</span> <span class="p">)</span><span class="n">exit</span><span class="p">;</span>
 
-    my_exit exit_ptr = (my_exit )exit;
+    <span class="n">exit_ptr</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
 
-    exit_ptr(0);
-
- }
-</code></pre>
-
-<p><strong>在全局 引用导入函数(API)指针</strong></p>
-
+ <span class="p">}</span>
+</code></pre></div><p><strong>在全局 引用导入函数(API)指针</strong></p>
 <p>引用项会分别在.rel.dyn(DT_REL)和.rel.plt(DT_JMPREL)中各加入一条:</p>
-
 <p>在.rel.dyn(DT_REL)中加入TYPE为R_ARM_ABS32.</p>
-
 <p>在.rel.plt(DT_JMPREL)中加入TYPE为R_ARM_JUMP_SLOT.</p>
-
 <p>例子:</p>
-
-<pre><code class="language-c">      void *g_exit = (void*)exit;
-</code></pre>
-
-<h2 id="2-got-概念-global-offset-table">2. GOT 概念(GLOBAL OFFSET TABLE)</h2>
-
+<div class="highlight"><pre class="chroma"><code class="language-c" data-lang="c">      <span class="kt">void</span> <span class="o">*</span><span class="n">g_exit</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span><span class="n">exit</span><span class="p">;</span>
+</code></pre></div><h2 id="2-got-概念global-offset-table">2. GOT 概念(GLOBAL OFFSET TABLE)</h2>
 <p>module的GOT表被加载时, 会由linker填充该module导入函数的addr. 之后该module中的代码通过GOT中被填充好的地址值来间接调用导入函数.</p>
-
-<p>GOT表无需太关注, 因为GOT中的每一项Elf32_Addr. 都有DT_REL和DT_JMPREL中Elf32_Rel::r_offset对其的指向,被所有Elf32_Rel::r_offset指向形成的这一片连续Elf32_Addr区域就被称为&rdquo;GOT表&rdquo;, 理论上讲所有的Elf32_Rel::r_offset也可以指向不连续的区域(前提是linker不再按照连续地址方式处理. 目前linker中对got表的处理使用了地址连续的方式.).这样在对抗和逆向中就多了一条路径: 通过Elf32_Rel::r_offset来找到对应got项.</p>
-
+<p>GOT表无需太关注, 因为GOT中的每一项Elf32_Addr. 都有DT_REL和DT_JMPREL中Elf32_Rel::r_offset对其的指向,被所有Elf32_Rel::r_offset指向形成的这一片连续Elf32_Addr区域就被称为&quot;GOT表&rdquo;, 理论上讲所有的Elf32_Rel::r_offset也可以指向不连续的区域(前提是linker不再按照连续地址方式处理. 目前linker中对got表的处理使用了地址连续的方式.).这样在对抗和逆向中就多了一条路径: 通过Elf32_Rel::r_offset来找到对应got项.</p>
 <p><strong>DT_PLTGOT与&rdquo;.got&rdquo;</strong></p>
-
-<p>dynamic的DT_PLTGOT处于section的&rdquo;.got&rdquo;范围之中:
-        &ldquo;.got&rdquo; :[item,item,&hellip;,DT_PLTGOT[item,item,&hellip;]]</p>
-
-<h2 id="3-hook-导入-导出函数">3. HOOK 导入/导出函数.</h2>
-
+<p>dynamic的DT_PLTGOT处于section的&rdquo;.got&quot;范围之中:
+&ldquo;.got&rdquo; :[item,item,&hellip;,DT_PLTGOT[item,item,&hellip;]]</p>
+<h2 id="3-hook-导入导出函数">3. HOOK 导入/导出函数.</h2>
 <p>导入函数信息存储于Elf32_Rel结构中, 该结构位于: (program_table::p_type == PT_DYNAMIC)的项下的Elf32_Dyn::d_type == DT_REL(.rel.dyn) 与 DT_JMP_REL(.rel.plt).</p>
-
 <p>Elf32_Rel中保存了导出函数的offset, 和对应的symbol_table_index以及rel_type(类型).  这里的关键是symbol_table_index.</p>
-
 <p>通过hash table把要HOOK的函数名(符号名)转为对应的symbol_table_index, 然后遍历Elf32_Dyn数组中的DT_REL与DT_JMP_REL中找到与之对应的项, 该项中的Elf32_Rel::r_offset中指向了一个sizeof(Elf32_Addr)长度的地址, 该地址存放的正是导入函数的地址. 所以执行如下便可完成hook:</p>
-
-<pre><code class="language-c"> *(Elf32_Addr*)(base + Elf32_Rel::r_offset ) = New_Fun_Ptr ;
-</code></pre>
-
-<p><strong>补充:</strong> 以上方法只能HOOK到静态调用, 对于通过dlsym()获取函数指针的调用方法可以通过如下方法:</p>
-
+<div class="highlight"><pre class="chroma"><code class="language-c" data-lang="c"> <span class="o">*</span><span class="p">(</span><span class="n">Elf32_Addr</span><span class="o">*</span><span class="p">)(</span><span class="n">base</span> <span class="o">+</span> <span class="n">Elf32_Rel</span><span class="o">::</span><span class="n">r_offset</span> <span class="p">)</span> <span class="o">=</span> <span class="n">New_Fun_Ptr</span> <span class="p">;</span>
+</code></pre></div><p><strong>补充:</strong> 以上方法只能HOOK到静态调用, 对于通过dlsym()获取函数指针的调用方法可以通过如下方法:</p>
 <pre><code>  修改&quot;导入函数&quot;所在的模块中用于描述该导出函数信息的Elf32_Dym对象, 然后修改其Elf32_Sym::st_value, 这样可以将dlsym()方式一并HOOK. (见下面的&quot;导出函数&quot;HOOK方法)
 
   要么使用inline hook解决一切麻烦.
 </code></pre>
-
 <p>导出函数的offset地址存储在Elf32_Sym::st_value中( Elf32_Sym::st_shndx != SHN_UNDEF 表明该Elf32_Sym存储的是一个导出函数项(android的linker源码中这样处理). 根据实际观察，通常导出函数的st_shndx为8. ), 导出函数所在Elf32_Sym结构的定位与上面导入函数的寻找方式一样, 都是通过hash table. 最后修改方法如:</p>
-
-<pre><code class="language-c"> *(Elf32_Addr*) Elf32_Sym::st_value = New_Fun_Ptr;
-</code></pre>
-
-<p><strong>补充:</strong> 以上方法只能在对文件进行HOOK, 因为当自身模块代码运行之前, Elf32_Sym::st_value已经被linker填充到了调用方的GOT表中了. 补充方法有二, 要么HOOK调用方的导入, 要么实施inline hook, 对进程内所有调用都有效.</p>
-
+<div class="highlight"><pre class="chroma"><code class="language-c" data-lang="c"> <span class="o">*</span><span class="p">(</span><span class="n">Elf32_Addr</span><span class="o">*</span><span class="p">)</span> <span class="n">Elf32_Sym</span><span class="o">::</span><span class="n">st_value</span> <span class="o">=</span> <span class="n">New_Fun_Ptr</span><span class="p">;</span>
+</code></pre></div><p><strong>补充:</strong> 以上方法只能在对文件进行HOOK, 因为当自身模块代码运行之前, Elf32_Sym::st_value已经被linker填充到了调用方的GOT表中了. 补充方法有二, 要么HOOK调用方的导入, 要么实施inline hook, 对进程内所有调用都有效.</p>
 <h2 id="4-总结">4. 总结:</h2>
-
 <p>此HOOK导入 等于 彼HOOK导出. 具体怎么实施HOOK看发起方是谁.  最后 inline hook 大法好!.</p>
 
     
@@ -266,15 +226,12 @@ xhr.send(null);
     <p class="asidetitle">目录</p>
     <ul class="archive-list">
       <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#1-rel-dyn-dt-rel-和-rel-plt-dt-jmprel-的区别">1. <code>.rel.dyn(DT_REL)</code> 和 <code>.rel.plt(DT_JMPREL)</code> 的区别.</a></li>
-<li><a href="#2-got-概念-global-offset-table">2. GOT 概念(GLOBAL OFFSET TABLE)</a></li>
-<li><a href="#3-hook-导入-导出函数">3. HOOK 导入/导出函数.</a></li>
-<li><a href="#4-总结">4. 总结:</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#1-reldyndt_rel-和-relpltdt_jmprel-的区别">1. <code>.rel.dyn(DT_REL)</code> 和 <code>.rel.plt(DT_JMPREL)</code> 的区别.</a></li>
+    <li><a href="#2-got-概念global-offset-table">2. GOT 概念(GLOBAL OFFSET TABLE)</a></li>
+    <li><a href="#3-hook-导入导出函数">3. HOOK 导入/导出函数.</a></li>
+    <li><a href="#4-总结">4. 总结:</a></li>
+  </ul>
 </nav>
     </ul>
   </div>
@@ -296,6 +253,8 @@ xhr.send(null);
     <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
     
@@ -326,7 +285,7 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/adb" title="adb">adb<sup>1</sup></a></li>
       
-			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>3</sup></a></li>
+			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/android" title="android">android<sup>9</sup></a></li>
       
@@ -342,6 +301,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/getsystemservice" title="getsystemservice">getsystemservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/jadx" title="jadx">jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/kernel" title="kernel">kernel<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/keyguard" title="keyguard">keyguard<sup>1</sup></a></li>
@@ -356,6 +317,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/publishbinderservice" title="publishbinderservice">publishbinderservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/super-jadx" title="super-jadx">super-jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/systemservice" title="systemservice">systemservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
@@ -363,6 +326,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -431,6 +396,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/getsystemservice" style="font-size: 12px;">getsystemservice</a>
     
+    <a href="https://pkiller.com/tags/jadx" style="font-size: 12px;">jadx</a>
+    
     <a href="https://pkiller.com/tags/kernel" style="font-size: 12px;">kernel</a>
     
     <a href="https://pkiller.com/tags/keyguard" style="font-size: 12px;">keyguard</a>
@@ -445,6 +412,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/publishbinderservice" style="font-size: 12px;">publishbinderservice</a>
     
+    <a href="https://pkiller.com/tags/super-jadx" style="font-size: 12px;">super-jadx</a>
+    
     <a href="https://pkiller.com/tags/systemservice" style="font-size: 12px;">systemservice</a>
     
     <a href="https://pkiller.com/tags/systemui" style="font-size: 12px;">systemui</a>
@@ -452,6 +421,8 @@ xhr.send(null);
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
     <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
+    <a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" style="font-size: 12px;">反编译工具</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     

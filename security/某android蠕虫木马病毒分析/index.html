@@ -95,51 +95,30 @@
 
 	<div class="article-content">
     
-    
-
-<blockquote>
+    <blockquote>
 <p>偶然机会得来一个应用，运行起来后发现桌面图标没了觉得很是可疑，所以花了点时间分析了一下。以下暂用<code>sample样本</code>指代。</p>
 </blockquote>
-
 <p>经过行为分析，sample样本会获取用户手机联系人以及短信并上传至收信邮箱：<code>13482173247@163.com</code>。 会执行指定手机发来的短信命令（来信号码中包含<code>3247</code>或<code>288</code>时便会执行其中的短信指令。已知的控制者手机号码为: <code>13482173247</code>）。最后判定sample为一款典型的Android平台的短信拦截木马。</p>
-
 <p>伪装成中国移动客户端,在初次启动时设置自身为设备管理器以防止自身被卸载。其中利用了设备管理器的一个漏洞，导致用户无法取消激活该样本，从而达到不被卸载的目的。</p>
-
-<p><img src="1.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
+<p><img src="1.png" alt="android 病毒木马" title="android 病毒木马"></p>
 <h2 id="受害情况分析">受害情况分析</h2>
-
 <p><strong>通过代码的分析，从中提取出了加密后的发信邮箱和密码：</strong></p>
-
 <blockquote>
 <p>账户：13482173247@163.com
-  密码：uodlmxxxxxxxesjzx</p>
+密码：uodlmxxxxxxxesjzx</p>
 </blockquote>
-
 <p><strong>经过对以上邮箱的登录验证，该邮箱内有近<code>两千两百多份</code>邮件：</strong></p>
-
-<p><img src="2.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
+<p><img src="2.png" alt="android 病毒木马" title="android 病毒木马"></p>
 <p><strong>邮件内的联系人信息</strong></p>
-
-<p><img src="3.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
+<p><img src="3.png" alt="android 病毒木马" title="android 病毒木马"></p>
 <p><strong>邮件内的短信内容</strong></p>
-
 <p>// 其中包含大量网银或个人账户的验证码短信</p>
-
-<p><img src="4.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
-<p><img src="5.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
-<p><img src="6.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
-<p><img src="7.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
+<p><img src="4.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><img src="5.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><img src="6.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><img src="7.png" alt="android 病毒木马" title="android 病毒木马"></p>
 <h2 id="传播途径分析">传播途径分析</h2>
-
 <p>从多个用户上报的短信内容发现了疑似<code>10086积分钓鱼</code>短信，通过对邮件的批量扫描提取出了共计<code>54</code>个疑似钓鱼站点，根据域名格式可以推断出这些站点为同源或同宗(绝大部分已无法访问，大部分钓鱼域名已经变为了小说网)：</p>
-
 <pre><code>wap.10086pqs.com
 wap.10086hxy.com
 wap.10086pxb.com
@@ -194,68 +173,39 @@ wap.10086vwy.com
 wap.10086nry.com
 wap.10086gus.com
 www.10086kdj.com
-</code></pre>
-
-<p><img src="8.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
+</code></pre><p><img src="8.png" alt="android 病毒木马" title="android 病毒木马"></p>
 <p>并且根据收信邮箱内的邮件格式可以推断，该邮箱的收信来源样本至少还有另外1个变种正处于活跃期。并且根据网络上的同类样本分析文章，此类型样本至少有不下3个变种：</p>
-
 <blockquote>
 <p>AVL Team: <a href="http://blog.avlyun.com/?p=2634">http://blog.avlyun.com/?p=2634</a>
 看雪论坛: <a href="http://bbs.pediy.com/showthread.php?t=209408">http://bbs.pediy.com/showthread.php?t=209408</a></p>
 </blockquote>
-
-<p><img src="9.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
-<p><img src="10.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
-<p><img src="11.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
+<p><img src="9.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><img src="10.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><img src="11.png" alt="android 病毒木马" title="android 病毒木马"></p>
 <h2 id="样本具体行为">样本具体行为</h2>
-
 <p>首次启动注册自身为<code>设备管理器</code>，并且在<code>onDisableRequested</code>中启动Setting为最顶层Activity并阻塞函数使其无法返回。最后迫使“Device administrators”被覆盖或导致Setting崩溃退出,让用户无法对其“取消激活”从而保护其不被卸载。利用了Android设备管理器漏洞: <code>ANDROID-9067882</code></p>
-
 <p><strong>首先使用DES解密邮件账户和密码,key: staker</strong></p>
-
-<p><img src="12.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
-<p><img src="13.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
+<p><img src="12.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><img src="13.png" alt="android 病毒木马" title="android 病毒木马"></p>
 <p><strong>通过邮件上报安装成功的消息</strong></p>
-
-<p><img src="14.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
+<p><img src="14.png" alt="android 病毒木马" title="android 病毒木马"></p>
 <p><strong>遍历手机内所有短信,并上传至邮箱</strong></p>
-
-<p><img src="15.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
+<p><img src="15.png" alt="android 病毒木马" title="android 病毒木马"></p>
 <p><strong>遍历手机内所有联系人,并上传至邮箱</strong></p>
-
-<p><img src="16.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
+<p><img src="16.png" alt="android 病毒木马" title="android 病毒木马"></p>
 <p><strong>随后启动后台Service监听和拦截短信</strong></p>
-
-<p><img src="17.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
+<p><img src="17.png" alt="android 病毒木马" title="android 病毒木马"></p>
 <p><strong>接收远程短信命令</strong></p>
-
-<p><img src="18.png" alt="android 病毒木马" title="android 病毒木马" /></p>
-
+<p><img src="18.png" alt="android 病毒木马" title="android 病毒木马"></p>
 <p>其中当短信发送方号码包含<code>3247</code>或<code>288</code>时(其中已知黑客使用的号码之一: <code>13482173247</code>), 开始接收并执行命令:</p>
-
 <pre><code>ADD  %PHONE_NUMBER%   # 开始拦截&quot;指定发件人&quot;
 DEL  %PHONE_NUMBER%   # 不再拦截&quot;指定发件人&quot;
 CLEAR ALL             # 不再拦截&quot;任何发件人&quot;
 LOOK [TIME|PHONE]     # **TIME**: 向控制端以短信返回&quot;到期时间&quot;(这里到期时间的概念为:在到达一定天数后会停止拦截, 否则长期无法正常接收短信会引起被控用户的警觉.)  **PHONE:** 向黑客以短信返回 &quot;手机型号+手机品牌+Android版本&quot;
 SEND %TARGET_NUMBER% %SMS_CONTENT% # 以被控手机身份发送指定内容短信
-</code></pre>
-
-<h2 id="清除方法">清除方法</h2>
-
+</code></pre><h2 id="清除方法">清除方法</h2>
 <p>由于sample样本在被“取消激活”设备管理器时会弹出Activity进行阻碍，导致无法最终弹出取消确认框。清除方法是通过intent调用启动到取消窗口，直接“取消激活”。取消后可正常对其进行卸载。</p>
-
 <h2 id="总结">总结</h2>
-
 <p>经过以上分析，该样本是一个典型的利用<code>短信群发</code>进行传播的且具有<code>远控功能</code>的<code>蠕虫木马</code>，该木马通过设备管理器漏洞来阻止自身被用户清除。在分析过程中可以看到，已经有相当多的受害者遭到攻击，并且部分用户可能由于短信验证码被失窃造成了银行卡被盗刷等经济损失，最后已将该样本提交至了多个安全软件及团队，也希望能够及时介入止损降低受害者损失。最后想跟作者说一句：莫伸手，警察叔叔溯源抓人很容易。</p>
 
     
@@ -341,16 +291,13 @@ xhr.send(null);
     <p class="asidetitle">目录</p>
     <ul class="archive-list">
       <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#受害情况分析">受害情况分析</a></li>
-<li><a href="#传播途径分析">传播途径分析</a></li>
-<li><a href="#样本具体行为">样本具体行为</a></li>
-<li><a href="#清除方法">清除方法</a></li>
-<li><a href="#总结">总结</a></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#受害情况分析">受害情况分析</a></li>
+    <li><a href="#传播途径分析">传播途径分析</a></li>
+    <li><a href="#样本具体行为">样本具体行为</a></li>
+    <li><a href="#清除方法">清除方法</a></li>
+    <li><a href="#总结">总结</a></li>
+  </ul>
 </nav>
     </ul>
   </div>
@@ -372,6 +319,8 @@ xhr.send(null);
     <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
     
@@ -402,7 +351,7 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/adb" title="adb">adb<sup>1</sup></a></li>
       
-			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>3</sup></a></li>
+			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/android" title="android">android<sup>9</sup></a></li>
       
@@ -418,6 +367,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/getsystemservice" title="getsystemservice">getsystemservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/jadx" title="jadx">jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/kernel" title="kernel">kernel<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/keyguard" title="keyguard">keyguard<sup>1</sup></a></li>
@@ -432,6 +383,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/publishbinderservice" title="publishbinderservice">publishbinderservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/super-jadx" title="super-jadx">super-jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/systemservice" title="systemservice">systemservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
@@ -439,6 +392,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -507,6 +462,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/getsystemservice" style="font-size: 12px;">getsystemservice</a>
     
+    <a href="https://pkiller.com/tags/jadx" style="font-size: 12px;">jadx</a>
+    
     <a href="https://pkiller.com/tags/kernel" style="font-size: 12px;">kernel</a>
     
     <a href="https://pkiller.com/tags/keyguard" style="font-size: 12px;">keyguard</a>
@@ -521,6 +478,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/publishbinderservice" style="font-size: 12px;">publishbinderservice</a>
     
+    <a href="https://pkiller.com/tags/super-jadx" style="font-size: 12px;">super-jadx</a>
+    
     <a href="https://pkiller.com/tags/systemservice" style="font-size: 12px;">systemservice</a>
     
     <a href="https://pkiller.com/tags/systemui" style="font-size: 12px;">systemui</a>
@@ -528,6 +487,8 @@ xhr.send(null);
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
     <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
+    <a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" style="font-size: 12px;">反编译工具</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     

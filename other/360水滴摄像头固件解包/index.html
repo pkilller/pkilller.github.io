@@ -96,22 +96,13 @@
 	<div class="article-content">
     
     <p>通过初步分析，360摄像头基于<code>松翰科技SN986</code>软硬件方案</p>
-
-<p>通过对官网提供的方案demo进行编译文件后发现(主要通过grep -r &ldquo;camera&rdquo;命令)，跟摄像头相关的业务在名为rootfs.cramfs的文件中，该文件为cramfs文件系统的镜像(cramfs是专为Flash设计的文件系统)，通过mount命令可直接挂载。</p>
-
-<p><img src="1.png" alt="360摄像头固件解包" title="360摄像头固件解包" /></p>
-
+<p>通过对官网提供的方案demo进行编译文件后发现(主要通过grep -r &ldquo;camera&quot;命令)，跟摄像头相关的业务在名为rootfs.cramfs的文件中，该文件为cramfs文件系统的镜像(cramfs是专为Flash设计的文件系统)，通过mount命令可直接挂载。</p>
+<p><img src="1.png" alt="360摄像头固件解包" title="360摄像头固件解包"></p>
 <p>固件由多个文件拼接而成，有特定布局。</p>
-
 <p>所以最后，根据以上获得的信息，就可直接从360的更新文件中寻找rootfs.cramfs的文件特征，找到后将其dump出来并直接挂载即可：</p>
-
-<pre><code class="language-bash">mount ./root.cramfs  ./mount-point
-</code></pre>
-
-<p>挂载成功后，固件系统文件：</p>
-
-<p><img src="2.png" alt="360摄像头固件解包" title="360摄像头固件解包" /></p>
-
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">mount ./root.cramfs  ./mount-point
+</code></pre></div><p>挂载成功后，固件系统文件：</p>
+<p><img src="2.png" alt="360摄像头固件解包" title="360摄像头固件解包"></p>
 <p>方法有些随便，不过解决问题就行。</p>
 
     
@@ -197,6 +188,13 @@ xhr.send(null);
 <aside class="clearfix">
   
   
+  <div class="archiveslist">
+    <p class="asidetitle">目录</p>
+    <ul class="archive-list">
+      <nav id="TableOfContents"></nav>
+    </ul>
+  </div>
+  
 
 
   
@@ -214,6 +212,8 @@ xhr.send(null);
     <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
     
@@ -244,7 +244,7 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/adb" title="adb">adb<sup>1</sup></a></li>
       
-			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>3</sup></a></li>
+			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/android" title="android">android<sup>9</sup></a></li>
       
@@ -260,6 +260,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/getsystemservice" title="getsystemservice">getsystemservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/jadx" title="jadx">jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/kernel" title="kernel">kernel<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/keyguard" title="keyguard">keyguard<sup>1</sup></a></li>
@@ -274,6 +276,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/publishbinderservice" title="publishbinderservice">publishbinderservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/super-jadx" title="super-jadx">super-jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/systemservice" title="systemservice">systemservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
@@ -281,6 +285,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -349,6 +355,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/getsystemservice" style="font-size: 12px;">getsystemservice</a>
     
+    <a href="https://pkiller.com/tags/jadx" style="font-size: 12px;">jadx</a>
+    
     <a href="https://pkiller.com/tags/kernel" style="font-size: 12px;">kernel</a>
     
     <a href="https://pkiller.com/tags/keyguard" style="font-size: 12px;">keyguard</a>
@@ -363,6 +371,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/publishbinderservice" style="font-size: 12px;">publishbinderservice</a>
     
+    <a href="https://pkiller.com/tags/super-jadx" style="font-size: 12px;">super-jadx</a>
+    
     <a href="https://pkiller.com/tags/systemservice" style="font-size: 12px;">systemservice</a>
     
     <a href="https://pkiller.com/tags/systemui" style="font-size: 12px;">systemui</a>
@@ -370,6 +380,8 @@ xhr.send(null);
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
     <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
+    <a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" style="font-size: 12px;">反编译工具</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     

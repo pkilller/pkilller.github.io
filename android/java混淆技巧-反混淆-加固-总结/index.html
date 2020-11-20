@@ -16,10 +16,10 @@
   <title>Java混淆/反混淆/加固 总结 - pkiller</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=3, minimum-scale=1">
   <meta name="keywords" content="混淆,加固,反混淆,android,">
-  <meta name="description" content="混淆手段 定义超长类名 可以造成超长文件名, 造成常规反编译工具失败(路径太长). 例子: oooooooooooooo 找茬 OoOoOoooOOooo $$_$$$$$ 使用Java关键字 java对关键字检查操作在编译">
+  <meta name="description" content="混淆手段 定义超长类名 可以造成超长文件名, 造成常规反编译工具失败(路径太长). 例子: oooooooooooooo 找茬 OoOoOoooOOooo _$$_$$__$_$$ 使用Java关键字 java对关键字检查操作在编译">
   
   <meta itemprop="name" content="Java混淆/反混淆/加固 总结 - pkiller">
-  <meta itemprop="description" content="混淆手段 定义超长类名 可以造成超长文件名, 造成常规反编译工具失败(路径太长). 例子: oooooooooooooo 找茬 OoOoOoooOOooo $$_$$$$$ 使用Java关键字 java对关键字检查操作在编译">
+  <meta itemprop="description" content="混淆手段 定义超长类名 可以造成超长文件名, 造成常规反编译工具失败(路径太长). 例子: oooooooooooooo 找茬 OoOoOoooOOooo _$$_$$__$_$$ 使用Java关键字 java对关键字检查操作在编译">
   <meta itemprop="image" content="https://pkiller.com/img/author.jpg">
   
   
@@ -95,107 +95,57 @@
 
 	<div class="article-content">
     
-    
-
-<h2 id="混淆手段">混淆手段</h2>
-
+    <h2 id="混淆手段">混淆手段</h2>
 <h3 id="定义超长类名">定义超长类名</h3>
-
 <p>可以造成超长文件名, 造成常规反编译工具失败(路径太长).
 例子: oooooooooooooo</p>
-
 <h3 id="找茬">找茬</h3>
-
 <p>OoOoOoooOOooo
-<strong>$$_$$</strong>$<em>$$</em></p>
-
+_<em>$$_$$__$_$$</em></p>
 <h3 id="使用java关键字">使用Java关键字</h3>
-
 <p>java对关键字检查操作在编译时, 所以在编译后修改没有问题.</p>
-
 <h3 id="unicode字符">Unicode字符</h3>
-
 <p>&hellip;</p>
-
-<h3 id="cjk-china-japan-korea-字符">CJK(China Japan korea)字符</h3>
-
+<h3 id="cjkchina-japan-korea字符">CJK(China Japan korea)字符</h3>
 <p>&hellip;</p>
-
 <h3 id="其他少见字符">其他少见字符</h3>
-
 <p>&hellip;</p>
-
 <h3 id="盲文点字符">盲文点字符</h3>
-
 <p>&hellip;</p>
-
 <h3 id="识别类名">识别类名</h3>
-
 <p>通过源码中保留的Log.d(tag, &ldquo;xx&rdquo;); 通常程序员会将tag写为所在class名.</p>
-
 <h3 id="识别enum">识别Enum</h3>
-
 <p>构建Enum的第二个参数是成员名.</p>
-
-<h3 id="acc-bridge">ACC_BRIDGE</h3>
-
+<h3 id="acc_bridge">ACC_BRIDGE</h3>
 <p>标识的函数会调用另外一个, 两个函数同名.</p>
-
-<h3 id="getter-setter">Getter/Setter</h3>
-
+<h3 id="gettersetter">Getter/Setter</h3>
 <p>成员与函数同名</p>
-
 <h3 id="根据日志">根据日志</h3>
-
 <p>&hellip;.</p>
-
 <h3 id="字符串加密">字符串加密</h3>
-
 <p>&hellip;</p>
-
 <h3 id="asset加密">Asset加密</h3>
-
 <p>加密文件, 在打开文件函数处注入解密代码.  达到无缝加密. 分析并解密</p>
-
-<h3 id="androidmanifest-xml中namespace-name被清除">AndroidManifest.xml中namespace:name被清除.</h3>
-
+<h3 id="androidmanifestxml中namespacename被清除">AndroidManifest.xml中namespace:name被清除.</h3>
 <p>该文件中同时包含ResourceId(Android特有)和namespace/name(标准xml特有)两套访问方式, 而Android中大部分使用resourceId, 该ResourceId对应了文本资源中的namaspace/name字符串。</p>
-
 <h3 id="函数合并">函数合并</h3>
-
 <p>合并函数调用</p>
-
 <h3 id="利用java函数重载">利用Java函数重载</h3>
-
 <p>在java中, 函数以 &ldquo;函数名+参数列表&rdquo; 为sig(函数名相同, 参数不同可构成重载). 而在smali(bytecodes)中, 函数则以 &ldquo;函数名+参数列表+返回类型&rdquo; 为sig.
-因此直接在编译后的smali(bytecodes)上动手, 将具有相同&rdquo;函数列表&rdquo;的函数改为同名. 这样在smali中可以正常执行, 但还原为java后, 会因为有多个相同&rdquo;函数名+参数列表&rdquo;而产生冲突.</p>
-
+因此直接在编译后的smali(bytecodes)上动手, 将具有相同&quot;函数列表&quot;的函数改为同名. 这样在smali中可以正常执行, 但还原为java后, 会因为有多个相同&quot;函数名+参数列表&quot;而产生冲突.</p>
 <h2 id="反混淆手段">反混淆手段</h2>
-
 <h3 id="借助jeb简化混淆的命名">借助JEB简化混淆的命名</h3>
-
 <p>&hellip;</p>
-
 <h3 id="借助proguard简化混淆的命名">借助Proguard简化混淆的命名</h3>
-
 <p>如果混淆字符长期且复杂, 可以先用Proguard混淆一把, 简化复杂度.</p>
-
 <p>通过Proguard keep class *(不混淆任何东西)来输出mapping表文件.(目的是为了修改mapping表中的对应名称来达到整体修改工程中名称的目的)</p>
-
 <p>通过分析得到类的有意义名称, 然后将其修改至mapping文件, 最后利用Proguard来帮助批量修改回代码.</p>
-
 <h2 id="加固">加固</h2>
-
-<h3 id="dalvik-bug">&ldquo;dalvik&rdquo;bug</h3>
-
-<p>利用&rdquo;dalvik&rdquo;bug使其可以运行, 但不能够被反编译.</p>
-
+<h3 id="dalvikbug">&ldquo;dalvik&quot;bug</h3>
+<p>利用&quot;dalvik&quot;bug使其可以运行, 但不能够被反编译.</p>
 <h3 id="dex超长数组">dex超长数组</h3>
-
 <p>定义超长数组可以使不少工具反编译失败(耗尽其内存), 实际运行中要在入口将其释放, 以免内存太大无法运行.</p>
-
 <h3 id="elf清除或畸形化section">elf清除或畸形化section</h3>
-
 <p>清除或填充为畸形, 可使IDA和gikdbg.art等发生崩溃或无法正常解析. 可参见笔记: IDA - 打开畸形ELF时的报错信息含义</p>
 
     
@@ -281,42 +231,42 @@ xhr.send(null);
     <p class="asidetitle">目录</p>
     <ul class="archive-list">
       <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li><a href="#混淆手段">混淆手段</a>
-<ul>
-<li><a href="#定义超长类名">定义超长类名</a></li>
-<li><a href="#找茬">找茬</a></li>
-<li><a href="#使用java关键字">使用Java关键字</a></li>
-<li><a href="#unicode字符">Unicode字符</a></li>
-<li><a href="#cjk-china-japan-korea-字符">CJK(China Japan korea)字符</a></li>
-<li><a href="#其他少见字符">其他少见字符</a></li>
-<li><a href="#盲文点字符">盲文点字符</a></li>
-<li><a href="#识别类名">识别类名</a></li>
-<li><a href="#识别enum">识别Enum</a></li>
-<li><a href="#acc-bridge">ACC_BRIDGE</a></li>
-<li><a href="#getter-setter">Getter/Setter</a></li>
-<li><a href="#根据日志">根据日志</a></li>
-<li><a href="#字符串加密">字符串加密</a></li>
-<li><a href="#asset加密">Asset加密</a></li>
-<li><a href="#androidmanifest-xml中namespace-name被清除">AndroidManifest.xml中namespace:name被清除.</a></li>
-<li><a href="#函数合并">函数合并</a></li>
-<li><a href="#利用java函数重载">利用Java函数重载</a></li>
-</ul></li>
-<li><a href="#反混淆手段">反混淆手段</a>
-<ul>
-<li><a href="#借助jeb简化混淆的命名">借助JEB简化混淆的命名</a></li>
-<li><a href="#借助proguard简化混淆的命名">借助Proguard简化混淆的命名</a></li>
-</ul></li>
-<li><a href="#加固">加固</a>
-<ul>
-<li><a href="#dalvik-bug">&ldquo;dalvik&rdquo;bug</a></li>
-<li><a href="#dex超长数组">dex超长数组</a></li>
-<li><a href="#elf清除或畸形化section">elf清除或畸形化section</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li><a href="#混淆手段">混淆手段</a>
+      <ul>
+        <li><a href="#定义超长类名">定义超长类名</a></li>
+        <li><a href="#找茬">找茬</a></li>
+        <li><a href="#使用java关键字">使用Java关键字</a></li>
+        <li><a href="#unicode字符">Unicode字符</a></li>
+        <li><a href="#cjkchina-japan-korea字符">CJK(China Japan korea)字符</a></li>
+        <li><a href="#其他少见字符">其他少见字符</a></li>
+        <li><a href="#盲文点字符">盲文点字符</a></li>
+        <li><a href="#识别类名">识别类名</a></li>
+        <li><a href="#识别enum">识别Enum</a></li>
+        <li><a href="#acc_bridge">ACC_BRIDGE</a></li>
+        <li><a href="#gettersetter">Getter/Setter</a></li>
+        <li><a href="#根据日志">根据日志</a></li>
+        <li><a href="#字符串加密">字符串加密</a></li>
+        <li><a href="#asset加密">Asset加密</a></li>
+        <li><a href="#androidmanifestxml中namespacename被清除">AndroidManifest.xml中namespace:name被清除.</a></li>
+        <li><a href="#函数合并">函数合并</a></li>
+        <li><a href="#利用java函数重载">利用Java函数重载</a></li>
+      </ul>
+    </li>
+    <li><a href="#反混淆手段">反混淆手段</a>
+      <ul>
+        <li><a href="#借助jeb简化混淆的命名">借助JEB简化混淆的命名</a></li>
+        <li><a href="#借助proguard简化混淆的命名">借助Proguard简化混淆的命名</a></li>
+      </ul>
+    </li>
+    <li><a href="#加固">加固</a>
+      <ul>
+        <li><a href="#dalvikbug">&ldquo;dalvik&quot;bug</a></li>
+        <li><a href="#dex超长数组">dex超长数组</a></li>
+        <li><a href="#elf清除或畸形化section">elf清除或畸形化section</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
     </ul>
   </div>
@@ -338,6 +288,8 @@ xhr.send(null);
     <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
     
@@ -368,7 +320,7 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/adb" title="adb">adb<sup>1</sup></a></li>
       
-			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>3</sup></a></li>
+			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/android" title="android">android<sup>9</sup></a></li>
       
@@ -384,6 +336,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/getsystemservice" title="getsystemservice">getsystemservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/jadx" title="jadx">jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/kernel" title="kernel">kernel<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/keyguard" title="keyguard">keyguard<sup>1</sup></a></li>
@@ -398,6 +352,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/publishbinderservice" title="publishbinderservice">publishbinderservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/super-jadx" title="super-jadx">super-jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/systemservice" title="systemservice">systemservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
@@ -405,6 +361,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -473,6 +431,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/getsystemservice" style="font-size: 12px;">getsystemservice</a>
     
+    <a href="https://pkiller.com/tags/jadx" style="font-size: 12px;">jadx</a>
+    
     <a href="https://pkiller.com/tags/kernel" style="font-size: 12px;">kernel</a>
     
     <a href="https://pkiller.com/tags/keyguard" style="font-size: 12px;">keyguard</a>
@@ -487,6 +447,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/publishbinderservice" style="font-size: 12px;">publishbinderservice</a>
     
+    <a href="https://pkiller.com/tags/super-jadx" style="font-size: 12px;">super-jadx</a>
+    
     <a href="https://pkiller.com/tags/systemservice" style="font-size: 12px;">systemservice</a>
     
     <a href="https://pkiller.com/tags/systemui" style="font-size: 12px;">systemui</a>
@@ -494,6 +456,8 @@ xhr.send(null);
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
     <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
+    <a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" style="font-size: 12px;">反编译工具</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     

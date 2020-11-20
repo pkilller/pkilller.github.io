@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>addService on pkiller</title>
@@ -10,24 +10,6 @@
     
 	<atom:link href="https://pkiller.com/tags/addservice/feed.xml" rel="self" type="application/rss+xml" />
     
-    
-    <item>
-      <title>Android服务注册及获取</title>
-      <link>https://pkiller.com/android/android%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E5%8F%8A%E8%8E%B7%E5%8F%96/</link>
-      <pubDate>Sun, 14 May 2017 18:32:05 +0800</pubDate>
-      
-      <guid>https://pkiller.com/android/android%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E5%8F%8A%E8%8E%B7%E5%8F%96/</guid>
-      <description>本文以Android 5.1为例展开，在7.0上细节会略有差异，但基本一致： Service大致分为两种 1. 系统服务SystemService // 以</description>
-    </item>
-    
-    <item>
-      <title>Android服务注册及获取</title>
-      <link>https://pkiller.com/android/android%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E5%8F%8A%E8%8E%B7%E5%8F%96/</link>
-      <pubDate>Sun, 14 May 2017 18:32:05 +0800</pubDate>
-      
-      <guid>https://pkiller.com/android/android%E6%9C%8D%E5%8A%A1%E6%B3%A8%E5%86%8C%E5%8F%8A%E8%8E%B7%E5%8F%96/</guid>
-      <description>本文以Android 5.1为例展开，在7.0上细节会略有差异，但基本一致： Service大致分为两种 1. 系统服务SystemService // 以</description>
-    </item>
     
     <item>
       <title>Android服务注册及获取</title>

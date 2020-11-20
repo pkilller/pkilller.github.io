@@ -1,29 +1,49 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://pkiller.com/android/</loc>
+    <lastmod>2020-11-16T15:07:23+08:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://pkiller.com/categories/</loc>
-    <lastmod>2020-05-07T18:30:31+08:00</lastmod>
+    <lastmod>2020-11-16T15:07:23+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://pkiller.com/iot/</loc>
-    <lastmod>2020-05-07T18:30:31+08:00</lastmod>
+    <loc>https://pkiller.com/tags/jadx/</loc>
+    <lastmod>2020-11-16T15:07:23+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://pkiller.com/</loc>
-    <lastmod>2020-05-07T18:30:31+08:00</lastmod>
+    <loc>https://pkiller.com/tags/super-jadx/</loc>
+    <lastmod>2020-11-16T15:07:23+08:00</lastmod>
   </url>
   
   <url>
     <loc>https://pkiller.com/tags/</loc>
-    <lastmod>2020-05-07T18:30:31+08:00</lastmod>
+    <lastmod>2020-11-16T15:07:23+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://pkiller.com/categories/zigbee/</loc>
+    <loc>https://pkiller.com/tags/%E5%8F%8D%E7%BC%96%E8%AF%91%E5%B7%A5%E5%85%B7/</loc>
+    <lastmod>2020-11-16T15:07:23+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pkiller.com/categories/%E5%8F%8D%E7%BC%96%E8%AF%91%E5%B7%A5%E5%85%B7/</loc>
+    <lastmod>2020-11-16T15:07:23+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pkiller.com/android/super-jadx_v1.0.0/</loc>
+    <lastmod>2020-11-16T15:07:23+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pkiller.com/iot/</loc>
     <lastmod>2020-05-07T18:30:31+08:00</lastmod>
   </url>
   
@@ -33,13 +53,13 @@
   </url>
   
   <url>
-    <loc>https://pkiller.com/iot/zigbee-basic/</loc>
+    <loc>https://pkiller.com/categories/zigbee/</loc>
     <lastmod>2020-05-07T18:30:31+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://pkiller.com/categories/android/</loc>
-    <lastmod>2019-08-23T14:10:05+08:00</lastmod>
+    <loc>https://pkiller.com/iot/zigbee-basic/</loc>
+    <lastmod>2020-05-07T18:30:31+08:00</lastmod>
   </url>
   
   <url>
@@ -48,12 +68,12 @@
   </url>
   
   <url>
-    <loc>https://pkiller.com/android/android-systemui-keyguard/</loc>
+    <loc>https://pkiller.com/categories/android/</loc>
     <lastmod>2019-08-23T14:10:05+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://pkiller.com/android/</loc>
+    <loc>https://pkiller.com/android/android-systemui-keyguard/</loc>
     <lastmod>2019-08-23T14:10:05+08:00</lastmod>
   </url>
   
@@ -233,12 +253,12 @@
   </url>
   
   <url>
-    <loc>https://pkiller.com/categories/%E7%97%85%E6%AF%92/</loc>
+    <loc>https://pkiller.com/tags/%E7%97%85%E6%AF%92/</loc>
     <lastmod>2017-06-04T22:18:05+08:00</lastmod>
   </url>
   
   <url>
-    <loc>https://pkiller.com/tags/%E7%97%85%E6%AF%92/</loc>
+    <loc>https://pkiller.com/categories/%E7%97%85%E6%AF%92/</loc>
     <lastmod>2017-06-04T22:18:05+08:00</lastmod>
   </url>
   
@@ -304,6 +324,11 @@
   
   <url>
     <loc>https://pkiller.com/about/</loc>
+    <lastmod>2017-04-14T23:00:48+08:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://pkiller.com/</loc>
     <lastmod>2017-04-14T23:00:48+08:00</lastmod>
   </url>
   

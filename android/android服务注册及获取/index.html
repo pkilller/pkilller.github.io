@@ -94,130 +94,109 @@
 
 	<div class="article-content">
     
-    
-
-<blockquote>
+    <blockquote>
 <p>本文以Android 5.1为例展开，在7.0上细节会略有差异，但基本一致：</p>
 </blockquote>
-
 <h3 id="service大致分为两种">Service大致分为两种</h3>
-
 <p><strong>1. 系统服务SystemService</strong></p>
-
 <p>// 以下展示的框架为标准的Android SystemService的调用结构。如：Context.LOCATION_SERVICE.
 [services.jar部分]</p>
-
 <ul>
-<li><p>服务提供方通过ServiceManager.addService()注册服务</p></li>
-
-<li><p>服务调用方通过ServiceManager.getService()获取服务，为IBinder类型. (通常供framework.jar使用，framework.jar内部会再包装Wrapper类，最后供上层APP使用.)</p></li>
+<li>
+<p>服务提供方通过ServiceManager.addService()注册服务</p>
+</li>
+<li>
+<p>服务调用方通过ServiceManager.getService()获取服务，为IBinder类型. (通常供framework.jar使用，framework.jar内部会再包装Wrapper类，最后供上层APP使用.)</p>
+</li>
 </ul>
-
 <p>[framework.jar部分]</p>
-
 <ul>
-<li><p>使用ContextImpl.registerService() (在7.0上为SystemServiceRegistry), 将通过ServiceManager.getService()的到的IBinder对象注册到framework中.</p></li>
-
-<li><p>在APP中使用context.getSystemService(LOCATION_SERVICE)</p></li>
+<li>
+<p>使用ContextImpl.registerService() (在7.0上为SystemServiceRegistry), 将通过ServiceManager.getService()的到的IBinder对象注册到framework中.</p>
+</li>
+<li>
+<p>在APP中使用context.getSystemService(LOCATION_SERVICE)</p>
+</li>
 </ul>
-
 <p><strong>2. 普通APP的Binder服务</strong>
-     服务提供方在内部最终通过什么注册服务?  (TODO: 分析如应用中的服务是如何注册的)
-     服务调用放通过bindService获得服务，为IBinder类型</p>
-
+服务提供方在内部最终通过什么注册服务?  (TODO: 分析如应用中的服务是如何注册的)
+服务调用放通过bindService获得服务，为IBinder类型</p>
 <p>以上两种方法对于IBinder都一样，使用asInterface将IBinder转为可方便调用的Client端接口：</p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java">    <span class="kd">public</span> <span class="kd">static</span> <span class="n">IPowerManager</span> <span class="nf">asInterface</span><span class="o">(</span><span class="n">IBinder</span> <span class="n">arg2</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">IPowerManager</span> <span class="n">v1</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">arg2</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">v1</span><span class="o">;</span>
+        <span class="o">}</span>
 
-<pre><code class="language-java">    public static IPowerManager asInterface(IBinder arg2) {
-        IPowerManager v1 = null;
-        if(arg2 == null) {
-            return v1;
-        }
+        <span class="n">IInterface</span> <span class="n">v0</span> <span class="o">=</span> <span class="n">arg2</span><span class="o">.</span><span class="na">queryLocalInterface</span><span class="o">(</span><span class="s">&#34;android.os.IPowerManager&#34;</span><span class="o">);</span>
+        <span class="k">if</span><span class="o">(</span><span class="n">v0</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="o">((</span><span class="n">v0</span> <span class="k">instanceof</span> <span class="n">IPowerManager</span><span class="o">)))</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="o">((</span><span class="n">IPowerManager</span><span class="o">)</span><span class="n">v0</span><span class="o">);</span>  <span class="c1">// 如果该Service在本进程内，则直接返回。
+</span><span class="c1"></span>        <span class="o">}</span>
 
-        IInterface v0 = arg2.queryLocalInterface(&quot;android.os.IPowerManager&quot;);
-        if(v0 != null &amp;&amp; ((v0 instanceof IPowerManager))) {
-            return ((IPowerManager)v0);  // 如果该Service在本进程内，则直接返回。
-        }
-
-        return new Proxy(arg2);  // Service不在本进程内，使用Proxy进行代理访问(内部通过mRemote.transact()访问远端服务)。
-    }
-</code></pre>
-
-<h3 id="1个标准android-systemservice的完整实现">1个标准Android SystemService的完整实现</h3>
-
+        <span class="k">return</span> <span class="k">new</span> <span class="n">Proxy</span><span class="o">(</span><span class="n">arg2</span><span class="o">);</span>  <span class="c1">// Service不在本进程内，使用Proxy进行代理访问(内部通过mRemote.transact()访问远端服务)。
+</span><span class="c1"></span>    <span class="o">}</span>
+</code></pre></div><h3 id="1个标准android-systemservice的完整实现">1个标准Android SystemService的完整实现</h3>
 <p><strong>首先在services.jar中添加服务</strong></p>
-
 <p>在service.jar可以通过调用SystemService.publishBinderService()或ServiceManager.addService将1个Service加入Binder队列.</p>
-
-<pre><code class="language-java">SystemManager.addService(LOCATION_SERVICE, new LocationManagerService(context));
-// or
-SystemService.publishBinderService(POWER_SERVICE, new BinderService(this, null));
-</code></pre>
-
-<p><strong>最后在framework中使用ContextImpl.registerService()将包装Binder后的Wrapper对象加入队列，之后便可以在APP开发中直接使用context.getSystemService(XXXX_SERVICE)获取Manager(Wrapper)进行服务操作:</strong></p>
-
-<pre><code class="language-java">// xref: /frameworks/base/core/java/android/app/ContextImpl.java
- static {
-      // 将对应Service的Manager(Wrapper)加入管理器中， 以后便可以直接在APP开发中使用context.getSystemService(XXXX_SERVICE)来获取指定服务的Manager(Wrapper).
-    /////////////////////////////////////// LOCATION_SERVICE //////////////////////////////////////
-    registerService(LOCATION_SERVICE, new ServiceFetcher() {
-            public Object createService(ContextImpl ctx) {
-                IBinder b = ServiceManager.getService(LOCATION_SERVICE);
-                return new LocationManager(ctx, ILocationManager.Stub.asInterface(b)); 
-            }});
-    // ...
-}
-</code></pre>
-
-<h3 id="其它">其它</h3>
-
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="n">SystemManager</span><span class="o">.</span><span class="na">addService</span><span class="o">(</span><span class="n">LOCATION_SERVICE</span><span class="o">,</span> <span class="k">new</span> <span class="n">LocationManagerService</span><span class="o">(</span><span class="n">context</span><span class="o">));</span>
+<span class="c1">// or
+</span><span class="c1"></span><span class="n">SystemService</span><span class="o">.</span><span class="na">publishBinderService</span><span class="o">(</span><span class="n">POWER_SERVICE</span><span class="o">,</span> <span class="k">new</span> <span class="n">BinderService</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="kc">null</span><span class="o">));</span>
+</code></pre></div><p><strong>最后在framework中使用ContextImpl.registerService()将包装Binder后的Wrapper对象加入队列，之后便可以在APP开发中直接使用context.getSystemService(XXXX_SERVICE)获取Manager(Wrapper)进行服务操作:</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="c1">// xref: /frameworks/base/core/java/android/app/ContextImpl.java
+</span><span class="c1"></span> <span class="kd">static</span> <span class="o">{</span>
+      <span class="c1">// 将对应Service的Manager(Wrapper)加入管理器中， 以后便可以直接在APP开发中使用context.getSystemService(XXXX_SERVICE)来获取指定服务的Manager(Wrapper).
+</span><span class="c1"></span>    <span class="c1">/////////////////////////////////////// LOCATION_SERVICE //////////////////////////////////////
+</span><span class="c1"></span>    <span class="n">registerService</span><span class="o">(</span><span class="n">LOCATION_SERVICE</span><span class="o">,</span> <span class="k">new</span> <span class="n">ServiceFetcher</span><span class="o">()</span> <span class="o">{</span>
+            <span class="kd">public</span> <span class="n">Object</span> <span class="nf">createService</span><span class="o">(</span><span class="n">ContextImpl</span> <span class="n">ctx</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">IBinder</span> <span class="n">b</span> <span class="o">=</span> <span class="n">ServiceManager</span><span class="o">.</span><span class="na">getService</span><span class="o">(</span><span class="n">LOCATION_SERVICE</span><span class="o">);</span>
+                <span class="k">return</span> <span class="k">new</span> <span class="n">LocationManager</span><span class="o">(</span><span class="n">ctx</span><span class="o">,</span> <span class="n">ILocationManager</span><span class="o">.</span><span class="na">Stub</span><span class="o">.</span><span class="na">asInterface</span><span class="o">(</span><span class="n">b</span><span class="o">));</span> 
+            <span class="o">}});</span>
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="o">}</span>
+</code></pre></div><h3 id="其它">其它</h3>
 <p><strong>addService / getService大致实现</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="c1">// pos: framework.jar
+</span><span class="c1"></span><span class="kn">package</span> <span class="nn">android.os</span><span class="o">;</span>
+<span class="kd">public</span> <span class="kd">final</span> <span class="kd">class</span> <span class="nc">ServiceManager</span> <span class="o">{</span>
+    <span class="c1">// ...
+</span><span class="c1"></span>
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">addService</span><span class="o">(</span><span class="n">String</span> <span class="n">arg3</span><span class="o">,</span> <span class="n">IBinder</span> <span class="n">arg4</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">ServiceManager</span><span class="o">.</span><span class="na">getIServiceManager</span><span class="o">().</span><span class="na">addService</span><span class="o">(</span><span class="n">arg3</span><span class="o">,</span> <span class="n">arg4</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">catch</span><span class="o">(</span><span class="n">RemoteException</span> <span class="n">v0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="s">&#34;ServiceManager&#34;</span><span class="o">,</span> <span class="s">&#34;error in addService&#34;</span><span class="o">,</span> <span class="o">((</span><span class="n">Throwable</span><span class="o">)</span><span class="n">v0</span><span class="o">));</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
 
-<pre><code class="language-java">// pos: framework.jar
-package android.os;
-public final class ServiceManager {
-    // ...
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">IBinder</span> <span class="nf">getService</span><span class="o">(</span><span class="n">String</span> <span class="n">arg5</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">IBinder</span> <span class="n">v4</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="n">Object</span> <span class="n">v1</span> <span class="o">=</span> <span class="n">ServiceManager</span><span class="o">.</span><span class="na">sCache</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">arg5</span><span class="o">);</span>
+            <span class="k">if</span><span class="o">(</span><span class="n">v1</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="o">((</span><span class="n">IBinder</span><span class="o">)</span><span class="n">v1</span><span class="o">);</span>
+            <span class="o">}</span>
 
-    public static void addService(String arg3, IBinder arg4) {
-        try {
-            ServiceManager.getIServiceManager().addService(arg3, arg4, false);
-        }
-        catch(RemoteException v0) {
-            Log.e(&quot;ServiceManager&quot;, &quot;error in addService&quot;, ((Throwable)v0));
-        }
-    }
-
-    public static IBinder getService(String arg5) {
-        IBinder v4 = null;
-        try {
-            Object v1 = ServiceManager.sCache.get(arg5);
-            if(v1 != null) {
-                return ((IBinder)v1);
-            }
-
-            return ServiceManager.getIServiceManager().getService(arg5);
-        }
-        catch(RemoteException v0) {
-            Log.e(&quot;ServiceManager&quot;, &quot;error in getService&quot;, ((Throwable)v0));
-            return v4;
-        }
-    }
-    // ...
-}
-</code></pre>
-
-<p><strong>publishBinderService的实现</strong></p>
-
-<pre><code class="language-java">// pos: services.jar
-package com.android.server;
-public abstract class SystemService {
-    // ...
-    protected final void publishBinderService(String arg1, IBinder arg2, boolean arg3) {
-        ServiceManager.addService(arg1, arg2, arg3);  // 最终会调入framework.jar中的android.os.ServiceManager
-    }
-    // ...
-}
-</code></pre>
-
+            <span class="k">return</span> <span class="n">ServiceManager</span><span class="o">.</span><span class="na">getIServiceManager</span><span class="o">().</span><span class="na">getService</span><span class="o">(</span><span class="n">arg5</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="k">catch</span><span class="o">(</span><span class="n">RemoteException</span> <span class="n">v0</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">Log</span><span class="o">.</span><span class="na">e</span><span class="o">(</span><span class="s">&#34;ServiceManager&#34;</span><span class="o">,</span> <span class="s">&#34;error in getService&#34;</span><span class="o">,</span> <span class="o">((</span><span class="n">Throwable</span><span class="o">)</span><span class="n">v0</span><span class="o">));</span>
+            <span class="k">return</span> <span class="n">v4</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="o">}</span>
+</code></pre></div><p><strong>publishBinderService的实现</strong></p>
+<div class="highlight"><pre class="chroma"><code class="language-java" data-lang="java"><span class="c1">// pos: services.jar
+</span><span class="c1"></span><span class="kn">package</span> <span class="nn">com.android.server</span><span class="o">;</span>
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">SystemService</span> <span class="o">{</span>
+    <span class="c1">// ...
+</span><span class="c1"></span>    <span class="kd">protected</span> <span class="kd">final</span> <span class="kt">void</span> <span class="nf">publishBinderService</span><span class="o">(</span><span class="n">String</span> <span class="n">arg1</span><span class="o">,</span> <span class="n">IBinder</span> <span class="n">arg2</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">arg3</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">ServiceManager</span><span class="o">.</span><span class="na">addService</span><span class="o">(</span><span class="n">arg1</span><span class="o">,</span> <span class="n">arg2</span><span class="o">,</span> <span class="n">arg3</span><span class="o">);</span>  <span class="c1">// 最终会调入framework.jar中的android.os.ServiceManager
+</span><span class="c1"></span>    <span class="o">}</span>
+    <span class="c1">// ...
+</span><span class="c1"></span><span class="o">}</span>
+</code></pre></div>
     
 	</div>
   <footer class="article-footer clearfix">
@@ -313,17 +292,15 @@ xhr.send(null);
     <p class="asidetitle">目录</p>
     <ul class="archive-list">
       <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#service大致分为两种">Service大致分为两种</a></li>
-<li><a href="#1个标准android-systemservice的完整实现">1个标准Android SystemService的完整实现</a></li>
-<li><a href="#其它">其它</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#service大致分为两种">Service大致分为两种</a></li>
+        <li><a href="#1个标准android-systemservice的完整实现">1个标准Android SystemService的完整实现</a></li>
+        <li><a href="#其它">其它</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
     </ul>
   </div>
@@ -345,6 +322,8 @@ xhr.send(null);
     <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
     
@@ -375,7 +354,7 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/adb" title="adb">adb<sup>1</sup></a></li>
       
-			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>3</sup></a></li>
+			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/android" title="android">android<sup>9</sup></a></li>
       
@@ -391,6 +370,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/getsystemservice" title="getsystemservice">getsystemservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/jadx" title="jadx">jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/kernel" title="kernel">kernel<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/keyguard" title="keyguard">keyguard<sup>1</sup></a></li>
@@ -405,6 +386,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/publishbinderservice" title="publishbinderservice">publishbinderservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/super-jadx" title="super-jadx">super-jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/systemservice" title="systemservice">systemservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
@@ -412,6 +395,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -480,6 +465,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/getsystemservice" style="font-size: 12px;">getsystemservice</a>
     
+    <a href="https://pkiller.com/tags/jadx" style="font-size: 12px;">jadx</a>
+    
     <a href="https://pkiller.com/tags/kernel" style="font-size: 12px;">kernel</a>
     
     <a href="https://pkiller.com/tags/keyguard" style="font-size: 12px;">keyguard</a>
@@ -494,6 +481,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/publishbinderservice" style="font-size: 12px;">publishbinderservice</a>
     
+    <a href="https://pkiller.com/tags/super-jadx" style="font-size: 12px;">super-jadx</a>
+    
     <a href="https://pkiller.com/tags/systemservice" style="font-size: 12px;">systemservice</a>
     
     <a href="https://pkiller.com/tags/systemui" style="font-size: 12px;">systemui</a>
@@ -501,6 +490,8 @@ xhr.send(null);
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
     <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
+    <a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" style="font-size: 12px;">反编译工具</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     

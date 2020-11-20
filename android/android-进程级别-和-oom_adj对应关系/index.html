@@ -95,54 +95,32 @@
 
 	<div class="article-content">
     
-    
-
-<p>oom_adj 数值越小证明优先级越高, 被干掉的时间越晚. 如果大于 8 一般就是属于 backgroud 随时可能被干掉. -100为system进程的值, 表示绝不会被干掉.</p>
-
-<h3 id="oom-adj-0">[oom_adj=0]</h3>
-
+    <p>oom_adj 数值越小证明优先级越高, 被干掉的时间越晚. 如果大于 8 一般就是属于 backgroud 随时可能被干掉. -100为system进程的值, 表示绝不会被干掉.</p>
+<h3 id="oom_adj0">[oom_adj=0]</h3>
 <p><strong>前台进程 (Active Process)</strong></p>
-
 <p>前台进程包括:</p>
-
 <pre><code>1.活动 正在前台接收用户输入 
 2.活动、服务与广播接收器正在执行一个onReceive事件的处理函数
 3.服务正在运行 onStart、onCreate或onDestroy事件处理函数.
 </code></pre>
-
 <p><strong>已启动服务的进程(Started Service Process)</strong></p>
-
 <pre><code>这类进程包含一个已启动的服务. 服务并不直接与用户输入交互,因此服务的优先级低于可见活动的优先级,但是,已启动服务的进程任被认为是前台进程,只有在活动以及可见活动需要资源时,已启动服务的进程才会被杀死.
 </code></pre>
-
-<h3 id="oom-adj-1">[oom_adj=1]</h3>
-
+<h3 id="oom_adj1">[oom_adj=1]</h3>
 <p><strong>可见进程 (Visible Process)</strong></p>
-
 <pre><code>活动是可见的,但并不在前台,或者不响应用户的输入.例如,活动被非全屏或者透明的活动所遮挡.
 </code></pre>
-
-<h3 id="oom-adj-2">[oom_adj=2]</h3>
-
+<h3 id="oom_adj2">[oom_adj=2]</h3>
 <p><strong>后台进程 (Backgroud Process)</strong></p>
-
 <pre><code>这类进程不包含任何可见的活动与启动的服务.通常大量后台进程存在时,系统会采用（last-seen-first-kill）后见先杀的方式,释放资源为前台进程使用.
 </code></pre>
-
-<h3 id="oom-adj-4">[oom_adj=4]</h3>
-
+<h3 id="oom_adj4">[oom_adj=4]</h3>
 <p><strong>主界面 (home process)</strong></p>
-
-<h3 id="oom-adj-7">[oom_adj=7]</h3>
-
+<h3 id="oom_adj7">[oom_adj=7]</h3>
 <p><strong>隐藏进程 (hidden process)</strong></p>
-
-<h3 id="oom-adj-14">[oom_adj=14]</h3>
-
+<h3 id="oom_adj14">[oom_adj=14]</h3>
 <p><strong>内容提供者 (content provider)</strong></p>
-
-<h3 id="oom-adj-15">[oom_adj=15]</h3>
-
+<h3 id="oom_adj15">[oom_adj=15]</h3>
 <p><strong>空进程 (Empty process)</strong></p>
 
     
@@ -230,21 +208,19 @@ xhr.send(null);
     <p class="asidetitle">目录</p>
     <ul class="archive-list">
       <nav id="TableOfContents">
-<ul>
-<li>
-<ul>
-<li>
-<ul>
-<li><a href="#oom-adj-0">[oom_adj=0]</a></li>
-<li><a href="#oom-adj-1">[oom_adj=1]</a></li>
-<li><a href="#oom-adj-2">[oom_adj=2]</a></li>
-<li><a href="#oom-adj-4">[oom_adj=4]</a></li>
-<li><a href="#oom-adj-7">[oom_adj=7]</a></li>
-<li><a href="#oom-adj-14">[oom_adj=14]</a></li>
-<li><a href="#oom-adj-15">[oom_adj=15]</a></li>
-</ul></li>
-</ul></li>
-</ul>
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#oom_adj0">[oom_adj=0]</a></li>
+        <li><a href="#oom_adj1">[oom_adj=1]</a></li>
+        <li><a href="#oom_adj2">[oom_adj=2]</a></li>
+        <li><a href="#oom_adj4">[oom_adj=4]</a></li>
+        <li><a href="#oom_adj7">[oom_adj=7]</a></li>
+        <li><a href="#oom_adj14">[oom_adj=14]</a></li>
+        <li><a href="#oom_adj15">[oom_adj=15]</a></li>
+      </ul>
+    </li>
+  </ul>
 </nav>
     </ul>
   </div>
@@ -266,6 +242,8 @@ xhr.send(null);
     <li><a href="https://pkiller.com/categories/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%85%b6%e4%bb%96" title="其他">其他<sup>1</sup></a></li>
+    
+    <li><a href="https://pkiller.com/categories/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
     
     <li><a href="https://pkiller.com/categories/%e5%ae%89%e5%85%a8" title="安全">安全<sup>1</sup></a></li>
     
@@ -296,7 +274,7 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/adb" title="adb">adb<sup>1</sup></a></li>
       
-			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>3</sup></a></li>
+			<li><a href="https://pkiller.com/tags/addservice" title="addservice">addservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/android" title="android">android<sup>9</sup></a></li>
       
@@ -312,6 +290,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/getsystemservice" title="getsystemservice">getsystemservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/jadx" title="jadx">jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/kernel" title="kernel">kernel<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/keyguard" title="keyguard">keyguard<sup>1</sup></a></li>
@@ -326,6 +306,8 @@ xhr.send(null);
       
 			<li><a href="https://pkiller.com/tags/publishbinderservice" title="publishbinderservice">publishbinderservice<sup>1</sup></a></li>
       
+			<li><a href="https://pkiller.com/tags/super-jadx" title="super-jadx">super-jadx<sup>1</sup></a></li>
+      
 			<li><a href="https://pkiller.com/tags/systemservice" title="systemservice">systemservice<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/systemui" title="systemui">systemui<sup>1</sup></a></li>
@@ -333,6 +315,8 @@ xhr.send(null);
 			<li><a href="https://pkiller.com/tags/unity3d" title="unity3d">unity3d<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/zigbee" title="zigbee">zigbee<sup>1</sup></a></li>
+      
+			<li><a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" title="反编译工具">反编译工具<sup>1</sup></a></li>
       
 			<li><a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" title="固件">固件<sup>1</sup></a></li>
       
@@ -401,6 +385,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/getsystemservice" style="font-size: 12px;">getsystemservice</a>
     
+    <a href="https://pkiller.com/tags/jadx" style="font-size: 12px;">jadx</a>
+    
     <a href="https://pkiller.com/tags/kernel" style="font-size: 12px;">kernel</a>
     
     <a href="https://pkiller.com/tags/keyguard" style="font-size: 12px;">keyguard</a>
@@ -415,6 +401,8 @@ xhr.send(null);
     
     <a href="https://pkiller.com/tags/publishbinderservice" style="font-size: 12px;">publishbinderservice</a>
     
+    <a href="https://pkiller.com/tags/super-jadx" style="font-size: 12px;">super-jadx</a>
+    
     <a href="https://pkiller.com/tags/systemservice" style="font-size: 12px;">systemservice</a>
     
     <a href="https://pkiller.com/tags/systemui" style="font-size: 12px;">systemui</a>
@@ -422,6 +410,8 @@ xhr.send(null);
     <a href="https://pkiller.com/tags/unity3d" style="font-size: 12px;">unity3d</a>
     
     <a href="https://pkiller.com/tags/zigbee" style="font-size: 12px;">zigbee</a>
+    
+    <a href="https://pkiller.com/tags/%e5%8f%8d%e7%bc%96%e8%af%91%e5%b7%a5%e5%85%b7" style="font-size: 12px;">反编译工具</a>
     
     <a href="https://pkiller.com/tags/%e5%9b%ba%e4%bb%b6" style="font-size: 12px;">固件</a>
     

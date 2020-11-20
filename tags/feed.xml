@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on pkiller</title>
@@ -6,10 +6,37 @@
     <description>Recent content in Tags on pkiller</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>zh-CN</language>
-    <lastBuildDate>Thu, 07 May 2020 18:30:31 +0800</lastBuildDate>
+    <lastBuildDate>Mon, 16 Nov 2020 15:07:23 +0800</lastBuildDate>
     
 	<atom:link href="https://pkiller.com/tags/feed.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>jadx</title>
+      <link>https://pkiller.com/tags/jadx/</link>
+      <pubDate>Mon, 16 Nov 2020 15:07:23 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/jadx/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>super-jadx</title>
+      <link>https://pkiller.com/tags/super-jadx/</link>
+      <pubDate>Mon, 16 Nov 2020 15:07:23 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/super-jadx/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>反编译工具</title>
+      <link>https://pkiller.com/tags/%E5%8F%8D%E7%BC%96%E8%AF%91%E5%B7%A5%E5%85%B7/</link>
+      <pubDate>Mon, 16 Nov 2020 15:07:23 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/%E5%8F%8D%E7%BC%96%E8%AF%91%E5%B7%A5%E5%85%B7/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>zigbee</title>
