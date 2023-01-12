@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <title>某android蠕虫木马病毒分析 // pkiller</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.105.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="pkiller" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.3c3c186cd62e563ad6e2f00a89dbee656ab912d1d46f856b5605dd0232521e2a.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="某android蠕虫木马病毒分析"/>
+<meta name="twitter:description" content="偶然机会得来一个应用，运行起来后发现桌面图标没了觉得很是可疑，所以花了点时间分析了一下。以下暂用sample样本指代。 经过行为分析，samp"/>
+
+    <meta property="og:title" content="某android蠕虫木马病毒分析" />
+<meta property="og:description" content="偶然机会得来一个应用，运行起来后发现桌面图标没了觉得很是可疑，所以花了点时间分析了一下。以下暂用sample样本指代。 经过行为分析，samp" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://pkiller.com/android/%E6%9F%90android%E8%A0%95%E8%99%AB%E6%9C%A8%E9%A9%AC%E7%97%85%E6%AF%92%E5%88%86%E6%9E%90/" /><meta property="article:section" content="android" />
+<meta property="article:published_time" content="2017-06-04T22:18:05+08:00" />
+<meta property="article:modified_time" content="2017-06-04T22:18:05+08:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://pkiller.com/"><img class="app-header-avatar" src="/images/avatar.png" alt="pkiller" /></a>
+      <span class="app-header-title">pkiller</span>
+      <nav class="app-header-menu">
+          <a class="app-header-menu-item" href="/android">Android</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/iot">IoT</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/other">Other</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/about">Me</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/tags/">Tags</a>
+      </nav>
+      <p>Android applications, android systems and IoT devices. Specifically on virus analysis, vulnerability research, security architecture design, and security assessments.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/pkilller" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">某android蠕虫木马病毒分析</h1>
+      <div class="post-meta">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Jun 4, 2017
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          3 min read
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag">
+  <title>tag</title>
+  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line>
+</svg>
+              <a class="tag" href="https://pkiller.com/tags/%E7%97%85%E6%AF%92/">病毒</a>
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <blockquote>
+<p>偶然机会得来一个应用，运行起来后发现桌面图标没了觉得很是可疑，所以花了点时间分析了一下。以下暂用<code>sample样本</code>指代。</p>
+</blockquote>
+<p>经过行为分析，sample样本会获取用户手机联系人以及短信并上传至收信邮箱：<code>13482173247@163.com</code>。 会执行指定手机发来的短信命令（来信号码中包含<code>3247</code>或<code>288</code>时便会执行其中的短信指令。已知的控制者手机号码为: <code>13482173247</code>）。最后判定sample为一款典型的Android平台的短信拦截木马。</p>
+<p>伪装成中国移动客户端,在初次启动时设置自身为设备管理器以防止自身被卸载。其中利用了设备管理器的一个漏洞，导致用户无法取消激活该样本，从而达到不被卸载的目的。</p>
+<p><img src="1.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<h2 id="受害情况分析">受害情况分析</h2>
+<p><strong>通过代码的分析，从中提取出了加密后的发信邮箱和密码：</strong></p>
+<blockquote>
+<p>账户：13482173247@163.com
+密码：uodlmxxxxxxxesjzx</p>
+</blockquote>
+<p><strong>经过对以上邮箱的登录验证，该邮箱内有近<code>两千两百多份</code>邮件：</strong></p>
+<p><img src="2.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><strong>邮件内的联系人信息</strong></p>
+<p><img src="3.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><strong>邮件内的短信内容</strong></p>
+<p>// 其中包含大量网银或个人账户的验证码短信</p>
+<p><img src="4.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><img src="5.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><img src="6.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><img src="7.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<h2 id="传播途径分析">传播途径分析</h2>
+<p>从多个用户上报的短信内容发现了疑似<code>10086积分钓鱼</code>短信，通过对邮件的批量扫描提取出了共计<code>54</code>个疑似钓鱼站点，根据域名格式可以推断出这些站点为同源或同宗(绝大部分已无法访问，大部分钓鱼域名已经变为了小说网)：</p>
+<pre tabindex="0"><code>wap.10086pqs.com
+wap.10086hxy.com
+wap.10086pxb.com
+10086nuf.com/b
+wap.10086bapd.com
+wap.10086fsx.com
+www.10086df.pw
+wap.10086pbc.com
+www.10086owq.cn
+wap.10086iwrz.com
+wap.10086ufs.com
+wap.10086vsg.com
+wap.10086taj.com
+wap.10086hqv.com/d
+wap.10086syk.com
+10086nvgw.com
+wap.10086fwz.com
+wap.10086hjz.cc
+wap.10086sfq.com
+wap.10086ikjq.com
+10086xpd.com
+10086mqw.com
+10086nub.com
+wap.10086ybn.com
+www.10086znt.com
+www.10086ice.com
+wap.10086dg.com
+wap.10086fzw.com
+wap.10086hda.com
+www.10086io.com
+wap.10086fzq.com
+wap.10086mky.com
+wap.10086mrd.com
+wap.10086abedk.com
+wap.10086ycxl.com
+wap.10086byxt.com
+10086ufw.com
+wap.10086xbr.com
+jfd.10086airx.com
+wap.10086zvp.com
+10086gph.com
+wap.10086yca.com
+10086ydgh.com
+wap.10086yf.com
+wap.10086vdw.com
+wap.10086qna.com
+10086qce.com
+wap.10086vac.com
+jfe.10086ncb.com
+wap.10086vha.com
+wap.10086vwy.com
+wap.10086nry.com
+wap.10086gus.com
+www.10086kdj.com
+</code></pre><p><img src="8.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p>并且根据收信邮箱内的邮件格式可以推断，该邮箱的收信来源样本至少还有另外1个变种正处于活跃期。并且根据网络上的同类样本分析文章，此类型样本至少有不下3个变种：</p>
+<blockquote>
+<p>AVL Team: <a href="http://blog.avlyun.com/?p=2634">http://blog.avlyun.com/?p=2634</a>
+看雪论坛: <a href="http://bbs.pediy.com/showthread.php?t=209408">http://bbs.pediy.com/showthread.php?t=209408</a></p>
+</blockquote>
+<p><img src="9.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><img src="10.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><img src="11.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<h2 id="样本具体行为">样本具体行为</h2>
+<p>首次启动注册自身为<code>设备管理器</code>，并且在<code>onDisableRequested</code>中启动Setting为最顶层Activity并阻塞函数使其无法返回。最后迫使“Device administrators”被覆盖或导致Setting崩溃退出,让用户无法对其“取消激活”从而保护其不被卸载。利用了Android设备管理器漏洞: <code>ANDROID-9067882</code></p>
+<p><strong>首先使用DES解密邮件账户和密码,key: staker</strong></p>
+<p><img src="12.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><img src="13.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><strong>通过邮件上报安装成功的消息</strong></p>
+<p><img src="14.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><strong>遍历手机内所有短信,并上传至邮箱</strong></p>
+<p><img src="15.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><strong>遍历手机内所有联系人,并上传至邮箱</strong></p>
+<p><img src="16.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><strong>随后启动后台Service监听和拦截短信</strong></p>
+<p><img src="17.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p><strong>接收远程短信命令</strong></p>
+<p><img src="18.png" alt="android 病毒木马" title="android 病毒木马"></p>
+<p>其中当短信发送方号码包含<code>3247</code>或<code>288</code>时(其中已知黑客使用的号码之一: <code>13482173247</code>), 开始接收并执行命令:</p>
+<pre tabindex="0"><code>ADD  %PHONE_NUMBER%   # 开始拦截&#34;指定发件人&#34;
+DEL  %PHONE_NUMBER%   # 不再拦截&#34;指定发件人&#34;
+CLEAR ALL             # 不再拦截&#34;任何发件人&#34;
+LOOK [TIME|PHONE]     # **TIME**: 向控制端以短信返回&#34;到期时间&#34;(这里到期时间的概念为:在到达一定天数后会停止拦截, 否则长期无法正常接收短信会引起被控用户的警觉.)  **PHONE:** 向黑客以短信返回 &#34;手机型号+手机品牌+Android版本&#34;
+SEND %TARGET_NUMBER% %SMS_CONTENT% # 以被控手机身份发送指定内容短信
+</code></pre><h2 id="清除方法">清除方法</h2>
+<p>由于sample样本在被“取消激活”设备管理器时会弹出Activity进行阻碍，导致无法最终弹出取消确认框。清除方法是通过intent调用启动到取消窗口，直接“取消激活”。取消后可正常对其进行卸载。</p>
+<h2 id="总结">总结</h2>
+<p>经过以上分析，该样本是一个典型的利用<code>短信群发</code>进行传播的且具有<code>远控功能</code>的<code>蠕虫木马</code>，该木马通过设备管理器漏洞来阻止自身被用户清除。在分析过程中可以看到，已经有相当多的受害者遭到攻击，并且部分用户可能由于短信验证码被失窃造成了银行卡被盗刷等经济损失，最后已将该样本提交至了多个安全软件及团队，也希望能够及时介入止损降低受害者损失。最后想跟作者说一句：莫伸手，警察叔叔溯源抓人很容易。</p>
+
+    </div>
+    <div class="post-footer">
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "pkiller" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>

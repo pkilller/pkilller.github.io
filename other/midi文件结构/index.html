@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <title>MIDI文件结构 // pkiller</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.105.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="pkiller" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.3c3c186cd62e563ad6e2f00a89dbee656ab912d1d46f856b5605dd0232521e2a.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="MIDI文件结构"/>
+<meta name="twitter:description" content="Chunks 一个MIDI文件由多个Chunk(块)构成. 1个Chunk包含以下信息: type length data 4byte 4byte length bytes type: 4-byte, 表示该chunk的类型 length: 4-byte, 表示该chunk中da"/>
+
+    <meta property="og:title" content="MIDI文件结构" />
+<meta property="og:description" content="Chunks 一个MIDI文件由多个Chunk(块)构成. 1个Chunk包含以下信息: type length data 4byte 4byte length bytes type: 4-byte, 表示该chunk的类型 length: 4-byte, 表示该chunk中da" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://pkiller.com/other/midi%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84/" /><meta property="article:section" content="other" />
+<meta property="article:published_time" content="2017-04-14T23:37:31+08:00" />
+<meta property="article:modified_time" content="2017-04-14T23:37:31+08:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://pkiller.com/"><img class="app-header-avatar" src="/images/avatar.png" alt="pkiller" /></a>
+      <span class="app-header-title">pkiller</span>
+      <nav class="app-header-menu">
+          <a class="app-header-menu-item" href="/android">Android</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/iot">IoT</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/other">Other</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/about">Me</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/tags/">Tags</a>
+      </nav>
+      <p>Android applications, android systems and IoT devices. Specifically on virus analysis, vulnerability research, security architecture design, and security assessments.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/pkilller" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">MIDI文件结构</h1>
+      <div class="post-meta">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Apr 14, 2017
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          3 min read
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag">
+  <title>tag</title>
+  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line>
+</svg>
+              <a class="tag" href="https://pkiller.com/tags/midi/">midi</a>
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h2 id="chunks">Chunks</h2>
+<p>一个MIDI文件由多个<code>Chunk(块)</code>构成.
+1个<code>Chunk</code>包含以下信息:</p>
+<table>
+<thead>
+<tr>
+<th>type</th>
+<th style="text-align:center">length</th>
+<th style="text-align:right">data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>4byte</td>
+<td style="text-align:center">4byte</td>
+<td style="text-align:right"><em>length bytes</em></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>type: 4-byte, 表示该chunk的类型</li>
+<li>length: 4-byte, 表示该chunk中data数据的长度</li>
+<li>data: n-byte, 该chunk中存放的数据主体</li>
+</ul>
+<p><strong>一共存在两种类型的Chunk:</strong></p>
+<p>头部块: <em>Chunk.type = &ldquo;MThd&rdquo;</em>
+轨道块: <em>Chunk.type = &ldquo;MTrk&rdquo;</em></p>
+<p><strong>一个MIDI文件由1个<code>头部块</code>加上1到n个的<code>轨道块</code>构成.</strong></p>
+<p>Chunk.length决定了Chunk的总长度, MIDI文件中可以存在<code>MThd</code>与<code>MTrk</code>之外的Chunk, 但是这些数据都应当被直接忽略. 在MIDI规范中要求软件应当能应付这种异常情况.</p>
+<table>
+<thead>
+<tr>
+<th>type</th>
+<th style="text-align:center">length</th>
+<th style="text-align:right">data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MThd</td>
+<td style="text-align:center">6</td>
+<td style="text-align:right"><em>[format], [tracks], [division]</em></td>
+</tr>
+<tr>
+<td>MTrk</td>
+<td style="text-align:center"><em>[length]</em></td>
+<td style="text-align:right"><em>[delta_time], [event]</em></td>
+</tr>
+<tr>
+<td>MTrk</td>
+<td style="text-align:center"><em>[length]</em></td>
+<td style="text-align:right"><em>[delta_time], [event]</em></td>
+</tr>
+</tbody>
+</table>
+<h3 id="值的含义">值的含义:</h3>
+<p>MIDI文件中, 除了基础的信息外, 还包括如:<code>delta-times</code>与<code>meta-events</code>.
+这些信息包含数值, 这些信息通常以以下两种格式存在:</p>
+<ul>
+<li>二进制</li>
+<li>变长数值</li>
+</ul>
+<h3 id="二进制">二进制</h3>
+<p>用以下方式存储:</p>
+<ul>
+<li>8-bits 1byte</li>
+<li>MSB first (Most Significant Byte first)
+(除非另有规定)</li>
+</ul>
+<h3 id="变长数值">变长数值</h3>
+<p><strong>变长数值</strong>提供了一种简单的表示任意大小数值的方式，没有必要来用定长的数值来表示，避免了不必要的长度浪费。
+一个<strong>变长数值</strong>由n个8bit(最高1位+后面7bit表示）组成. 非结尾的byte/8bit, 最高bit为1. 最后1byte最高bit为0.
+Example:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Decimal</th>
+<th style="text-align:right">Hex</th>
+<th style="text-align:right">Binary</th>
+<th style="text-align:right">Veriable-Length-Representation Binary</th>
+<th style="text-align:center">Veriable-Length-Representation Hex</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">-</td>
+<td style="text-align:right">abcd</td>
+<td style="text-align:right">aaaabbbbccccdddd</td>
+<td style="text-align:right">100000aa 1aabbbbc 0cccdddd</td>
+<td style="text-align:center">-</td>
+</tr>
+<tr>
+<td style="text-align:center">0 &hellip; 127</td>
+<td style="text-align:right">00 &hellip; 7F</td>
+<td style="text-align:right">0000 0000 &hellip; 0111 1111</td>
+<td style="text-align:right">0000 0000 &hellip; 0111 1111</td>
+<td style="text-align:center">00 &hellip; 7F</td>
+</tr>
+<tr>
+<td style="text-align:center">128 &hellip; 16383</td>
+<td style="text-align:right">80 &hellip; 3FFF</td>
+<td style="text-align:right">00000000 10000000 &hellip; 00111111 11111111</td>
+<td style="text-align:right">100000001 00000000 &hellip; 11111111 01111111</td>
+<td style="text-align:center">81 00 &hellip; FF 7F</td>
+</tr>
+<tr>
+<td style="text-align:center">1000</td>
+<td style="text-align:right">03E8</td>
+<td style="text-align:right">11 1110 1000</td>
+<td style="text-align:right">10000111 01101000</td>
+<td style="text-align:center">87 68</td>
+</tr>
+<tr>
+<td style="text-align:center">100000</td>
+<td style="text-align:right">0F4240</td>
+<td style="text-align:right">1111 0100 0010 0100 0000</td>
+<td style="text-align:right">10111101 10000100 01000000</td>
+<td style="text-align:center">BD 84 40</td>
+</tr>
+</tbody>
+</table>
+<p>上面例子可以看到，每个byte中有7-bit(可容纳0-127)用来存放具体的值。
+在MIDI文件中允许的最大值为：0FFFFFFF, 也就是占用4byte (32bit)。</p>
+<h2 id="header-chunks">Header Chunks</h2>
+<p>这里的Data数据由3部分16bit的字段构成，分别为：描述格式、描述音轨数和描述事件定时.</p>
+<p>header 为6-bytes. 读取MIDI文件时需要遵循长度字段, 就算超过预期长度, 也需要忽略. <code>Header Chunk</code>:</p>
+<p><img src="1.png" alt="Header Chunk" title="Header Chunk"></p>
+<p><strong>length</strong>
+指明chunk中的data长度.
+这是一个MSB的32-bit数值.
+在MIDI 1.0下时, 这里的数值通常都为6(byte). 尽管如此, 还是要考虑更大的尺寸, 以兼容未来可能的扩展.</p>
+<p><strong>format</strong>
+指明该MIDI的格式
+这是一个MSB的16-bit数值.
+这里有效的值为三种: 0, 1和2.</p>
+<p><strong>tracks</strong>
+指明该MIDI文件包含的音轨chunks数量.
+这是一个MSB的16-bit数值.</p>
+<p><strong>division</strong>
+这里定义了一个delta-time单位的时长.
+这是一个MSB的16-bit数值.
+该值为以下两种格式之一:</p>
+<p><img src="2.png" alt="2.png" title="2.png"></p>
+<p><em>if (bit 15 == 0):</em>
+bits 0-14 : 每四分之一音符中，包含多少个Tick(Tick是MIDI中的最小时间单位).</p>
+<p><em>if (bit 15 == 1):</em>
+bits 0-7:  每SMTPE frame有多少Tick.
+bits 8-14: 这里由负数构成，表示每秒有多少个SMTPE frames, 呼应bit 0-7.</p>
+<pre><code>-24 = 24 frames per second
+-25 = 25 frames per second
+-29 = 30 frames per second, drop frame
+-30 = 30 frames per second, non-drop frame
+</code></pre>
+<p>**总结以上两种division值的类型: **第一种以<code>四分之一音符</code>来描述速度, 而第二种以<code>SMTPE frame</code>来描述速度(先确定每秒的frame数，然后再从frame中确定出Tick数, 实际上就是确定了速度) .</p>
+<p><a href="http://www.personal.kent.edu/~sbirch/Music_Production/MP-II/MIDI/midi_system_common_messages.htm">http://www.personal.kent.edu/~sbirch/Music_Production/MP-II/MIDI/midi_system_common_messages.htm</a></p>
+<h3 id="midi-文件格式">MIDI 文件格式</h3>
+<p>MIDI文件有3个变种：</p>
+<ul>
+<li>Format 0
+只包含单个音轨.</li>
+<li>Format 1
+包含一或多个同步的音轨(可以理解为不同乐器演奏一首曲子)</li>
+<li>Format 2
+包含一或多个独立的音轨(理解为该文件内包含多首曲子?)</li>
+</ul>
+<p>&hellip;  后续还未完成..</p>
+<h3 id="原文">原文</h3>
+<p><a href="http://cs.fit.edu/~ryan/cse4051/projects/midi/midi.html">http://cs.fit.edu/~ryan/cse4051/projects/midi/midi.html</a>（已失效）
+<a href="https://www.csie.ntu.edu.tw/~r92092/ref/midi/">https://www.csie.ntu.edu.tw/~r92092/ref/midi/</a></p>
+
+    </div>
+    <div class="post-footer">
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "pkiller" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>
