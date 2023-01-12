@@ -17,6 +17,24 @@
     </item>
     
     <item>
+      <title>jail容器访问usb设备</title>
+      <link>https://pkiller.com/other/jail%E5%AE%B9%E5%99%A8%E8%AE%BF%E9%97%AEusb%E8%AE%BE%E5%A4%87/</link>
+      <pubDate>Mon, 21 Nov 2022 15:23:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/other/jail%E5%AE%B9%E5%99%A8%E8%AE%BF%E9%97%AEusb%E8%AE%BE%E5%A4%87/</guid>
+      <description>一、背景 需要让jail实例访问adb，以完成一些手机操作，但其默认不允许访问USB设备。 二、基本知识 jail是freebsd系统在2000年</description>
+    </item>
+    
+    <item>
+      <title>Lgram-15z990 黑苹果安装</title>
+      <link>https://pkiller.com/other/lgram-15z990-%E9%BB%91%E8%8B%B9%E6%9E%9C%E5%AE%89%E8%A3%85/</link>
+      <pubDate>Sun, 25 Jul 2021 23:15:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/other/lgram-15z990-%E9%BB%91%E8%8B%B9%E6%9E%9C%E5%AE%89%E8%A3%85/</guid>
+      <description>1. 目标安装磁盘的准备 在要安装macos的磁盘中进行分区，需要分2个区。 第一个是名为ESP的分区（FAT16格式，给300M），用于存放EFI</description>
+    </item>
+    
+    <item>
       <title>逆向专版 super-jadx v1.0.0 发布（jadx反编译工具增强版），支持类、方法、字段、变量重命名</title>
       <link>https://pkiller.com/android/super-jadx_v1.0.0/</link>
       <pubDate>Mon, 16 Nov 2020 15:07:23 +0800</pubDate>

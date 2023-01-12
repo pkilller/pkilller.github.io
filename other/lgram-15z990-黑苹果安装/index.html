@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <title>Lgram-15z990 黑苹果安装 // pkiller</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.105.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="pkiller" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.3c3c186cd62e563ad6e2f00a89dbee656ab912d1d46f856b5605dd0232521e2a.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Lgram-15z990 黑苹果安装"/>
+<meta name="twitter:description" content="1. 目标安装磁盘的准备 在要安装macos的磁盘中进行分区，需要分2个区。 第一个是名为ESP的分区（FAT16格式，给300M），用于存放EFI"/>
+
+    <meta property="og:title" content="Lgram-15z990 黑苹果安装" />
+<meta property="og:description" content="1. 目标安装磁盘的准备 在要安装macos的磁盘中进行分区，需要分2个区。 第一个是名为ESP的分区（FAT16格式，给300M），用于存放EFI" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://pkiller.com/other/lgram-15z990-%E9%BB%91%E8%8B%B9%E6%9E%9C%E5%AE%89%E8%A3%85/" /><meta property="article:section" content="other" />
+<meta property="article:published_time" content="2021-07-25T23:15:00+08:00" />
+<meta property="article:modified_time" content="2021-07-25T23:15:00+08:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://pkiller.com/"><img class="app-header-avatar" src="/images/avatar.png" alt="pkiller" /></a>
+      <span class="app-header-title">pkiller</span>
+      <nav class="app-header-menu">
+          <a class="app-header-menu-item" href="/android">Android</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/iot">IoT</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/other">Other</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/about">Me</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/tags/">Tags</a>
+      </nav>
+      <p>Android applications, android systems and IoT devices. Specifically on virus analysis, vulnerability research, security architecture design, and security assessments.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/pkilller" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">Lgram-15z990 黑苹果安装</h1>
+      <div class="post-meta">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Jul 25, 2021
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          4 min read
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag">
+  <title>tag</title>
+  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line>
+</svg>
+              <a class="tag" href="https://pkiller.com/tags/macos/">macos</a>
+              <a class="tag" href="https://pkiller.com/tags/clover/">Clover</a>
+              <a class="tag" href="https://pkiller.com/tags/opencore/">OpenCore</a>
+              <a class="tag" href="https://pkiller.com/tags/hackintool/">Hackintool</a>
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h2 id="1-目标安装磁盘的准备">1. 目标安装磁盘的准备</h2>
+<p>在要安装macos的磁盘中进行分区，需要分2个区。</p>
+<ul>
+<li>第一个是名为ESP的分区（FAT16格式，给300M），用于存放EFI引导文件。</li>
+<li>第二个存放苹果系统文件（APFS格式，安装期间用苹果安装程序来格式化，普通分区管理工具不支持该格式）。
+其实最终安装后的磁盘数量和结构，与安装U盘的格式完全一致。都是两个分区，一个引导，一个放系统数据。</li>
+</ul>
+<p><code>所以安装后会有一个问题，拔掉U盘无法开机，原因就是安装程序只会把系统数据拷贝到目标磁盘的1个分区，另一个负责引导的分区没有被拷入，解决方法就是安装后用PE系统把U盘的ESP中的数据拷贝一份到目标安装磁盘的ESP就OK了</code></p>
+<h2 id="2-镜像选择big-sur-113">2. 镜像选择Big Sur 11.3</h2>
+<p><a href="https://osx.cx/macos-big-sur-11-3-20e232-for-opencore.html">https://osx.cx/macos-big-sur-11-3-20e232-for-opencore.html</a></p>
+<h2 id="3-安装u盘制作">3. 安装U盘制作</h2>
+<p>镜像下载来为xxx.dmg镜像，需要使用<code>TransMac</code>工具来进行烧录，烧录后有2个重要的核心分区：</p>
+<p><img src="1.png" alt="Lgram-15z990 黑苹果安装" title="Lgram-15z990 黑苹果安装"></p>
+<pre tabindex="0"><code>OSX.CX  # 以上面网站域名命名，里面放的是OSX的整个系统数据，包括安装程序。
+ESP     # 是引导程序所在的分区，里面的EFI可能是Clover或OpenCore引导程序（取决与选择），负责引导程序到苹果安装程序，或引导到PE系统（用于磁盘分区准备）。
+</code></pre><h2 id="4-引导方案的选择">4. 引导方案的选择</h2>
+<p>目前黑苹果主流的引导方案有两套，</p>
+<pre tabindex="0"><code>1. Clover      #  属于第一代方案，以后各类驱动的支持可能会越来越少
+2. OpenCore    # 属于新的方案，目前很多老的驱动和适配工作会逐步迁移到OpenCore中来
+</code></pre><p>本次安装选择的是OpenCore方案。无论是哪种方案，都是下载对应机型的EFI目录，替换安装U盘ESP分区中的EFI文件夹就好了。
+这里有个EFI大全列表：https://blog.daliansky.net/Hackintosh-long-term-maintenance-model-checklist.html ，这里有各类机型的EFI。
+本机器用是里面提供的： <a href="https://github.com/myd986/LG-gram-14z990-Hackintosh">https://github.com/myd986/LG-gram-14z990-Hackintosh</a></p>
+<h2 id="5-安装过程语言调整">5. 安装过程语言调整</h2>
+<p>对安装U盘中替换为适合Lggram 15Z990的EFI后默认为俄文，所以需要对其进行调整。
+不管是Clover还是OpenCore方案，EFI下都有一个<code>config.plist</code>，里面的引导参数默认为俄文，所以需要对其进行修改。
+详细教程在：https://www.mfpud.com/topics/4446/ 。config.plist文件修改有很多方法，安装xcode后直接利用内置编辑器编辑：只关注<code>prev-lang:kbd</code>就够了</p>
+<p><img src="2.png" alt="Lgram-15z990 黑苹果安装" title="Lgram-15z990 黑苹果安装"></p>
+<p>或如果为OpenCore方案，可使用OpenCore Configurator：</p>
+<p><img src="3.png" alt="Lgram-15z990 黑苹果安装" title="Lgram-15z990 黑苹果安装"></p>
+<p>最终，调整后的config.plist(主要调整了：通过修改boot-args禁用了开机跑代码，并调整为英语):</p>
+<h2 id="6-问题总结">6. 问题总结</h2>
+<p><strong>1. 如果系统完全安装好后，使用U盘ESP启动后，目标11已安装磁盘的ESP貌似也会别同步。</strong></p>
+<p>安装后使用U盘启动来测试各类config.plist中的参数，发现每次拔掉U盘后，配置依然会被保留。需要使用Kext Utility来进行缓存清理以便生效。</p>
+<p><strong>2. 把config.plist中的NVRAM下的7C436110-xx下的boot-args中的值里的 <code>keepsyms=1</code>被去掉后，开机屏幕亮度会变为最低，且无法调整, 恢复该值后可以恢复。</strong></p>
+<p><strong>3. 当Hackintool中，将hibernatemode为0时，且proximitywake也为0时，启动后屏幕无法显示（黑屏），需要合上盖子盖子，稍后再打开才能显示（休眠后再唤醒）。</strong></p>
+<p><img src="4.png" alt="Lgram-15z990 黑苹果安装" title="Lgram-15z990 黑苹果安装"></p>
+<p><strong>4. 该系统在lggram15z990上安装好后，进入休眠。当鼠标移动、键盘及其他USB发生事件时，会唤醒休眠。但是如果是以合上盖子的休眠方式，在唤醒后如果没有持续触发事件，稍等片刻后又会进入休眠。</strong></p>
+<p><strong>5. 休眠耗电：经过测试，合上盖子12小时掉电为5%，还不错。但上一条提到的USB唤醒频率可能会动态影响耗电量。</strong></p>
+<p><strong>6. 其他补丁大全，但就试用了里面的强制深度睡眠的补丁，但试用后无效： <a href="https://github.com/daliansky/OC-little">https://github.com/daliansky/OC-little</a></strong></p>
+<h1 id="7-参考资料">7. 参考资料</h1>
+<p><a href="https://osx.cx/2021-macos-big-sur-11-install-course.html">https://osx.cx/2021-macos-big-sur-11-install-course.html</a></p>
+
+    </div>
+    <div class="post-footer">
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "pkiller" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>

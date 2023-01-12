@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>macos on pkiller</title>
+    <link>https://pkiller.com/tags/macos/</link>
+    <description>Recent content in macos on pkiller</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sun, 25 Jul 2021 23:15:00 +0800</lastBuildDate><atom:link href="https://pkiller.com/tags/macos/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Lgram-15z990 黑苹果安装</title>
+      <link>https://pkiller.com/other/lgram-15z990-%E9%BB%91%E8%8B%B9%E6%9E%9C%E5%AE%89%E8%A3%85/</link>
+      <pubDate>Sun, 25 Jul 2021 23:15:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/other/lgram-15z990-%E9%BB%91%E8%8B%B9%E6%9E%9C%E5%AE%89%E8%A3%85/</guid>
+      <description>1. 目标安装磁盘的准备 在要安装macos的磁盘中进行分区，需要分2个区。 第一个是名为ESP的分区（FAT16格式，给300M），用于存放EFI</description>
+    </item>
+    
+  </channel>
+</rss>

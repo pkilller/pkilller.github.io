@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>usb on pkiller</title>
+    <link>https://pkiller.com/tags/usb/</link>
+    <description>Recent content in usb on pkiller</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 21 Nov 2022 15:23:00 +0800</lastBuildDate><atom:link href="https://pkiller.com/tags/usb/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>jail容器访问usb设备</title>
+      <link>https://pkiller.com/other/jail%E5%AE%B9%E5%99%A8%E8%AE%BF%E9%97%AEusb%E8%AE%BE%E5%A4%87/</link>
+      <pubDate>Mon, 21 Nov 2022 15:23:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/other/jail%E5%AE%B9%E5%99%A8%E8%AE%BF%E9%97%AEusb%E8%AE%BE%E5%A4%87/</guid>
+      <description>一、背景 需要让jail实例访问adb，以完成一些手机操作，但其默认不允许访问USB设备。 二、基本知识 jail是freebsd系统在2000年</description>
+    </item>
+    
+  </channel>
+</rss>
