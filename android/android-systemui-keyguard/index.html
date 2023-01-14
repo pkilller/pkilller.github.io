@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <title>Android SystemUI &amp; Keyguard原理分析，加个“摇一摇”解锁 // pkiller</title>
+    <title>Android Systemui &amp; Keyguard 原理分析 - 摇一摇解锁 // pkiller</title>
     <link rel="shortcut icon" href="/favicon.ico" />
     <meta charset="utf-8" />
     <meta name="generator" content="Hugo 0.105.0">
@@ -12,10 +12,10 @@
 
     
     <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Android SystemUI &amp; Keyguard原理分析，加个“摇一摇”解锁"/>
+<meta name="twitter:title" content="Android Systemui &amp; Keyguard 原理分析 - 摇一摇解锁"/>
 <meta name="twitter:description" content="android systemui 与 keyguard 的原理分析，并在基础上进行定制"/>
 
-    <meta property="og:title" content="Android SystemUI &amp; Keyguard原理分析，加个“摇一摇”解锁" />
+    <meta property="og:title" content="Android Systemui &amp; Keyguard 原理分析 - 摇一摇解锁" />
 <meta property="og:description" content="android systemui 与 keyguard 的原理分析，并在基础上进行定制" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://pkiller.com/android/android-systemui-keyguard/" /><meta property="article:section" content="android" />
@@ -60,7 +60,7 @@
       
   <article class="post">
     <header class="post-header">
-      <h1 class ="post-title">Android SystemUI &amp; Keyguard原理分析，加个“摇一摇”解锁</h1>
+      <h1 class ="post-title">Android Systemui &amp; Keyguard 原理分析 - 摇一摇解锁</h1>
       <div class="post-meta">
         <div>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
@@ -209,7 +209,7 @@ FrameLayout
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// ...
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
 </span></span></code></pre></div><h3 id="三首次锁屏事件">三、首次锁屏事件</h3>
-<p><img src="3.png" alt="android keyguard systemui" title="android keyguard systemui"></p>
+<p><img src="3.jpg" alt="android keyguard systemui" title="android keyguard systemui"></p>
 <p><strong>开机显示keyguard的总结：</strong></p>
 <p>1、在KeyguardViewMediator.java的onSystemReady()方法内调用doKeyguardLocked()开始锁屏加载流程;</p>
 <p>2、setKeyguardEnabled();其他应用程序或者服务可以调用setKeyguardEnabled()方法请求禁止锁屏;</p>
@@ -228,7 +228,7 @@ FrameLayout
 <p>而在keyguard中主要是KeyguardAbsKeyInputView.java、KeyguardPasswordView.java、KeyguardPatternView.java等等Keyguard*View.java这些类继承于此接口实现其内部方法，这些类就是具体的锁屏界面view显示;</p>
 <h3 id="四关闭屏幕后的锁屏流程">四、关闭屏幕后的锁屏流程</h3>
 <p>关闭屏幕后SystemUI会第一时间将锁屏界面准备好，以便用户点亮后能够即使显示。  所以关闭屏幕的第一件事就是进行锁屏。 下图描述了整个过程，在后半段的流程与以上的<code>首次锁屏事件</code>完全一样。</p>
-<p><img src="4.png" alt="android keyguard systemui" title="android keyguard systemui"></p>
+<p><img src="4.jpg" alt="android keyguard systemui" title="android keyguard systemui"></p>
 <p><strong>关闭屏幕keyguard流程总结：</strong>
 1、不管是按Power键还是自动灭屏，都会执行到PowerManagerService.java的gotoSleep()方法;
 2、在这个方法内通过一系列的调用，调入到PhoneWindowManager.java的finishedGoingToSleep()方法;
@@ -259,7 +259,7 @@ FrameLayout
 </span></span><span class="line"><span class="cl">    <span class="c1">// ...
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
 </span></span></code></pre></div><h3 id="六amigo定制内容">六、Amigo定制内容</h3>
-<p><img src="5.png" alt="android keyguard systemui" title="android keyguard systemui"></p>
+<p><img src="5.jpg" alt="android keyguard systemui" title="android keyguard systemui"></p>
 <p><strong>新增HostViewHost</strong>
 Amigo自行增加了一个KeyguardViewHost的类(android原始版本中称为KeyguardHostView)，然后在StatusBarKeyguardViewManager::registerStatusBar()中增加代码来初始化和注册。
 并使用新增的KeyguardViewHostManager来对KeyguardViewHost进行操纵，新增的KeyguardViewHost不再由KeyguardBouncer代为操作，而是直接由StatusBarKeyguardViewManager进行。</p>
@@ -271,7 +271,7 @@ KeyguardInterfaceManager内部最终利用反射来调用<code>com.amigo.keyguar
 但在Amigo中: <code>FingerprintUnlockController</code>已被删除，指纹相关处理被回调值Amigo新增的<code>FingerprintManagerExt::handleAuthenticationResult()</code>内(FingerprintManagerExt负责跟隐私空间相关的操作，主要是负责跟FingerprintManager进行交互).  之后如果此指纹属于隐私空间，那么最终将此回调至FingerprintManager::privateCallback()，直接解锁进入到隐私空间.</p>
 <h2 id="bandroid-systemui的事件派发框架">B、Android SystemUI的事件派发框架</h2>
 <p>本节基于Android_7.1.1源码进行(android 6与之大同小异)，主要分析整个SystemUI的事件(如：按下关机键、电量改变、解锁成功等)派发框架(顺便指出GIONEE-S10(Amigo)在SystemUI上的一些定制点)。本节不会对指纹、图形锁、密码等鉴权细节做深入，涉及指纹等其他细节将在后续章节中作详细描述。</p>
-<p><img src="6.png" alt="android keyguard systemui" title="android keyguard systemui"></p>
+<p><img src="6.jpg" alt="android keyguard systemui" title="android keyguard systemui"></p>
 <h3 id="一概括">一、概括</h3>
 <p>Android中由系统应用com.android.systemui来负责跟UI相关的显示工作, 比如：StatusBar(状态栏)、NavigationBar(导航栏)等.其中也包含锁屏部分的功能.
 com.android.systemui的大致工作原理是：</p>

@@ -305,6 +305,69 @@
     </item>
     
     <item>
+      <title>arm64</title>
+      <link>https://pkiller.com/tags/arm64/</link>
+      <pubDate>Mon, 23 Oct 2017 16:42:28 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/arm64/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>汇编</title>
+      <link>https://pkiller.com/tags/%E6%B1%87%E7%BC%96/</link>
+      <pubDate>Mon, 23 Oct 2017 16:42:28 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/%E6%B1%87%E7%BC%96/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>逆向</title>
+      <link>https://pkiller.com/tags/%E9%80%86%E5%90%91/</link>
+      <pubDate>Mon, 23 Oct 2017 16:42:28 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/%E9%80%86%E5%90%91/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Fingerprint</title>
+      <link>https://pkiller.com/tags/fingerprint/</link>
+      <pubDate>Thu, 10 Aug 2017 20:26:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/fingerprint/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Touch ID</title>
+      <link>https://pkiller.com/tags/touch-id/</link>
+      <pubDate>Thu, 10 Aug 2017 20:26:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/touch-id/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>指纹</title>
+      <link>https://pkiller.com/tags/%E6%8C%87%E7%BA%B9/</link>
+      <pubDate>Thu, 10 Aug 2017 20:26:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/%E6%8C%87%E7%BA%B9/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>指纹解锁</title>
+      <link>https://pkiller.com/tags/%E6%8C%87%E7%BA%B9%E8%A7%A3%E9%94%81/</link>
+      <pubDate>Thu, 10 Aug 2017 20:26:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/%E6%8C%87%E7%BA%B9%E8%A7%A3%E9%94%81/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>病毒</title>
       <link>https://pkiller.com/tags/%E7%97%85%E6%AF%92/</link>
       <pubDate>Sun, 04 Jun 2017 22:18:05 +0800</pubDate>
@@ -382,6 +445,42 @@
       <pubDate>Sun, 26 Feb 2017 12:56:34 +0800</pubDate>
       
       <guid>https://pkiller.com/tags/oom_adj/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>karma</title>
+      <link>https://pkiller.com/tags/karma/</link>
+      <pubDate>Thu, 04 Aug 2016 09:16:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/karma/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>KarmaAttack</title>
+      <link>https://pkiller.com/tags/karmaattack/</link>
+      <pubDate>Thu, 04 Aug 2016 09:16:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/karmaattack/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Pineapple</title>
+      <link>https://pkiller.com/tags/pineapple/</link>
+      <pubDate>Thu, 04 Aug 2016 09:16:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/pineapple/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Wi-Fi</title>
+      <link>https://pkiller.com/tags/wi-fi/</link>
+      <pubDate>Thu, 04 Aug 2016 09:16:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/tags/wi-fi/</guid>
       <description></description>
     </item>
     

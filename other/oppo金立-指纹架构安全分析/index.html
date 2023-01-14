@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <title>OPPO&amp;金立 指纹架构分析 // pkiller</title>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta charset="utf-8" />
+    <meta name="generator" content="Hugo 0.105.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="author" content="pkiller" />
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="/css/main.min.3c3c186cd62e563ad6e2f00a89dbee656ab912d1d46f856b5605dd0232521e2a.css" />
+
+    
+    <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="OPPO&amp;金立 指纹架构分析"/>
+<meta name="twitter:description" content="1. Android原生Fingerprint框架 r9s的指纹识别框架是在Android标准框架上进行的，所以先从android原生框架入手了解"/>
+
+    <meta property="og:title" content="OPPO&amp;金立 指纹架构分析" />
+<meta property="og:description" content="1. Android原生Fingerprint框架 r9s的指纹识别框架是在Android标准框架上进行的，所以先从android原生框架入手了解" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://pkiller.com/other/oppo%E9%87%91%E7%AB%8B-%E6%8C%87%E7%BA%B9%E6%9E%B6%E6%9E%84%E5%AE%89%E5%85%A8%E5%88%86%E6%9E%90/" /><meta property="article:section" content="other" />
+<meta property="article:published_time" content="2021-07-25T23:15:00+08:00" />
+<meta property="article:modified_time" content="2021-07-25T23:15:00+08:00" />
+
+
+
+  </head>
+  <body>
+    <header class="app-header">
+      <a href="https://pkiller.com/"><img class="app-header-avatar" src="/images/avatar.png" alt="pkiller" /></a>
+      <span class="app-header-title">pkiller</span>
+      <nav class="app-header-menu">
+          <a class="app-header-menu-item" href="/android">Android</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/iot">IoT</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/other">Other</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/about">Me</a>
+             - 
+          
+          <a class="app-header-menu-item" href="/tags/">Tags</a>
+      </nav>
+      <p>Android applications, android systems and IoT devices. Specifically on virus analysis, vulnerability research, security architecture design, and security assessments.</p>
+      <div class="app-header-social">
+        
+          <a href="https://github.com/pkilller" target="_blank" rel="noreferrer noopener me">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-github">
+  <title>My Github</title>
+  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+</svg>
+          </a>
+        
+      </div>
+    </header>
+    <main class="app-container">
+      
+  <article class="post">
+    <header class="post-header">
+      <h1 class ="post-title">OPPO&amp;金立 指纹架构分析</h1>
+      <div class="post-meta">
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-calendar">
+  <title>calendar</title>
+  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+</svg>
+          Jul 25, 2021
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-clock">
+  <title>clock</title>
+  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+          14 min read
+        </div>
+        <div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tag">
+  <title>tag</title>
+  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line>
+</svg>
+              <a class="tag" href="https://pkiller.com/tags/%E6%8C%87%E7%BA%B9%E8%A7%A3%E9%94%81/">指纹解锁</a>
+              <a class="tag" href="https://pkiller.com/tags/%E6%8C%87%E7%BA%B9/">指纹</a>
+              <a class="tag" href="https://pkiller.com/tags/fingerprint/">Fingerprint</a>
+        </div>
+      </div>
+    </header>
+    <div class="post-content">
+      <h1 id="1-android原生fingerprint框架">1. Android原生Fingerprint框架</h1>
+<hr>
+<p>r9s的指纹识别框架是在Android标准框架上进行的，所以先从android原生框架入手了解</p>
+<p><img src="/download/attachments/40998880/image2017-7-12%2014%3A59%3A55.png?version=1&amp;modificationDate=1499842790302&amp;api=v2" alt=""></p>
+<h2 id="11-fingerprintd-fingerprintddaemon">1.1 Fingerprintd (FingerprintdDaemon)</h2>
+<p>以6.01为例, 以下便是编译成fingerprintd的所有文件，源码位于: <code>/system/core/fingerprintd/</code></p>
+<p><code>Android.mk     fingerprintd.cpp      FingerprintDaemonProxy.cpp      FingerprintDaemonProxy.h     IFingerprintDaemon.cpp     IFingerprintDaemon.h     IFingerprintDaemonCallback.cpp     IFingerprintDaemonCallback.h</code></p>
+<p>以上文件按功能可划分为四个部分：<br>
+<code>fingerprintd.cpp</code>：负责将fingerprintd加入到ServiceManager中，以便Java层能够获取FingerprintService.<br>
+<code>IFingerprintDaemon.h/IFingerprintDaemon.cpp</code> : 负责fingerprintd与Java层ServiceManager的Binder通信.<br>
+<code>IFingerprintDaemonCallback.h/IFingerprintDaemonCallback.cpp</code> ： 同属于以上，这里定义的是一些回调至ServiceManager的Callback接口.<br>
+<code>FingerprintDaemonProxy.h/FingerprintDaemonProxy.cpp</code> ：负责fingerprintd和Fignerprint hal层的通信.</p>
+<p><strong>1. 在system_server进程启动后，class: <code>SystemServer::startOtherServices()</code>被调用，在这里<code>FingerprintService</code>服务会被start.</strong></p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// xref: /frameworks/base/services/java/com/android/server/SystemServer.java
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">private</span> <span class="kt">void</span> <span class="nf">startOtherServices</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">//...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>           <span class="n">mSystemServiceManager</span><span class="o">.</span><span class="na">startService</span><span class="o">(</span><span class="n">TrustManagerService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">mSystemServiceManager</span><span class="o">.</span><span class="na">startService</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">class</span><span class="o">);</span>  <span class="c1">// 启动FingerprintService服务
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="c1">//...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span> <span class="o">}</span>
+</span></span></code></pre></div><p>**<br>
+2. <code>FingerprintService</code>被start后，<code>onStart()</code>会尝试获取mDaemon与Pingerprintd建立连接。然后调用<code>IFingerprintDaemon::openHal()</code>初始化底层硬件.**</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// xref: /frameworks/base/services/core/java/com/android/server/fingerprint/FingerprintService.java
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStart</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">publishBinderService</span><span class="o">(</span><span class="n">Context</span><span class="o">.</span><span class="na">FINGERPRINT_SERVICE</span><span class="o">,</span> <span class="k">new</span> <span class="n">FingerprintServiceWrapper</span><span class="o">());</span>
+</span></span><span class="line"><span class="cl">    <span class="n">IFingerprintDaemon</span> <span class="n">daemon</span> <span class="o">=</span> <span class="n">getFingerprintDaemon</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">DEBUG</span><span class="o">)</span> <span class="n">Slog</span><span class="o">.</span><span class="na">v</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&#34;Fingerprint HAL id: &#34;</span> <span class="o">+</span> <span class="n">mHalDeviceId</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">listenForUserSwitches</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></div><p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// xref: /frameworks/base/services/core/java/com/android/server/fingerprint/FingerprintService.java
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">public</span> <span class="n">IFingerprintDaemon</span> <span class="nf">getFingerprintDaemon</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">mDaemon</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">mDaemon</span> <span class="o">=</span> <span class="n">IFingerprintDaemon</span><span class="o">.</span><span class="na">Stub</span><span class="o">.</span><span class="na">asInterface</span><span class="o">(</span><span class="n">ServiceManager</span><span class="o">.</span><span class="na">getService</span><span class="o">(</span><span class="n">FINGERPRINTD</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="o">(</span><span class="n">mDaemon</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">try</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">mDaemon</span><span class="o">.</span><span class="na">asBinder</span><span class="o">().</span><span class="na">linkToDeath</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">0</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">mDaemon</span><span class="o">.</span><span class="na">init</span><span class="o">(</span><span class="n">mDaemonCallback</span><span class="o">);</span>  <span class="c1">// 设置回调函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                    <span class="n">mHalDeviceId</span> <span class="o">=</span> <span class="n">mDaemon</span><span class="o">.</span><span class="na">openHal</span><span class="o">();</span>  <span class="c1">// 初始化硬件
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">//...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">mDaemon</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span></code></pre></div><p><strong>以上为<code>ServiceManager</code> -&gt; <code>fingerprintd</code>的初始化流程。以下介绍<code>fingerprintd</code> -&gt; <code>hal</code> -&gt; <code>hardware</code>的初始化流程：</strong><br>
+<code>fingerprintd</code>自身的代码位于: <code>/system/core/fingerprintd/</code></p>
+<p><strong>1. <code>fingerprintd</code>收到openHal();的调用后会依照HAL的标准流程, 与指纹设备建立连接</strong></p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// xref: /system/core/fingerprintd/FingerprintDaemonProxy.cpp
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">int64_t</span> <span class="n">FingerprintDaemonProxy</span><span class="o">::</span><span class="n">openHal</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ALOG</span><span class="o">(</span><span class="n">LOG_VERBOSE</span><span class="o">,</span> <span class="n">LOG_TAG</span><span class="o">,</span> <span class="s">&#34;nativeOpenHal()\n&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">err</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">const</span> <span class="n">hw_module_t</span> <span class="o">*</span><span class="n">hw_module</span> <span class="o">=</span> <span class="n">NULL</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">0</span> <span class="o">!=</span> <span class="o">(</span><span class="n">err</span> <span class="o">=</span> <span class="n">hw_get_module</span><span class="o">(</span><span class="n">FINGERPRINT_HARDWARE_MODULE_ID</span><span class="o">,</span> <span class="o">&amp;</span><span class="n">hw_module</span><span class="o">)))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ALOGE</span><span class="o">(</span><span class="s">&#34;Can&#39;t open fingerprint HW Module, error: %d&#34;</span><span class="o">,</span> <span class="n">err</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">0</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">mModule</span> <span class="o">=</span> <span class="n">reinterpret_cast</span><span class="o">&lt;</span><span class="kd">const</span> <span class="n">fingerprint_module_t</span><span class="o">*&gt;(</span><span class="n">hw_module</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">hw_device_t</span> <span class="o">*</span><span class="n">device</span> <span class="o">=</span> <span class="n">NULL</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">0</span> <span class="o">!=</span> <span class="o">(</span><span class="n">err</span> <span class="o">=</span> <span class="n">mModule</span><span class="o">-&gt;</span><span class="n">common</span><span class="o">.</span><span class="na">methods</span><span class="o">-&gt;</span><span class="n">open</span><span class="o">(</span><span class="n">hw_module</span><span class="o">,</span> <span class="n">NULL</span><span class="o">,</span> <span class="o">&amp;</span><span class="n">device</span><span class="o">)))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ALOGE</span><span class="o">(</span><span class="s">&#34;Can&#39;t open fingerprint methods, error: %d&#34;</span><span class="o">,</span> <span class="n">err</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">0</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">kVersion</span> <span class="o">!=</span> <span class="n">device</span><span class="o">-&gt;</span><span class="n">version</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ALOGE</span><span class="o">(</span><span class="s">&#34;Wrong fp version. Expected %d, got %d&#34;</span><span class="o">,</span> <span class="n">kVersion</span><span class="o">,</span> <span class="n">device</span><span class="o">-&gt;</span><span class="n">version</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// return 0; // FIXME
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">mDevice</span> <span class="o">=</span> <span class="n">reinterpret_cast</span><span class="o">&lt;</span><span class="n">fingerprint_device_t</span><span class="o">*&gt;(</span><span class="n">device</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">err</span> <span class="o">=</span> <span class="n">mDevice</span><span class="o">-&gt;</span><span class="n">set_notify</span><span class="o">(</span><span class="n">mDevice</span><span class="o">,</span> <span class="n">hal_notify_callback</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">//...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="c1">// Sanity check - remove
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">mDevice</span><span class="o">-&gt;</span><span class="n">notify</span> <span class="o">!=</span> <span class="n">hal_notify_callback</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ALOGE</span><span class="o">(</span><span class="s">&#34;NOTIFY not set properly: %p != %p&#34;</span><span class="o">,</span> <span class="n">mDevice</span><span class="o">-&gt;</span><span class="n">notify</span><span class="o">,</span> <span class="n">hal_notify_callback</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ALOG</span><span class="o">(</span><span class="n">LOG_VERBOSE</span><span class="o">,</span> <span class="n">LOG_TAG</span><span class="o">,</span> <span class="s">&#34;fingerprint HAL successfully initialized&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="n">reinterpret_cast</span><span class="o">&lt;</span><span class="n">int64_t</span><span class="o">&gt;(</span><span class="n">mDevice</span><span class="o">);</span> <span class="c1">// This is just a handle
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
+</span></span></code></pre></div><p><strong>2. fingerprintd通过hw_get_module() 得到hw目录下厂商提供的指纹识别hal模块(如：/system/lib64/hw/<a href="http://fingerprint.default.so">fingerprint.default.so</a>).</strong><br>
+aosp中提供了一套fingerprint hal的空框架, 需要厂商自行实现，位于: <code>/hardware/libhardware/modules/fingerprint/fingerprint.c</code></p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// xref: /hardware/libhardware/modules/fingerprint/fingerprint.c
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">static</span> <span class="kt">int</span> <span class="nf">fingerprint_open</span><span class="o">(</span><span class="kd">const</span> <span class="n">hw_module_t</span><span class="o">*</span> <span class="n">module</span><span class="o">,</span> <span class="kd">const</span> <span class="kt">char</span> <span class="n">__unused</span> <span class="o">*</span><span class="n">id</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">                            <span class="n">hw_device_t</span><span class="o">**</span> <span class="n">device</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">device</span> <span class="o">==</span> <span class="n">NULL</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ALOGE</span><span class="o">(</span><span class="s">&#34;NULL device on open&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="o">-</span><span class="n">EINVAL</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
+</span></span></code></pre></div><p><strong>3. <a href="http://fingerprint.xxx.so">fingerprint.xxx.so</a>加载后被fingerprintd调用其的fingerprint_open用于初始化该厂商自己的指纹模块。内部实现通过Android操作hal的标准接口</strong><br>
+<strong>TODO:</strong> 了解android hal的框架和细节。<br>
+<strong>以上流程完成后，上层APP可以通过<code>FingerprintManager</code>或<code>FingerprintManagerCompat</code>(上层提供了两套接口，可任意选其一)进行指纹操作的使用.</strong></p>
+<h1 id="2-gionee-m6-底层实现基于mt6755">2. GIONEE M6 底层实现（基于MT6755）</h1>
+<hr>
+<h3 id="1-hal初始化">1. HAL初始化</h3>
+<p><strong>1. 这里接上节，调用至hw_get_mogule()后, GIONEE M6上的“/system/lib64/hw/<a href="http://fingerprint.mt6755.so">fingerprint.mt6755.so</a>”被加载</strong><br>
+在<code>/system/libx/hw</code>目录下的所有hal文件都会向外导出一个名为<code>hw_module_t HAL_MODULE_INFO_SYM</code> 的结构体符号.<br>
+这样系统可通过此导出结构体来得到一些关键信息， 比如下例中.methods字段中包含了有关指纹设备操作的关键函数：</p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// xref: /hardware/libhardware/modules/fingerprint/fingerprint.c
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">fingerprint_module_t</span> <span class="n">HAL_MODULE_INFO_SYM</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">common</span> <span class="o">=</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">tag</span>                <span class="o">=</span> <span class="n">HARDWARE_MODULE_TAG</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">module_api_version</span> <span class="o">=</span> <span class="n">FINGERPRINT_MODULE_API_VERSION_2_0</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">hal_api_version</span>    <span class="o">=</span> <span class="n">HARDWARE_HAL_API_VERSION</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">id</span>                 <span class="o">=</span> <span class="n">FINGERPRINT_HARDWARE_MODULE_ID</span><span class="p">,</span>  <span class="c1">//   &lt;-- &#34;fingerprint&#34;, 这里的字符串即为hw_get_mogule()的第一个参数.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="p">.</span><span class="n">name</span>               <span class="o">=</span> <span class="s">&#34;FPC Fingrprint HAL&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">author</span>             <span class="o">=</span> <span class="s">&#34;Fingerprint Cards AB&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="p">.</span><span class="n">methods</span>            <span class="o">=</span> <span class="o">&amp;</span><span class="n">fingerprint_module_methods</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl">    <span class="p">.</span><span class="n">init</span> <span class="o">=</span> <span class="n">fpc_module_open</span><span class="p">,</span> <span class="p">};</span>
+</span></span></code></pre></div><p>编译后表现为名为HMI的导出符号：</p>
+<p><img src="/download/attachments/40998880/image2017-7-12%2015%3A12%3A16.png?version=1&amp;modificationDate=1499843531238&amp;api=v2" alt=""><br>
+<strong>2. 这里以<code>FingerprintDaemonProxy::openHal</code>(对应fingerprintd中名为”nativeOpenHal”的native函数)为起点继续对 <code>[fingerprint.mt6755.so](http://fingerprint.mt6755.so)</code> 进行分析.</strong><br>
+进入后，首先调用<code>hw_get_module(&quot;fingerprint&quot;, &amp;v18);</code>对hal进行加载，这里对应的hal为: <code>[fingerprint.mt6755.so](http://fingerprint.mt6755.so)</code> :</p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// pos: fingerprintd
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kr">__int64</span> <span class="kr">__fastcall</span> <span class="nf">nativeOpenHal</span><span class="p">(</span><span class="kr">__int64</span> <span class="n">a1</span><span class="p">,</span> <span class="kr">__int64</span> <span class="n">a2</span><span class="p">,</span> <span class="kr">__int64</span> <span class="n">a3</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">a4</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">a5</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>  <span class="n">v5</span> <span class="o">=</span> <span class="n">a1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">2LL</span><span class="p">,</span> <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span> <span class="s">&#34;nativeOpenHal()</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">a4</span><span class="p">,</span> <span class="n">a5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">v18</span> <span class="o">=</span> <span class="mi">0LL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">v6</span> <span class="o">=</span> <span class="n">hw_get_module</span><span class="p">(</span><span class="s">&#34;fingerprint&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">v18</span><span class="p">);</span>  <span class="c1">// &lt;-- 首先加载hal模块： fingerprint.mt6755.so， 执行结束后v12+128将被置为fpc_set_notify指针
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="k">if</span> <span class="p">(</span> <span class="n">v6</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">6LL</span><span class="p">,</span> <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span> <span class="s">&#34;Can&#39;t open fingerprint HW Module, error: %d&#34;</span><span class="p">,</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="n">v6</span><span class="p">,</span> <span class="n">v7</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">result</span> <span class="o">=</span> <span class="mi">0LL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">48</span><span class="p">)</span> <span class="o">=</span> <span class="n">v12</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="n">v14</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="kr">__int64</span><span class="p">,</span> <span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">*</span><span class="p">)(</span><span class="n">_DWORD</span> <span class="o">*</span><span class="p">)))(</span><span class="n">v12</span> <span class="o">+</span> <span class="mi">128</span><span class="p">))(</span><span class="n">v12</span><span class="p">,</span> <span class="n">sub_5228</span><span class="p">);</span>  <span class="c1">// fpc_set_notify() &lt;--  这里注册指纹通知
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="k">if</span> <span class="p">(</span> <span class="n">v14</span> <span class="o">&amp;</span> <span class="mh">0x80000000</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="c1">// ... 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">          <span class="k">else</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">v16</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="n">_DWORD</span> <span class="o">*</span><span class="p">))(</span><span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">48</span><span class="p">)</span> <span class="o">+</span> <span class="mi">120LL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="p">(</span> <span class="n">v16</span> <span class="o">!=</span> <span class="n">sub_5228</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">              <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">6LL</span><span class="p">,</span> <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span> <span class="s">&#34;NOTIFY not set properly: %p != %p&#34;</span><span class="p">,</span> <span class="n">v16</span><span class="p">,</span> <span class="n">sub_5228</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">2LL</span><span class="p">,</span> <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span> <span class="s">&#34;fingerprint HAL successfully initialized&#34;</span><span class="p">,</span> <span class="n">v16</span><span class="p">,</span> <span class="n">v15</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">result</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">48</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">     <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>3. 当<code>hw_get_module(&quot;fingerprint&quot;, &amp;v18);</code>被调用后， <code>[fingerprint.mt6755.so](http://fingerprint.mt6755.so)</code> 即被加载并触发init方法<code>fpc_model_open</code>:</strong></p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// pos: fingerprint.mt6755.so
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">signed</span> <span class="kr">__int64</span> <span class="kr">__fastcall</span> <span class="nf">fpc_module_open</span><span class="p">(</span><span class="kr">__int64</span> <span class="n">a1</span><span class="p">,</span> <span class="kr">__int64</span> <span class="n">a2</span><span class="p">,</span> <span class="kr">__int64</span> <span class="o">*</span><span class="n">a3</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">__int64</span> <span class="o">*</span><span class="n">v3</span><span class="p">;</span> <span class="c1">// x20@1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kr">__int64</span> <span class="n">v4</span><span class="p">;</span> <span class="c1">// x24@1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kr">__int64</span> <span class="n">v5</span><span class="p">;</span> <span class="c1">// x19@1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kr">__int64</span> <span class="n">v6</span><span class="p">;</span> <span class="c1">// x0@2
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">v7</span><span class="p">;</span> <span class="c1">// w23@3
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kr">__int64</span> <span class="n">v8</span><span class="p">;</span> <span class="c1">// x0@4
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kr">__int64</span> <span class="n">v9</span><span class="p">;</span> <span class="c1">// x0@5
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">  <span class="n">v3</span> <span class="o">=</span> <span class="n">a3</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">v4</span> <span class="o">=</span> <span class="n">a1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">3LL</span><span class="p">,</span> <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span> <span class="s">&#34;%s&#34;</span><span class="p">,</span> <span class="s">&#34;fpc_module_open&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">3LL</span><span class="p">,</span> <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span> <span class="s">&#34;%s&#34;</span><span class="p">,</span> <span class="s">&#34;gn_fpc_hw_reset&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">gn_sysfs_node_write</span><span class="p">(</span><span class="s">&#34;/sys/devices/fpc_interrupt/hw_reset&#34;</span><span class="p">,</span> <span class="s">&#34;reset&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="n">v3</span> <span class="o">=</span> <span class="mi">0LL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">v5</span> <span class="o">=</span> <span class="n">malloc</span><span class="p">(</span><span class="mi">4528LL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">v5</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">return</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="o">-</span><span class="mi">12</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">memset</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pthread_mutex_init</span><span class="p">(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">0LL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 填充指纹操作函数，此函数返回后. 该结构体将以参数形式从hw_get_module()中返回.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">8</span><span class="p">)</span> <span class="o">=</span> <span class="n">v4</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_DWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">4</span><span class="p">)</span> <span class="o">=</span> <span class="mi">512</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_DWORD</span> <span class="o">*</span><span class="p">)</span><span class="n">v5</span> <span class="o">=</span> <span class="mh">0x48574454</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mh">0x70</span><span class="p">)</span> <span class="o">=</span> <span class="n">fpc_module_close</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mh">0x90</span><span class="p">)</span> <span class="o">=</span> <span class="n">fpc_enroll</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mh">0xA8</span><span class="p">)</span> <span class="o">=</span> <span class="n">fpc_cancel</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mh">0xB8</span><span class="p">)</span> <span class="o">=</span> <span class="n">fpc_remove</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mh">0x80</span><span class="p">)</span> <span class="o">=</span> <span class="n">fpc_set_notify</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mh">0x78</span><span class="p">)</span> <span class="o">=</span> <span class="mi">0LL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mh">0xC8</span><span class="p">)</span> <span class="o">=</span> <span class="n">fpc_authenticate</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mh">0x88</span><span class="p">)</span> <span class="o">=</span> <span class="n">fpc_pre_enroll</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mh">0xB0</span><span class="p">)</span> <span class="o">=</span> <span class="n">fpc_enumerate</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mh">0xA0</span><span class="p">)</span> <span class="o">=</span> <span class="n">fpc_get_authenticator_id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mh">0xC0</span><span class="p">)</span> <span class="o">=</span> <span class="n">fpc_set_active_group</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mh">0x98</span><span class="p">)</span> <span class="o">=</span> <span class="n">fpc_post_enroll</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">v6</span> <span class="o">=</span> <span class="n">fpc_tee_init</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">328</span><span class="p">)</span> <span class="o">=</span> <span class="n">v6</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span> <span class="n">v6</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">v7</span> <span class="o">=</span> <span class="n">fpc_tee_init_hw_auth</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">v7</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">v8</span> <span class="o">=</span> <span class="n">fpc_worker_new</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">248</span><span class="p">)</span> <span class="o">=</span> <span class="n">v8</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span> <span class="n">v8</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">v9</span> <span class="o">=</span> <span class="n">fpc_sensortest_new</span><span class="p">(</span><span class="n">v5</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">304</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">        <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">296</span><span class="p">)</span> <span class="o">=</span> <span class="n">v9</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span> <span class="n">v9</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">fpc_extension_start</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">304</span><span class="p">),</span> <span class="n">v9</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">312</span><span class="p">),</span> <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v5</span> <span class="o">+</span> <span class="mi">320</span><span class="p">));</span>
+</span></span><span class="line"><span class="cl">          <span class="o">*</span><span class="n">v3</span> <span class="o">=</span> <span class="n">v5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="n">fingerprint_hal_resume</span><span class="p">(</span><span class="n">v5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="k">return</span> <span class="n">v7</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">6LL</span><span class="p">,</span> <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span> <span class="s">&#34;%s failed</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="s">&#34;fpc_module_open&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">fpc_module_close</span><span class="p">((</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)</span><span class="n">v5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="mh">0xFFFFFFFFLL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>4. 以上函数调用完成，返回至<code>fingerprintd</code>中的<code>nativeOpenHal()</code>. 这样<a href="http://fingerprint.mt6755.so">fingerprint.mt6755.so</a>内的fpc_set_notify函数指针会被<code>fingerprintd</code>调用，用来设置指纹事件回调.</strong></p>
+<p>这里的回调最终会通过Binder调用到Java层当初设置的mCallback中(<code>IFingerprintDaemon::init(mCallback)</code>).</p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// pos: fingerprintd
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="n">v14</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="kr">__int64</span><span class="p">,</span> <span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">*</span><span class="p">)(</span><span class="n">_DWORD</span> <span class="o">*</span><span class="p">)))(</span><span class="n">v12</span> <span class="o">+</span> <span class="mi">128</span><span class="p">))(</span><span class="n">v12</span><span class="p">,</span> <span class="n">sub_5228</span><span class="p">);</span>  <span class="c1">// fpc_set_notify() &lt;--  这里注册指纹通知
+</span></span></span></code></pre></div><h3 id="2-指纹验证流程">2. 指纹验证流程</h3>
+<p><img src="/download/attachments/40998880/%E6%8C%87%E7%BA%B9%E9%AA%8C%E8%AF%81%E6%B5%81%E7%A8%8B.png?version=1&amp;modificationDate=1499847732721&amp;api=v2" alt=""><br>
+<strong>1. 当应用层调用framework.jar中的<code>FingerprintManager::authenticate()</code>方法时，会先进行参数的转换，以便后续调用到services.jar<code>中的FingerprintService::authenticate()</code>：</strong><br>
+转换方法如下：</p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// pos: framework.jar
+</span></span></span><span class="line"><span class="cl"><span class="c1">// xref: /frameworks/base/services/core/java/com/android/server/fingerprint/AuthenticationClient.java
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nd">@RequiresPermission</span><span class="o">(</span><span class="n">USE_FINGERPRINT</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">authenticate</span><span class="o">(</span><span class="nd">@Nullable</span> <span class="n">CryptoObject</span> <span class="n">crypto</span><span class="o">,</span> <span class="nd">@Nullable</span> <span class="n">CancellationSignal</span> <span class="n">cancel</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">flags</span><span class="o">,</span> <span class="nd">@NonNull</span> <span class="n">AuthenticationCallback</span> <span class="n">callback</span><span class="o">,</span> <span class="nd">@Nullable</span> <span class="n">Handler</span> <span class="n">handler</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">authenticate</span><span class="o">(</span><span class="n">crypto</span><span class="o">,</span> <span class="n">cancel</span><span class="o">,</span> <span class="n">flags</span><span class="o">,</span> <span class="n">callback</span><span class="o">,</span> <span class="n">handler</span><span class="o">,</span> <span class="n">UserHandle</span><span class="o">.</span><span class="na">myUserId</span><span class="o">());</span>  <span class="c1">// 调用到“内层 authenticate()”函数，前面的参数都不变，最后一个参数传入当前UserId
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// 内层authenticate
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="cm">/**
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * Per-user version
+</span></span></span><span class="line"><span class="cl"><span class="cm"> * @hide
+</span></span></span><span class="line"><span class="cl"><span class="cm"> */</span>
+</span></span><span class="line"><span class="cl"><span class="nd">@RequiresPermission</span><span class="o">(</span><span class="n">USE_FINGERPRINT</span><span class="o">)</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">void</span> <span class="nf">authenticate</span><span class="o">(</span><span class="nd">@Nullable</span> <span class="n">CryptoObject</span> <span class="n">crypto</span><span class="o">,</span> <span class="nd">@Nullable</span> <span class="n">CancellationSignal</span> <span class="n">cancel</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">flags</span><span class="o">,</span> <span class="nd">@NonNull</span> <span class="n">AuthenticationCallback</span> <span class="n">callback</span><span class="o">,</span> <span class="n">Handler</span> <span class="n">handler</span><span class="o">,</span> <span class="kt">int</span> <span class="n">userId</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span> <span class="o">(</span><span class="n">mService</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="k">try</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">useHandler</span><span class="o">(</span><span class="n">handler</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mAuthenticationCallback</span> <span class="o">=</span> <span class="n">callback</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">mCryptoObject</span> <span class="o">=</span> <span class="n">crypto</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">long</span> <span class="n">sessionId</span> <span class="o">=</span> <span class="n">crypto</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">?</span> <span class="n">crypto</span><span class="o">.</span><span class="na">getOpId</span><span class="o">()</span> <span class="o">:</span> <span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 从这里开始，调用到FingerprintService
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">mService</span><span class="o">.</span><span class="na">authenticate</span><span class="o">(</span><span class="n">mToken</span><span class="o">,</span>   <span class="c1">// 这里是一个空的Binder，通过 new Binder()创建的   作用不明？
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">sessionId</span><span class="o">,</span>  <span class="c1">// 这里通过crypto.getOpId()得到，在FingerprintService中称为opId
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">userId</span><span class="o">,</span>   <span class="c1">// 当前调用者的用户Id
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">mServiceReceiver</span><span class="o">,</span> <span class="c1">// 这里是指纹验证结果的回调，结果会通过此传回
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">flags</span><span class="o">,</span>  <span class="c1">// 直接传递，不转换
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">mContext</span><span class="o">.</span><span class="na">getOpPackageName</span><span class="o">());</span>  <span class="c1">// 调用方的包名
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">RemoteException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Log</span><span class="o">.</span><span class="na">w</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&#34;Remote exception while authenticating: &#34;</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="o">(</span><span class="n">callback</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="c1">// Though this may not be a hardware issue, it will cause apps to give up or try
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="c1">// again later.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">callback</span><span class="o">.</span><span class="na">onAuthenticationError</span><span class="o">(</span><span class="n">FINGERPRINT_ERROR_HW_UNAVAILABLE</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">getErrorString</span><span class="o">(</span><span class="n">FINGERPRINT_ERROR_HW_UNAVAILABLE</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></div><p><strong>2. 当应用层调用FingerprintService时，会进入在system_server中的<code>FingerprintService$FingerprintServiceWrapper</code></strong><br>
+之所以会进入Wrapper, 是因为FingerprintService在启动时将其与标识”fingerprint”进行了绑定：</p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// pos: services.jar
+</span></span></span><span class="line"><span class="cl"><span class="c1">// xref:  /frameworks/base/services/core/java/com/android/server/fingerprint/FingerprintService.java
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">onStart</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">.</span><span class="na">publishBinderService</span><span class="o">(</span><span class="s">&#34;fingerprint&#34;</span><span class="o">,</span> <span class="k">new</span> <span class="n">FingerprintServiceWrapper</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="kc">null</span><span class="o">));</span> <span class="c1">// &lt;-- 绑定
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">this</span><span class="o">.</span><span class="na">getFingerprintDaemon</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">.</span><span class="na">listenForUserSwitches</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">this</span><span class="o">.</span><span class="na">initPrivateFingerprint</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></div><p><strong>3. 进入<code>FingerprintService$FingerprintServiceWrapper::authenticate()</code>:</strong></p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// pos: services.jar
+</span></span></span><span class="line"><span class="cl"><span class="c1">// xref: /frameworks/base/services/core/java/com/android/server/fingerprint/FingerprintService.java
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">public</span> <span class="kt">void</span> <span class="nf">authenticate</span><span class="o">(</span><span class="n">IBinder</span> <span class="n">IToken</span><span class="o">,</span> <span class="kt">long</span> <span class="n">opId</span><span class="o">,</span> <span class="kt">int</span> <span class="n">groupId</span><span class="o">,</span> <span class="n">IFingerprintServiceReceiver</span> <span class="n">Receiver</span><span class="o">,</span> <span class="kt">int</span> <span class="n">nFlags</span><span class="o">,</span> <span class="n">String</span> <span class="n">opPackageName</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="o">(!</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">canUseFingerprint_</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">,</span> <span class="n">opPackageName</span><span class="o">,</span> <span class="kc">true</span><span class="o">))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">getPrivateStatus</span><span class="o">())</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 如果调用者APP为隐私空间，就进入此流程
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span><span class="o">(!</span><span class="n">opPackageName</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">&#34;com.gionee.encryptspace&#34;</span><span class="o">)</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">opPackageName</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">getKeyguardPackage</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">))</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">opPackageName</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">&#34;com.gionee.amisystem&#34;</span><span class="o">))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">goto</span> <span class="n">label_74</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">        <span class="n">Slog</span><span class="o">.</span><span class="na">d</span><span class="o">(</span><span class="s">&#34;FingerprintService&#34;</span><span class="o">,</span> <span class="s">&#34;authenticate :&#34;</span> <span class="o">+</span> <span class="n">opPackageName</span><span class="o">);</span>  <span class="c1">// private app / 
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">FingerprintService</span><span class="o">.</span><span class="na">setPrivateFingerPackageName_</span><span class="o">(</span><span class="n">opPackageName</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">label_74</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">FingerprintService</span><span class="o">.</span><span class="na">setPrivateFingerPackageName_</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">int</span> <span class="n">nEffectiveGroupId</span> <span class="o">=</span> <span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">getEffectiveUserId</span><span class="o">(</span><span class="n">groupId</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">boolean</span> <span class="n">bRestricted</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">isRestricted</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="o">(((</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">inLockoutMode_</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">))</span> <span class="o">||</span> <span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">getRestricted</span><span class="o">()))</span> <span class="o">&amp;&amp;</span> <span class="o">(</span><span class="n">opPackageName</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">getKeyguardPackage</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">)))</span> <span class="o">||</span> <span class="o">(</span><span class="n">opPackageName</span><span class="o">.</span><span class="na">equals</span><span class="o">(</span><span class="s">&#34;com.gionee.amisystem&#34;</span><span class="o">)))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">         <span class="c1">// 如果调用者APP为Keyguard或com.gionee.amisystem
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">inLockoutMode_</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">))</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">mHandler</span><span class="o">.</span><span class="na">postDelayed</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">getStartAuthenticationRunnable</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">),</span> <span class="n">60000</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">mHandler</span><span class="o">.</span><span class="na">postDelayed</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">getStartAuthenticationRunnable</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">),</span> <span class="n">500</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="c1">// 如果调用者APP为普通应用
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">getToken</span><span class="o">()</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="n">FingerprintService</span><span class="o">.</span><span class="na">getReceiver</span><span class="o">()</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>  <span class="c1">// other app
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">mHandler</span><span class="o">.</span><span class="na">removeCallbacks</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">getStartAuthenticationRunnable</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">));</span>
+</span></span><span class="line"><span class="cl">            <span class="n">FingerprintService</span><span class="o">.</span><span class="na">clearAuthenticationData_</span><span class="o">(</span><span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">FingerprintService</span><span class="o">.</span><span class="na">this</span><span class="o">.</span><span class="na">mHandler</span><span class="o">.</span><span class="na">post</span><span class="o">(</span><span class="k">new</span> <span class="n">Runnable</span><span class="o">(</span><span class="n">opId</span><span class="o">,</span> <span class="n">IToken</span><span class="o">,</span> <span class="n">nEffectiveGroupId</span><span class="o">,</span> <span class="n">Receiver</span><span class="o">,</span> <span class="n">nFlags</span><span class="o">,</span> <span class="n">bRestricted</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="k">this</span><span class="o">.</span><span class="na">this$1</span><span class="o">.</span><span class="na">this$0</span><span class="o">.</span><span class="na">startAuthentication</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">val$token</span><span class="o">,</span> <span class="k">this</span><span class="o">.</span><span class="na">val$opId</span><span class="o">,</span> <span class="k">this</span><span class="o">.</span><span class="na">val$effectiveGroupId</span><span class="o">,</span> <span class="k">this</span><span class="o">.</span><span class="na">val$receiver</span><span class="o">,</span> <span class="k">this</span><span class="o">.</span><span class="na">val$flags</span><span class="o">,</span> <span class="k">this</span><span class="o">.</span><span class="na">val$restricted</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">            <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">});</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></div><p><strong>4. 接上面，跟进startAuthentication(), 这里最后调用了IFingerprintDaemon::authenticate(). 然后通过Binder调用到真正的Server，也就是<code>fingerprintd</code>(FingerprintDaemonProxy.cpp)中：</strong></p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// pos: services.jar
+</span></span></span><span class="line"><span class="cl"><span class="c1">// xref: /frameworks/base/services/core/java/com/android/server/fingerprint/FingerprintService.java
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kt">void</span> <span class="nf">startAuthentication</span><span class="o">(</span><span class="n">IBinder</span> <span class="n">IBinder</span><span class="o">,</span> <span class="kt">long</span> <span class="n">opId</span><span class="o">,</span> <span class="kt">int</span> <span class="n">UserId</span><span class="o">,</span> <span class="n">IFingerprintServiceReceiver</span> <span class="n">receiver</span><span class="o">,</span> <span class="kt">int</span> <span class="n">flags</span><span class="o">,</span> <span class="kt">boolean</span> <span class="n">restricted</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span><span class="o">(</span><span class="k">this</span><span class="o">.</span><span class="na">isSimulated</span><span class="o">())</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">this</span><span class="o">.</span><span class="na">mAuthClient</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ClientMonitor</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">IBinder</span><span class="o">,</span> <span class="n">opId</span><span class="o">,</span> <span class="n">receiver</span><span class="o">,</span> <span class="n">UserId</span><span class="o">,</span> <span class="n">restricted</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">this</span><span class="o">.</span><span class="na">handleAuthenticated</span><span class="o">(</span><span class="n">547483734688L</span><span class="o">,</span> <span class="n">295219575</span><span class="o">,</span> <span class="n">UserId</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="n">IFingerprintDaemon</span> <span class="n">v13</span> <span class="o">=</span> <span class="k">this</span><span class="o">.</span><span class="na">getFingerprintDaemon</span><span class="o">();</span>  <span class="c1">// 得到FingerprintDaemon对象
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">if</span><span class="o">(</span><span class="n">v13</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">Slog</span><span class="o">.</span><span class="na">w</span><span class="o">(</span><span class="s">&#34;FingerprintService&#34;</span><span class="o">,</span> <span class="s">&#34;startAuthentication: no fingeprintd!&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">try</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="kt">int</span> <span class="n">v15</span> <span class="o">=</span> <span class="n">v13</span><span class="o">.</span><span class="na">authenticate</span><span class="o">(</span><span class="n">opId</span><span class="o">,</span> <span class="n">UserId</span><span class="o">);</span>   <span class="c1">// &lt;-- 调用到fingerprintd中fingerprint.mt6755.so的authenticate()函数
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span><span class="o">(</span><span class="n">v15</span> <span class="o">==</span> <span class="n">0</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="k">return</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="o">}</span>
+</span></span></code></pre></div><p><strong>从这里开始，执行的流程将从上面的<code>sytem_server</code>进入<code>fingerprintd</code>进程。</strong><br>
+<strong>5. 以上system_server中的JAVA代码调用<code>v13.authenticate()</code>后，流程将进入fingerprintd进程内<a href="http://fingerprint.mt6755.so">fingerprint.mt6755.so</a>模块中的authenticate()函数：</strong></p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// pos: fingerprint.mt6755.so
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kr">__int64</span> <span class="kr">__fastcall</span> <span class="nf">fpc_authenticate</span><span class="p">(</span><span class="n">tagDevice</span> <span class="o">*</span><span class="n">a1</span><span class="p">,</span> <span class="kr">__int64</span> <span class="n">operation_id</span><span class="p">,</span> <span class="kt">int</span> <span class="n">current_gid__or__current_user_id</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="kr">__int64</span> <span class="n">operation_id_1</span><span class="p">;</span> <span class="c1">// x23@1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kt">int</span> <span class="n">current_gid</span><span class="p">;</span> <span class="c1">// w24@1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">tagDevice</span> <span class="o">*</span><span class="n">obj_device</span><span class="p">;</span> <span class="c1">// x19@1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">tagTask</span> <span class="o">*</span><span class="n">pTask</span><span class="p">;</span> <span class="c1">// x0@3
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="kt">unsigned</span> <span class="kt">int</span> <span class="n">v7</span><span class="p">;</span> <span class="c1">// w23@3
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">  <span class="n">operation_id_1</span> <span class="o">=</span> <span class="n">operation_id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">current_gid</span> <span class="o">=</span> <span class="n">current_gid__or__current_user_id</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">obj_device</span> <span class="o">=</span> <span class="n">a1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">3LL</span><span class="p">,</span> <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span> <span class="s">&#34;%s operation_id %lu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="s">&#34;fpc_authenticate&#34;</span><span class="p">,</span> <span class="n">operation_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pthread_mutex_lock</span><span class="p">((</span><span class="n">pthread_mutex_t</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">obj_device</span><span class="o">-&gt;</span><span class="n">pMutex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">fingerprint_hal_goto_idle</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span> <span class="n">obj_device</span><span class="o">-&gt;</span><span class="n">fun_notify_callback</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span> <span class="o">*</span><span class="p">(</span><span class="n">_DWORD</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">obj_device</span><span class="o">-&gt;</span><span class="n">gid</span> <span class="o">==</span> <span class="n">current_gid</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">pTask</span> <span class="o">=</span> <span class="n">obj_device</span><span class="o">-&gt;</span><span class="n">pTask</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">obj_device</span><span class="o">-&gt;</span><span class="n">operation_id</span> <span class="o">=</span> <span class="n">operation_id_1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">v7</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">fpc_worker_set_task</span><span class="p">(</span><span class="n">pTask</span><span class="p">,</span> <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="n">func_authenticate_callback</span><span class="p">,</span> <span class="n">obj_device</span><span class="p">);</span>   <span class="c1">// &lt;-- 这里设置手指接触任务回调： arg0: obj_work, arg1: func_callback, arg2: obj_device
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">else</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">v7</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">3LL</span><span class="p">,</span> <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span> <span class="s">&#34;%s finger.gid != current_gid</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="s">&#34;fpc_authenticate&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">v7</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">6LL</span><span class="p">,</span> <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span> <span class="s">&#34;%s failed notify not set</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="s">&#34;fpc_authenticate&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">fingerprint_hal_resume</span><span class="p">(</span><span class="n">obj_device</span><span class="p">);</span>  <span class="c1">// &lt;-- 通过以上fpc_worker_set_task设置好任务后， 这里恢复运行，当有手指触摸时将会回调至func_authenticate_callback
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">pthread_mutex_unlock</span><span class="p">(</span><span class="o">&amp;</span><span class="n">obj_device</span><span class="o">-&gt;</span><span class="n">pMutex</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">v7</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>6. 当用户用手指触摸指纹后，上面设置的<code>func_authenticate_callback</code>会被立刻调用：</strong><br>
+当该函数被调用时，指纹的“抓取”和“验证”其实还没有开始，该函数的任务就是“抓取”和“验证”指纹：</p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// pos: fingerprint.mt6755.so
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kr">__int64</span> <span class="kr">__fastcall</span> <span class="nf">func_authenticate_callback</span><span class="p">(</span><span class="kr">__int64</span> <span class="n">a1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pDevice</span> <span class="o">=</span> <span class="p">(</span><span class="n">tagDevice</span> <span class="o">*</span><span class="p">)</span><span class="n">a1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">log</span><span class="p">(</span><span class="mi">6LL</span><span class="p">,</span> <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span> <span class="s">&#34;fpc:%s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="s">&#34;do_authenticate&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">status_1</span> <span class="o">=</span> <span class="n">fpc_tee_set_auth_challenge</span><span class="p">(</span><span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">pTee</span><span class="p">,</span> <span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">operation_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">status_1</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">is_capture_failed</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">operation_id</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="n">status_2</span> <span class="o">=</span> <span class="n">gn_fpc_tee_capture_image</span><span class="p">(</span><span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">pTee</span><span class="p">);</span>  <span class="c1">// 抓取指纹“图像”
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">is_capture_failed</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span> <span class="n">status_2</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span> <span class="c1">//  抓取失败
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span> <span class="n">status_2</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">notify_callback_5</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">*</span><span class="p">)(</span><span class="n">tagNotify</span> <span class="o">*</span><span class="p">))</span><span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">fun_notify_callback</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="n">ret</span><span class="p">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>  <span class="c1">// 1. 表示此条通知是：抓取指纹“图像”结果
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="n">ret</span><span class="p">.</span><span class="n">nGroupId</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>  <span class="c1">// 5.表示抓取失败
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="n">notify_callback_5</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ret</span><span class="p">);</span>  <span class="c1">// do notify
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="n">log</span><span class="p">(</span><span class="mi">6LL</span><span class="p">,</span> <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span> <span class="s">&#34;gn_fpc_tee_capture_image fails:FINGERPRINT_ACQUIRED_TOO_FAST</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">log</span><span class="p">(</span><span class="mi">6LL</span><span class="p">,</span> <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span> <span class="s">&#34;gn_fpc_tee_capture_image fails</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">is_capture_failed</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="p">(</span> <span class="n">is_capture_failed</span> <span class="o">!=</span> <span class="mi">1</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="k">goto</span> <span class="n">CAPTURE_SUCCEED</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="c1">// 继续尝试抓取指纹
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">while</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">while</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">v5</span> <span class="o">=</span> <span class="n">fpc_tee_capture_image</span><span class="p">(</span><span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">pTee</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">status_1</span> <span class="o">=</span> <span class="n">v5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span> <span class="n">v5</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">          <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">log</span><span class="p">(</span><span class="mi">6LL</span><span class="p">,</span> <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span> <span class="s">&#34;capture image failed!&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ret</span><span class="p">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">notify_callback_3</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">*</span><span class="p">)(</span><span class="n">tagNotify</span> <span class="o">*</span><span class="p">))</span><span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">fun_notify_callback</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ret</span><span class="p">.</span><span class="n">nGroupId</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">notify_callback_3</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ret</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span> <span class="n">v5</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="nl">CAPTURE_SUCCEED</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">      <span class="n">notify_callback_2</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">*</span><span class="p">)(</span><span class="n">tagNotify</span> <span class="o">*</span><span class="p">))</span><span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">fun_notify_callback</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">v19</span><span class="p">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>  
+</span></span><span class="line"><span class="cl">      <span class="n">v19</span><span class="p">.</span><span class="n">nGroupId</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>  <span class="c1">// 抓取指纹成功
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">notify_callback_2</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v19</span><span class="p">);</span>  <span class="c1">// do notify
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">status</span> <span class="o">=</span> <span class="n">fpc_tee_identify</span><span class="p">(</span><span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">pTee</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">nFingerprint</span><span class="p">);</span>  <span class="c1">// 得到刚才抓取的指纹.nFingerprint
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">status_1</span> <span class="o">=</span> <span class="n">status</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span> <span class="n">status</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">log</span><span class="p">(</span><span class="mi">6LL</span><span class="p">,</span> <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span> <span class="s">&#34;fpc_tee_identify fails status=%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">status</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="k">if</span> <span class="p">(</span> <span class="n">nFingerprint</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">status_1</span> <span class="o">=</span> <span class="n">fpc_tee_get_auth_result</span><span class="p">(</span><span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">pTee</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">auth_result</span><span class="p">);</span>  <span class="c1">// 检查该指纹的授权信息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span> <span class="n">status_1</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">          <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">log</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="mi">3LL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;hat-&gt;challenge %lu</span><span class="se">\n</span><span class="s">&#34;</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;hat-&gt;authenticator_id %lu</span><span class="se">\n</span><span class="s">&#34;</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;hat-&gt;authenticator_type %u</span><span class="se">\n</span><span class="s">&#34;</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;hat-&gt;timestamp %lu</span><span class="se">\n</span><span class="s">&#34;</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;hat-&gt;user_id %lu</span><span class="se">\n</span><span class="s">&#34;</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;hat-&gt;version %hhu</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="n">auth_result</span><span class="p">.</span><span class="n">challenge</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="n">auth_result</span><span class="p">.</span><span class="n">authenticator_id</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">auth_result</span><span class="p">.</span><span class="n">authenticator_type</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="n">auth_result</span><span class="p">.</span><span class="n">timestamp</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="n">auth_result</span><span class="p">.</span><span class="n">user_id</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">gid</span> <span class="o">=</span> <span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">gid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">notify_callback_4</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">*</span><span class="p">)(</span><span class="n">tagNotify</span> <span class="o">*</span><span class="p">))</span><span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">fun_notify_callback</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ret</span><span class="p">.</span><span class="n">nFingerprint</span> <span class="o">=</span><span class="p">.</span><span class="n">nFingerprint</span><span class="p">;</span>  <span class="c1">// 指纹验证成功，回传指.nFingerprint
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">ret</span><span class="p">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">ret</span><span class="p">.</span><span class="n">nGroupId</span> <span class="o">=</span> <span class="n">gid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">notify_callback_4</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ret</span><span class="p">);</span> <span class="c1">// do notify
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">pTee</span> <span class="o">=</span> <span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">pTee</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="n">fpc_tee_store_template_db</span><span class="p">();</span>
+</span></span><span class="line"><span class="cl">      <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="n">gid_2</span> <span class="o">=</span> <span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">gid</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">notify_callback</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">*</span><span class="p">)(</span><span class="n">tagNotify</span> <span class="o">*</span><span class="p">))</span><span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">fun_notify_callback</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">ret</span><span class="p">.</span><span class="n">type</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">ret</span><span class="p">.</span><span class="n">nGroupId</span> <span class="o">=</span> <span class="n">gid_2</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="n">ret</span><span class="p">.</span><span class="n">nFingerprint</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>  <span class="c1">// 指纹验证失败
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="n">notify_callback</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ret</span><span class="p">);</span>                    <span class="c1">// do notify
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pError</span> <span class="o">=</span> <span class="n">fpc_error_str</span><span class="p">(</span><span class="n">status_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="n">result</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="mi">6LL</span><span class="p">,</span> <span class="s">&#34;fpc_fingerprint_hal&#34;</span><span class="p">,</span> <span class="s">&#34;%s failed %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="s">&#34;do_authenticate&#34;</span><span class="p">,</span> <span class="n">pError</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span> <span class="n">status_1</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">7</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">notify_callback_1</span> <span class="o">=</span> <span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">*</span><span class="p">)(</span><span class="n">tagNotify</span> <span class="o">*</span><span class="p">))</span><span class="n">pDevice</span><span class="o">-&gt;</span><span class="n">fun_notify_callback</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">ret</span><span class="p">.</span><span class="n">type</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>  <span class="c1">// 失败。。。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="n">ret</span><span class="p">.</span><span class="n">nGroupId</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">result</span> <span class="o">=</span> <span class="n">notify_callback_1</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ret</span><span class="p">);</span>           <span class="c1">// notify
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>7. 当以上验证操作完成并调用<code>notify_callback()</code>反馈结果后，流程会回到fingerprintd(主模块)中的notify_callback:</strong><br>
+在以下<code>case 6</code>分支中通过Binder调用system_server中的IFingerprintDaemonCallback::onAuthenticated()，这时FingerprintService便收到了指纹识别事件。</p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="c1">// pos: fingerprintd
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kr">__int64</span> <span class="kr">__fastcall</span> <span class="nf">notify_callback</span><span class="p">(</span><span class="n">_DWORD</span> <span class="o">*</span><span class="n">pNotify</span><span class="p">,</span> <span class="kr">__int64</span> <span class="n">a2</span><span class="p">,</span> <span class="kr">__int64</span> <span class="n">a3</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">a4</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span><span class="n">a5</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pNotify_1</span> <span class="o">=</span> <span class="p">(</span><span class="n">tagNotify</span> <span class="o">*</span><span class="p">)</span><span class="n">pNotify</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="n">pDaemonProxy</span> <span class="o">=</span> <span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)</span><span class="n">android</span><span class="o">::</span><span class="n">FingerprintDaemonProxy</span><span class="o">::</span><span class="n">sInstance</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">android</span><span class="o">::</span><span class="n">FingerprintDaemonProxy</span><span class="o">::</span><span class="n">sInstance</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">pDaemonProxy</span> <span class="o">=</span> <span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)</span><span class="k">operator</span> <span class="k">new</span><span class="p">(</span><span class="mh">0x50uLL</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">CFingerprintDeamonProxy__CFingerprintDeamonProxy</span><span class="p">(</span><span class="n">pDaemonProxy</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">    <span class="n">android</span><span class="o">::</span><span class="n">FingerprintDaemonProxy</span><span class="o">::</span><span class="n">sInstance</span> <span class="o">=</span> <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="n">pDaemonProxy</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="n">v7</span> <span class="o">=</span> <span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)</span><span class="n">pDaemonProxy</span><span class="p">[</span><span class="mi">7</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">  <span class="n">v13</span> <span class="o">=</span> <span class="n">v7</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span> <span class="n">v7</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">android</span><span class="o">::</span><span class="n">RefBase</span><span class="o">::</span><span class="n">incStrong</span><span class="p">((</span><span class="n">android</span><span class="o">::</span><span class="n">RefBase</span> <span class="o">*</span><span class="p">)((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">v7</span> <span class="o">+</span> <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="o">*</span><span class="n">v7</span> <span class="o">-</span> <span class="mi">24LL</span><span class="p">)),</span> <span class="o">&amp;</span><span class="n">v13</span><span class="p">),</span> <span class="n">v13</span><span class="p">)</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">type</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="n">v9</span> <span class="o">=</span> <span class="n">pDaemonProxy</span><span class="p">[</span><span class="mi">6</span><span class="p">];</span>
+</span></span><span class="line"><span class="cl">    <span class="n">type_1</span> <span class="o">=</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)((</span><span class="n">_DWORD</span><span class="p">)</span><span class="n">type</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>  <span class="c1">// 这里的type+1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="k">switch</span> <span class="p">(</span> <span class="p">(</span><span class="n">_DWORD</span><span class="p">)</span><span class="n">type_1</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="p">{</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">0</span><span class="o">:</span>                                   <span class="c1">// onError
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">__android_log_print</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="mi">3LL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;onError(%d)&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nGroupId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="n">type_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">,</span> <span class="kr">__int64</span><span class="p">,</span> <span class="n">_QWORD</span><span class="p">))(</span><span class="o">*</span><span class="n">v13</span> <span class="o">+</span> <span class="mi">48LL</span><span class="p">))(</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">v13</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">v9</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nGroupId</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">2</span><span class="o">:</span>                                   <span class="c1">// onAcquired
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">__android_log_print</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="mi">3LL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;onAcquired(%d)&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nGroupId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="n">type_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">,</span> <span class="kr">__int64</span><span class="p">,</span> <span class="n">_QWORD</span><span class="p">))(</span><span class="o">*</span><span class="n">v13</span> <span class="o">+</span> <span class="mi">32LL</span><span class="p">))(</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">v13</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">v9</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nGroupId</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">4</span><span class="o">:</span>                                   <span class="c1">// onEnrollResult
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">__android_log_print</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="mi">3LL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;onEnrollResult.nFingerprint=%d, gid=%d, rem=%d)&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nFingerprintId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nGroupId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">type</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">,</span> <span class="kr">__int64</span><span class="p">,</span> <span class="n">_QWORD</span><span class="p">,</span> <span class="n">_QWORD</span><span class="p">,</span> <span class="n">_QWORD</span><span class="p">))(</span><span class="o">*</span><span class="n">v13</span> <span class="o">+</span> <span class="mi">24LL</span><span class="p">))(</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">v13</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">v9</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nFingerprintId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nGroupId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="n">type</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">5</span><span class="o">:</span>                                   <span class="c1">// onRemove
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">__android_log_print</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="mi">3LL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;onRemove.nFingerprint=%d, gid=%d)&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nFingerprintId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nGroupId</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">,</span> <span class="kr">__int64</span><span class="p">,</span> <span class="n">_QWORD</span><span class="p">,</span> <span class="n">_QWORD</span><span class="p">))(</span><span class="o">*</span><span class="n">v13</span> <span class="o">+</span> <span class="mi">56LL</span><span class="p">))(</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">v13</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">v9</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nFingerprintId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nGroupId</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">6</span><span class="o">:</span>                                   <span class="c1">// onAuthenticated     指纹验证结果
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">__android_log_print</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="mi">3LL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;onAuthenticated.nFingerprint=%d, gid=%d)&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nFingerprintId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nGroupId</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">       <span class="p">.</span><span class="n">nFingerprint</span> <span class="o">=</span> <span class="mi">0LL</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span> <span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nFingerprintId</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">sub_4AF4</span><span class="p">((</span><span class="n">android</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">pNotify_1</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</span></span><span class="line"><span class="cl">         <span class="p">.</span><span class="n">nFingerprint</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nFingerprintId</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">,</span> <span class="kr">__int64</span><span class="p">,</span> <span class="kr">__int64</span><span class="p">,</span> <span class="n">_QWORD</span><span class="p">))(</span><span class="o">*</span><span class="n">v13</span> <span class="o">+</span> <span class="mi">40LL</span><span class="p">))(</span>    <span class="c1">// 这里直接通过Binder调用到system_server的IFingerprintDaemonCallback::onAuthenticated()中.    
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                   <span class="n">v13</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">v9</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                  <span class="p">.</span><span class="n">nFingerprint</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nGroupId</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">7</span><span class="o">:</span>                                   <span class="c1">// onFingerDown
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">3LL</span><span class="p">,</span> <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span> <span class="s">&#34;onFingerDown()&#34;</span><span class="p">,</span> <span class="n">type</span><span class="p">,</span> <span class="n">type_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">,</span> <span class="kr">__int64</span><span class="p">))(</span><span class="o">*</span><span class="n">v13</span> <span class="o">+</span> <span class="mi">72LL</span><span class="p">))(</span><span class="n">v13</span><span class="p">,</span> <span class="n">v9</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">8</span><span class="o">:</span>                                   <span class="c1">// onFingerUp
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">3LL</span><span class="p">,</span> <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span> <span class="s">&#34;onFingerUp()&#34;</span><span class="p">,</span> <span class="n">type</span><span class="p">,</span> <span class="n">type_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">,</span> <span class="kr">__int64</span><span class="p">))(</span><span class="o">*</span><span class="n">v13</span> <span class="o">+</span> <span class="mi">80LL</span><span class="p">))(</span><span class="n">v13</span><span class="p">,</span> <span class="n">v9</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mi">9</span><span class="o">:</span>                                   <span class="c1">// onWaittingFinger
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">3LL</span><span class="p">,</span> <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span> <span class="s">&#34;onWaittingFinger()&#34;</span><span class="p">,</span> <span class="n">type</span><span class="p">,</span> <span class="n">type_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">,</span> <span class="kr">__int64</span><span class="p">))(</span><span class="o">*</span><span class="n">v13</span> <span class="o">+</span> <span class="mi">88LL</span><span class="p">))(</span><span class="n">v13</span><span class="p">,</span> <span class="n">v9</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">case</span> <span class="mh">0xA</span><span class="o">:</span>                                 <span class="c1">// onTestCmd
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">__android_log_print</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">          <span class="mi">3LL</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="s">&#34;onTestCmd(cmd=%d, result=%d)</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nGroupId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">          <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nFingerprintId</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="kr">__int64</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">,</span> <span class="kr">__int64</span><span class="p">,</span> <span class="n">_QWORD</span><span class="p">,</span> <span class="n">_QWORD</span><span class="p">))(</span><span class="o">*</span><span class="n">v13</span> <span class="o">+</span> <span class="mi">96LL</span><span class="p">))(</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">v13</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="n">v9</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nGroupId</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                   <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">pNotify_1</span><span class="o">-&gt;</span><span class="n">nFingerprintId</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">      <span class="k">default</span><span class="o">:</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">6LL</span><span class="p">,</span> <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span> <span class="s">&#34;invalid msg type: %d&#34;</span><span class="p">,</span> <span class="n">type</span><span class="p">,</span> <span class="n">type_1</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">else</span>
+</span></span><span class="line"><span class="cl">  <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="n">result</span> <span class="o">=</span> <span class="n">__android_log_print</span><span class="p">(</span><span class="mi">6LL</span><span class="p">,</span> <span class="p">(</span><span class="kr">__int64</span><span class="p">)</span><span class="s">&#34;fingerprintd&#34;</span><span class="p">,</span> <span class="s">&#34;Invalid callback object&#34;</span><span class="p">,</span> <span class="n">a4</span><span class="p">,</span> <span class="n">a5</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="p">}</span>
+</span></span><span class="line"><span class="cl">  <span class="k">if</span> <span class="p">(</span> <span class="n">v13</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">result</span> <span class="o">=</span> <span class="n">android</span><span class="o">::</span><span class="n">RefBase</span><span class="o">::</span><span class="n">decStrong</span><span class="p">((</span><span class="n">android</span><span class="o">::</span><span class="n">RefBase</span> <span class="o">*</span><span class="p">)((</span><span class="kt">char</span> <span class="o">*</span><span class="p">)</span><span class="n">v13</span> <span class="o">+</span> <span class="o">*</span><span class="p">(</span><span class="n">_QWORD</span> <span class="o">*</span><span class="p">)(</span><span class="o">*</span><span class="n">v13</span> <span class="o">-</span> <span class="mi">24LL</span><span class="p">)),</span> <span class="o">&amp;</span><span class="n">v13</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>从这里开始，流程将从<code>fingerprintd</code>进程再次回到<code>system_server</code>中，触发指纹事件回调</strong><br>
+<strong>8. 收到指纹事件回调， 流程回到<code>system_server</code>中的<code>AuthenticationClient::onAuthenticated()</code></strong><br>
+在这个函数中，看到了熟悉的<code>onAuthenticationFailed</code>与<code>onAuthenticationSucceeded</code>的调用:</p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-java" data-lang="java"><span class="line"><span class="cl"><span class="c1">// pos: services.jar
+</span></span></span><span class="line"><span class="cl"><span class="c1">// xref: /frameworks/base/services/core/java/com/android/server/fingerprint/AuthenticationClient.java
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nd">@Override</span>
+</span></span><span class="line"><span class="cl"><span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">onAuthenticated</span><span class="o">(</span><span class="kt">int</span> <span class="n">fingerId</span><span class="o">,</span> <span class="kt">int</span> <span class="n">groupId</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">boolean</span> <span class="n">result</span> <span class="o">=</span> <span class="kc">false</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">    <span class="kt">boolean</span> <span class="n">authenticated</span> <span class="o">=</span> <span class="n">fingerId</span> <span class="o">!=</span> <span class="o">;</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">    <span class="n">IFingerprintServiceReceiver</span> <span class="n">receiver</span> <span class="o">=</span> <span class="n">getReceiver</span><span class="o">();</span>
+</span></span><span class="line"><span class="cl">    <span class="k">if</span> <span class="o">(</span><span class="n">receiver</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="k">try</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">MetricsLogger</span><span class="o">.</span><span class="na">action</span><span class="o">(</span><span class="n">getContext</span><span class="o">(),</span> <span class="n">MetricsEvent</span><span class="o">.</span><span class="na">ACTION_FINGERPRINT_AUTH</span><span class="o">,</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">authenticated</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">            <span class="k">if</span> <span class="o">(!</span><span class="n">authenticated</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="n">receiver</span><span class="o">.</span><span class="na">onAuthenticationFailed</span><span class="o">(</span><span class="n">getHalDeviceId</span><span class="o">());</span>   <span class="c1">// 指纹验证失败，回调至framework(应用层)。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="o">(</span><span class="n">DEBUG</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="n">Slog</span><span class="o">.</span><span class="na">v</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&#34;onAuthenticated(owner=&#34;</span> <span class="o">+</span> <span class="n">getOwnerString</span><span class="o">()</span>
+</span></span><span class="line"><span class="cl">                            <span class="o">+</span> <span class="s">&#34;, id=&#34;</span> <span class="o">+</span> <span class="n">fingerId</span> <span class="o">+</span> <span class="s">&#34;, gp=&#34;</span> <span class="o">+</span> <span class="n">groupId</span> <span class="o">+</span> <span class="s">&#34;)&#34;</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">                <span class="o">}</span>
+</span></span><span class="line"><span class="cl">                <span class="n">Fingerprint</span> <span class="n">fp</span> <span class="o">=</span> <span class="o">!</span><span class="n">getIsRestricted</span><span class="o">()</span>
+</span></span><span class="line"><span class="cl">                        <span class="o">?</span> <span class="k">new</span> <span class="n">Fingerprint</span><span class="o">(</span><span class="s">&#34;&#34;</span> <span class="cm">/* TODO */</span><span class="o">,</span> <span class="n">groupId</span><span class="o">,</span> <span class="n">fingerId</span><span class="o">,</span> <span class="n">getHalDeviceId</span><span class="o">())</span>
+</span></span><span class="line"><span class="cl">                        <span class="o">:</span> <span class="kc">null</span><span class="o">;</span>
+</span></span><span class="line"><span class="cl">                <span class="n">receiver</span><span class="o">.</span><span class="na">onAuthenticationSucceeded</span><span class="o">(</span><span class="n">getHalDeviceId</span><span class="o">(),</span> <span class="n">fp</span><span class="o">,</span> <span class="n">getTargetUserId</span><span class="o">());</span>  <span class="c1">// 指纹验证成功，回调至framework(应用层)。
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>            <span class="o">}</span>
+</span></span><span class="line"><span class="cl">        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">RemoteException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">Slog</span><span class="o">.</span><span class="na">w</span><span class="o">(</span><span class="n">TAG</span><span class="o">,</span> <span class="s">&#34;Failed to notify Authenticated:&#34;</span><span class="o">,</span> <span class="n">e</span><span class="o">);</span>
+</span></span><span class="line"><span class="cl">            <span class="n">result</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span> <span class="c1">// client failed
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="o">}</span>
+</span></span><span class="line"><span class="cl">    <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">result</span> <span class="o">=</span> <span class="kc">true</span><span class="o">;</span> <span class="c1">// client not listening
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="o">}</span>
+</span></span><span class="line"><span class="cl"><span class="o">}</span>
+</span></span></code></pre></div><p><strong>至此，指纹的验证流程全部梳理完成（从应用-&gt;HAL层）</strong></p>
+<p><strong>这里提供以上分析的fingerprintd与fingerprint.mt6755.so的idb文件(IDA6.9)：</strong></p>
+<p>**<a href="/download/attachments/40998880/idb%E6%96%87%E4%BB%B6.tar.gz?version=1&amp;modificationDate=1499846864348&amp;api=v2"><img src="/s/zh_CN/8100/6512c1e2a41cdf14570641b46bd2fe3eaeb38d03/4.0.3/_/download/resources/com.atlassian.confluence.plugins.confluence-view-file-macro:view-file-macro-resources/images/placeholder-small-file.png" alt="">idb文件.tar.gz</a><br>
+**</p>
+<h1 id="3-oppo-r9s-底层实现">3. OPPO r9s 底层实现</h1>
+<hr>
+<h3 id="1-fingerprintd到hal大致流程">1. fingerprintd到hal大致流程</h3>
+<p>OPPO r9s采用的是Qualcomm 骁龙625(MSM8953)，指纹传感器为: goodix.<br>
+指纹相关的文件：</p>
+<p><code>/system/lib64/hw/fingerprintd  加载fingerprint.msm8953.so实现功能， 负责建立ServiceManager与HAL的通讯。   /system/lib64/hw/fingerprint.msm8953.so  提供fingerprint hal外层的接口， 最终通过调用lib_fpc_tac_shared.so实现功能。   /system/lib64/lib_fpc_tac_shared.so  提供与TruztZone通讯的操作。</code></p>
+<h3 id="2-指纹验证流程-1">2. 指纹验证流程</h3>
+<p>主要流程会由fingerprint.msm8953.so?(do_authenticate)实现：</p>
+<p>展开源码</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-cpp" data-lang="cpp"><span class="line"><span class="cl"><span class="kt">int</span> <span class="kr">__fastcall</span> <span class="nf">do_authenticate</span><span class="p">(</span><span class="kt">int</span> <span class="n">a1</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl"> <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>  <span class="n">_android_log_print</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s">&#34;fpc_hal&#34;</span><span class="p">,</span> <span class="s">&#34;%s&#34;</span><span class="p">,</span> <span class="s">&#34;do_authenticate&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">   <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>      <span class="k">while</span> <span class="p">(</span> <span class="mi">1</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">      <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="n">v10</span> <span class="o">=</span> <span class="n">capture_image</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>    <span class="c1">// 抓取指纹图像
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">v4</span> <span class="o">=</span> <span class="n">v10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">v10</span> <span class="o">&gt;</span> <span class="mi">2</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">v5</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="s">&#34;fpc_hal&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="n">v28</span> <span class="o">=</span> <span class="n">v10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="n">v7</span> <span class="o">=</span> <span class="s">&#34;%s capture_image failed with status = %d&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="n">v6</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="s">&#34;do_authenticate&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="k">goto</span> <span class="n">LABEL_10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x58u</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">v11</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="kt">void</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">**</span><span class="p">)(</span><span class="n">_DWORD</span><span class="p">))(</span><span class="n">v1</span> <span class="o">+</span> <span class="mi">64</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="n">s</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">v11</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span> <span class="n">v4</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">v31</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x18u</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="n">_android_log_print</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s">&#34;fpc_hal&#34;</span><span class="p">,</span> <span class="s">&#34;%s clear identify data</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="s">&#34;do_authenticate&#34;</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">else</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">v12</span> <span class="o">=</span> <span class="n">fpc_tee_identify</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">_DWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v1</span> <span class="o">+</span> <span class="mi">200</span><span class="p">),</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="o">&amp;</span><span class="n">is_auth_succeed</span><span class="p">,</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="o">&amp;</span><span class="n">v31</span><span class="p">);</span>  <span class="c1">// 判断该指纹是否已被录入
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="n">v4</span> <span class="o">=</span> <span class="n">v12</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="k">if</span> <span class="p">(</span> <span class="n">v12</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">            <span class="n">v5</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="s">&#34;fpc_hal&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">v7</span> <span class="o">=</span> <span class="s">&#34;%s fpc_tee_identify failed with status = %d&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">v28</span> <span class="o">=</span> <span class="n">v12</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="n">v6</span> <span class="o">=</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="s">&#34;do_authenticate&#34;</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">            <span class="k">goto</span> <span class="n">LABEL_10</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="p">}</span>
+</span></span><span class="line"><span class="cl">      <span class="c1">//...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="k">if</span> <span class="p">(</span> <span class="n">is_auth_succeed</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="p">{</span>
+</span></span><span class="line"><span class="cl">          <span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">s</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x58u</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="n">v4</span> <span class="o">=</span> <span class="n">fpc_tee_get_auth_result</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">_DWORD</span> <span class="o">*</span><span class="p">)(</span><span class="n">v1</span> <span class="o">+</span> <span class="mi">200</span><span class="p">),</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="o">&amp;</span><span class="n">v40</span><span class="p">);</span>
+</span></span><span class="line"><span class="cl">          <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">v4</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">          <span class="p">{</span>
+</span></span><span class="line"><span class="cl">           <span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>          <span class="p">}</span>
+</span></span><span class="line"><span class="cl">        <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">dword_91A8</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">)</span>
+</span></span><span class="line"><span class="cl">          <span class="k">break</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl">        <span class="n">_android_log_print</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s">&#34;fpc_hal&#34;</span><span class="p">,</span> <span class="s">&#34;%s identify failed!! try again&#34;</span><span class="p">,</span> <span class="s">&#34;do_authenticate&#34;</span><span class="p">);</span>  <span class="c1">// 指纹验证失败
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p><strong>1. 进入等待验证指纹的状态：</strong><br>
+<strong>CallStatck</strong></p>
+<p><code>// 由下向上   // ....以上暂时不明.   lib_fpc_tac_shared.so?00005278(monitor_trigger)   lib_fpc_tac_shared.so?00003890(fpc_tee_wait_finger_lost)   lib_fpc_tac_shared.so?00003B38(fpc_tee_wait_finger_down)   lib_fpc_tac_shared.so?00004E64(fpc_tee_capture_image)   fingerprint.msm8953.so?00001F80(capture_image)  &lt;-- 抓取指纹图像   fingerprint.msm8953.so?000022FC(do_authenticat)</code></p>
+<p><strong>2. 该指纹是否已入库(猜测)：</strong><br>
+<strong>CallStatck</strong></p>
+<p><code>// 由下向上   ioctl()   libQSEEComAPI.so?00001FE4 (__QSEECom_send_modified_cmd)   lib_fpc_tac_shared.so?00005964(fpc_tac_transfer)   fingerprint.msm8953.so?000022FC(do_authenticat)</code></p>
+<p><strong>3. 如果入库，判断是否被允许通过(猜测)：</strong><br>
+<strong>CallStatck</strong></p>
+<p><code>// 由下向上   lib_fpc_tac_shared.so?00005964(fpc_tac_transfer)   lib_fpc_tac_shared.so?00004C98(fpc_tee_get_auth_result)   fingerprint.msm8953.so?000022FC(do_authenticat)</code></p>
+<h3 id="3-上层框架">3. 上层框架</h3>
+<p><strong>com.coloros.fingerprint</strong> 负责对指纹解锁或图形解锁的开关，及其他相关的操作。<br>
+该APP使用以下4种receiver的Action，用于接受跟指纹配置相关的操作：</p>
+<p><code>oppo.intent.action.CLOSE_FINGERPRINT_UNLOCK    # 关闭指纹解锁   oppo.intent.action.PASSWORD_QUALITY_UNSPECIFIED    # 设置锁屏密码强度   oppo.intent.action.DELETE_FINGERPRINTS    # 删除所有指纹数据   oppo.intent.action.SET_UNLOCK_PASSWORD    # 设置锁屏密码</code></p>
+<p>该APP收到广播后最终会将其写入自身目录下的<code>fingerprint_preferences.xml</code>和<code>com.coloros.fingerprint_preferences.xml</code>。</p>
+<p>其他的应用会通过广播来设置指纹相关的操作:</p>
+<p><code>com.coloros.filemanager(文件管理器，加解密文件)、   com.android.keyguard(锁屏界面，请求验证密码)   com.android.settings(系统设置，打开和关闭指纹解锁或图形解锁)   com.coloros.safecenter(安全中心，同上)   com.nearme.statistics.rom(不明)   com.coloros.wirelesssettings(其它无线链接，作用不明)</code></p>
+<p>所有发送此广播的APP需要拥有com.coloros.fingerprint.permission.DELETE_FINGERPRINT权限，权限等级为<code>signatureOrSystem</code>，所以并无风险。</p>
+
+    </div>
+    <div class="post-footer">
+      <div id="disqus_thread"></div>
+<script type="application/javascript">
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "pkiller" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </div>
+  </article>
+
+    </main>
+  </body>
+</html>

@@ -8,16 +8,16 @@
     <language>zh-CN</language>
     <lastBuildDate>Tue, 12 Jul 2016 11:02:04 +0800</lastBuildDate><atom:link href="https://pkiller.com/tags/elf/feed.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>ELF的DUMP及修复思路</title>
-      <link>https://pkiller.com/android/elf%E7%9A%84dump%E5%8F%8A%E4%BF%AE%E5%A4%8D%E6%80%9D%E8%B7%AF/</link>
+      <title>so 脱壳后的修复</title>
+      <link>https://pkiller.com/android/so%E8%84%B1%E5%A3%B3%E5%90%8E%E7%9A%84%E4%BF%AE%E5%A4%8D/</link>
       <pubDate>Tue, 12 Jul 2016 11:02:04 +0800</pubDate>
       
-      <guid>https://pkiller.com/android/elf%E7%9A%84dump%E5%8F%8A%E4%BF%AE%E5%A4%8D%E6%80%9D%E8%B7%AF/</guid>
+      <guid>https://pkiller.com/android/so%E8%84%B1%E5%A3%B3%E5%90%8E%E7%9A%84%E4%BF%AE%E5%A4%8D/</guid>
       <description>加壳后ELF的section基本是被抹掉或是被写垃圾数据的, 但section对于静态分析来讲又非常重要, 所以DUMP后有必要重建sectio</description>
     </item>
     
     <item>
-      <title>ELF32 (Android ARM)</title>
+      <title>ELF32 (android arm)</title>
       <link>https://pkiller.com/android/elf32-android-arm/</link>
       <pubDate>Sat, 18 Jun 2016 08:36:15 +0800</pubDate>
       

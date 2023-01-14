@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>arm64 on pkiller</title>
+    <link>https://pkiller.com/tags/arm64/</link>
+    <description>Recent content in arm64 on pkiller</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Mon, 23 Oct 2017 16:42:28 +0800</lastBuildDate><atom:link href="https://pkiller.com/tags/arm64/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>arm64 代码定式</title>
+      <link>https://pkiller.com/android/arm64%E4%BB%A3%E7%A0%81%E5%AE%9A%E5%BC%8F/</link>
+      <pubDate>Mon, 23 Oct 2017 16:42:28 +0800</pubDate>
+      
+      <guid>https://pkiller.com/android/arm64%E4%BB%A3%E7%A0%81%E5%AE%9A%E5%BC%8F/</guid>
+      <description>本文案例默认编译自android-ndk-r10d, 并且编译选项的均为: APP_OPTIM := release OPT_CFLAGS := -O2&amp;quot; 若为其它ndk环境将会在小节开头处有特殊说明. 一. 成员函</description>
+    </item>
+    
+  </channel>
+</rss>
