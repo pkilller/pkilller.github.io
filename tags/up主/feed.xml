@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>up主 on pkiller</title>
+    <link>https://pkiller.com/tags/up%E4%B8%BB/</link>
+    <description>Recent content in up主 on pkiller</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-CN</language>
+    <lastBuildDate>Sat, 22 Jul 2023 20:31:00 +0800</lastBuildDate><atom:link href="https://pkiller.com/tags/up%E4%B8%BB/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>关于《bilibili UP大师》SparkDesk插件</title>
+      <link>https://pkiller.com/other/%E5%85%B3%E4%BA%8Ebilibili-up%E5%A4%A7%E5%B8%88sparkdesk%E6%8F%92%E4%BB%B6/</link>
+      <pubDate>Sat, 22 Jul 2023 20:31:00 +0800</pubDate>
+      
+      <guid>https://pkiller.com/other/%E5%85%B3%E4%BA%8Ebilibili-up%E5%A4%A7%E5%B8%88sparkdesk%E6%8F%92%E4%BB%B6/</guid>
+      <description>[数据及隐私] 1. 本插件的所有数据均来自 bilibili 公开数据，且所有数据的版权归 bilibili 及其创作者所有。 2. 本插件只会收到视频的url（且完全无法关联您的星火大</description>
+    </item>
+    
+  </channel>
+</rss>

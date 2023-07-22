@@ -742,7 +742,8 @@ KeyguardService –&gt; KeyguardViewMediator –&gt; KeyguardUpdateMonitor –&g
 </span></span><span class="line"><span class="cl"><span class="n">KeyguardViewMediator</span><span class="o">-&gt;</span><span class="n">KeyguardUpdateMonitor</span><span class="o">:</span> <span class="n">KeyguardViewMediator将</span><span class="s">&#34;锁屏类&#34;</span><span class="err">\</span><span class="n">n事件稍作处理</span><span class="err">，</span><span class="n">向后传递</span>
 </span></span><span class="line"><span class="cl"><span class="n">KeyguardUpdateMonitor</span><span class="o">-&gt;</span><span class="n">KeyguardUpdateMonitorCallback</span><span class="o">:</span> <span class="n">KeyguardUpdateMonitor监听</span><span class="s">&#34;其他事件&#34;</span><span class="err">：\</span><span class="n">n电量</span><span class="err">、</span><span class="n">壁纸和时间等</span><span class="err">，</span><span class="n">并整合</span><span class="s">&#34;锁屏类&#34;</span><span class="n">事件</span><span class="o">.</span>
 </span></span><span class="line"><span class="cl"><span class="n">option</span> <span class="n">footer</span><span class="o">=</span><span class="n">bar</span>
-</span></span></code></pre></div><h3 id="七faq">七、FAQ</h3>
+</span></span></code></pre></div><p><img src="7.png" alt="android keyguard systemui" title="android keyguard systemui"></p>
+<h3 id="七faq">七、FAQ</h3>
 <h4 id="1-本文所涉及的内容应该从哪里看起">1. 本文所涉及的内容应该从哪里看起？</h4>
 <p>本文设计的有三个维度: 1. SystemUI启动方式       2. 锁屏事件的传递(关屏幕、锁屏等)     3. 关键类的创建</p>
 <p>1). SystemUI启动方式:<br>
@@ -1168,7 +1169,7 @@ SystemUI内的关键类初始化工作基本都以PhoneStatusBar::startKeyguard(
 </span></span></span><span class="line"><span class="cl"><span class="cm">        }*/</span>
 </span></span><span class="line"><span class="cl">    <span class="o">}</span>
 </span></span></code></pre></div><p>解锁效果图：</p>
-<p><img src="7.png" alt="android keyguard systemui" title="android keyguard systemui"></p>
+<p><img src="8.png" alt="android keyguard systemui" title="android keyguard systemui"></p>
 <h2 id="八总结">八、总结</h2>
 <ol>
 <li>Keyguard作为SystemUI(com.android.systemui)的Library主要负责锁屏业务。</li>
